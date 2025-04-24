@@ -2,7 +2,10 @@
 
 from enum import Enum
 
+import geopandas as gpd
+import numpy as np
 from pydantic import BaseModel, Field
+from scipy.spatial.transform import Rotation
 from shapely.geometry import Point
 
 from schema.rocket import RocketConfigModel
@@ -32,9 +35,14 @@ class LaunchSiteModel(BaseModel):
         description="Name of the launch site",
     )
 
+    geo_location: Point = Field(
+        default=Point(139.421333, 34.736139),
+        description="Geographical location of launch site",
+    )
+
     # Launch site location
     rocket_transform: Transform = Field(
-        default=Transform(point=Point(139.421333, 34.736139)),
+        default=Transform(point=np.ndarray([]), rotation=[0, 75]),
         description="Location of launch site",
     )
 
@@ -45,8 +53,8 @@ class EnviromentModel(BaseModel):
     """Environment model."""
 
     # Atmosphere property
-    T0: float = Field(298.0, description="Temperature at 10m altitude [K]")
-    p0: float = Field(1.013e5, description="Pressure at 10m alt. [Pa]")
+    ground_temperature: float = Field(298.0, description="Temperature at 10m altitude [K]")
+    ground_pressure: float = Field(1.013e5, description="Pressure at 10m alt. [Pa]")
 
     # Wind property
     wind_direction_original: float = Field(-1.0)
@@ -55,8 +63,10 @@ class EnviromentModel(BaseModel):
     wind_power_coeff: float = Field(14.0)
     wind_alt_std: float = Field(5.0, description="Alt. at which the wind speed is given [m]")
     wind_model: WindModel = Field(
-        "power", description="'power' for Wind Power Method, 'power-forecast-hydrid' for power-forecast hybrid"
+        WindModel.power, description="'power' for Wind Power Method, 'power-forecast-hydrid' for power-forecast hybrid"
     )
+
+    earth_rotaion: float = Field(7.2921159e-5, description="Earth rotation speed [rad/s]")
 
 
 class SimulationParameterModel(BaseModel):
@@ -65,7 +75,6 @@ class SimulationParameterModel(BaseModel):
     # Numerical executive parameters
     dt: float = Field(0.05, description="Time step [s]")
     t_max: float = Field(100 * 60, description="Maximum time [s]")
-    N_record: int = Field(500, description="Record history every N_record iteration")
     integ: str = Field("lsoda_odeint", description="Time integration scheme")
 
     # Rocket configuration
