@@ -1,0 +1,10 @@
+メモ帳で実行
+
+シミュレーション実行の仕方
+
+１．Anaconda　コマンドプロンプトを開く
+２．「cd C:\Users\wadat\OneDrive\デスクトップ\Planet-Q\TrajecSimu-master」
+３．「python driver_sample.py」
+
+--やめたいとき---
+control + C で終了

@@ -1,0 +1,160 @@
+$  ROCKET PARAMETER DEFINITION SAMPLE,
+$,
+$  by Hayato,
+$  PLANET-Q 2022/12/21,
+$  Felix-tbdパラメータ,
+$,
+,
+$ ----------------------------,
+$ rocket airframe parameters,
+$ ----------------------------,
+$ rocket height [m],
+rocket_height,1.3320
+$ rocket diameter [m],外経
+rocket_diameter,0.109
+$ dry mass [kg],乾燥質量（機体＋燃料）4.572（酸化剤は除く）
+m_dry,4.572
+$ propellant mass [kg],s推進剤の材料（燃料＋酸化剤）
+m_prop,0.424
+$ center of gravity (CG) location of dry mass from nose tip [m],機体の重心（ノーズから）open rocketで出した方がいい
+CG_dry,0.728
+$ center of gravity (CG) location of propellant from nose tip [m],酸化剤と燃料の重心（ノーズから）Fusionで出した方がいい
+CG_prop,0.933
+,
+$ 乾燥時の機体の慣性モーメント [kg-m^2],
+MOI_dry_x,0.01
+MOI_dry_y,0.511
+MOI_dry_z,0.511
+,
+$ 推進剤の重心周りの慣性モーメント [kg-m^2],
+MOI_prop_x,0.005
+MOI_prop_y,0.0618
+MOI_prop_z,0.0618
+,
+$ ランチラグのノーズ先端からの位置[m],
+$ 2/26 実測,
+$ NOTE: Felix-Camelliaにはラグが3つあるが、2つ以上のラグがある場合は,
+$ ノーズ先端から最も遠い2つのラグを採用し、2つのうちでノーズから近い順にlug_1st,lug_2ndとしてください
+lug_1st,0.625155
+lug_2nd,1.1305
+,
+$ ----------------------------,
+$ rocket aerodynamic parameters (at M = 0.3,AoA ~ 0deg)
+$ ----------------------------,
+$ center of pressure (CP) location from nose tip [m],open rocketでどうぞ
+CP_body,0.924
+$ drag coefficient,
+Cd0,0.265
+$ Lift slope [1/rad],
+Cl_alpha,7.03
+$ pitch damping coefficient,
+Cmq,-4
+,
+,
+$ ----------------------------,
+$ numerical parameters,
+$ ----------------------------,
+$ time step [s],時間の刻み0.01より小さくはできひん
+dt,0.01
+$ max time for computation [s],
+t_max,2000
+,
+,
+$ ----------------------------,
+$ launch parameters,
+$ ----------------------------,
+$ ランチャ仰角[deg],海打ちは70~80度、陸は80~90度、安全のため
+$ 普通は70~80度,
+$ ここをいじると最高高度やマッハ数、落下点が変わる,
+elev_angle,80
+$ ランチャ方位角[deg],北=0deg、東=90deg、西=270deg
+azimuth,0
+$ launcher rail lenght [m],
+rail_length,5
+,
+,
+$ ----------------------------,
+$ launch parameters,
+$ ----------------------------,
+$ wind_alt_std: 基準高度(地上風向風速観測点の地面からの高度) [m],
+wind_alt_std,2
+$ wind_direction: 基準高度(wind_alt_std)での風の吹いてくる方向(run_singleの場合のみ使う),
+wind_direction,90
+$ wind_speed: 基準高度(wind_alt_std)での風速[m],
+wind_speed,0
+$ wind_direction_original: ↓予報誤差分散ループを使う場合だけ指定する。-1はいじらなくていい,
+$wind_direction_original,-1
+,
+$ wind_power_coeff: べき則の係数,運営が言ってくる
+wind_power_coeff,6
+,
+$ wind_model: 風モデルの指定,
+$   power: べき則,
+$   log: 対数則,
+$   forecast: 数値予報モデル,
+$   error-statistics: 予報誤差統計モデル,
+$   A-B-hybrid: AとBの組み合わせ ,
+$wind_model, power-forecast-hybrid
+wind_model,power 
+$power_Gustならべき法則＋突風モデル
+$wind_model, error-statistis
+$wind_model, power-es-hybrid
+$wind_model, forecast
+,
+$ 風モデルに必要なファイル等,
+$   (予報モデルを使用する場合のみ)予報値のファイル名,
+$   予報ファイルは通常はwind_forecast_csvフォルダ内に入れてください,
+$forecast_csvname, wind_forecast_csv/wind.csv
+$   (予報誤差統計モデルを使用する場合のみ)誤差統計パラメータのファイル名,
+$error_stat_filename,Config_sample/error_stat_JST15+15h.json
+,
+,
+$ ----------------------------,
+$ engine parameters,
+$ ----------------------------,
+$ thrust_input_type: スラストカーブの形式。どちらを指定する場合でも'時刻に対する推力値'のデータが必要,
+$ 'curve_const_t' 一定時間毎のサンプリングの場合に使用できる。LPFフィルタリングによるノイズ除去を行う。'thrust_dt'でサンプリング間隔[s]を指定する必要がある,
+$   'time_curve' 一定間隔でのサンプリングではなくても使用できる。原理上LPFフィルタリングは行えない。,
+$thrust_input_type, time_curve
+thrust_input_type, curve_const_t
+thrust_dt,0.001
+,
+$ curve_fitting: スラストの多項式近似によるフィッティングを行うかどうか。デフォルトtrue,
+curve_fitting,false
+$ fitting_order: 多項式フィッティングの最大次数。デフォルト15,
+$ NOTE: LPFを使用する場合はカットオフ周波数(デフォルト10)より大きい数にすると結果がでたらめになります。,（９でしましょう）
+fitting_order,9
+,
+$ thrust_filename: スラストカーブのファイル名,
+$   スラストカーブファイルは通常はThrust_curve_csvフォルダ内に入れてください,
+thrust_filename, Thrust_curve_csv/I260_2022.06.12.csv
+,
+$ thrust_mag_factor: スラストカーブの振幅の倍率。デフォルト1。,
+$ 設計段階でまだスラストの実測ができない状態では設計値よりも推力を低めに見積もなどの場合に使用,
+thrust_mag_factor,1
+$ time_mag_factor: スラストカーブの時間方向の倍率。デフォルト1。,（公称値で0.7にするときもある）
+time_mag_factor,1
+,
+,
+$ ----------------------------,
+$ parachute parameters,
+$ ----------------------------,
+$ 1段目のパラシュート展開の頂点検知からの秒数[s],（分離試験で確認しろ(頂点検知（電装指令）からパラが完全に開くまで)
+t_para_delay,10000
+$ 1段目パラシュートの抗力係数,
+Cd_para,1.2
+$ 1段目パラシュートの有効面積,
+S_para,0.772
+$ 2段目のパラシュートがあるかどうか。,
+second_para, true
+$ 2段目パラシュート展開の離床からの秒数,
+$ 注意：2段目の展開は'alt_para2'パラメータで設定した高度に到達するか,
+$      離床から't_deploy_2'で設定した秒数経過するかどちらかの条件で開きます,
+$      つまり早く条件を満たした方が採用されるので、例えば高度検知のみで試したいときはt_deploy_2を1000とかにすると良い,
+t_deploy_2,100
+$ 2段目パラシュート展開高度,
+alt_para_2,200
+$ 2段目パラシュートの抗力係数,
+Cd_para_2,1.2
+$ 2段目パラシュートの有効面積,
+S_para_2,3.39
