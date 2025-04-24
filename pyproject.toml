@@ -37,6 +37,7 @@ select = ["ALL"]
 
 ignore = [
     "G004", # `logging-f-string` : loggingでf-stringを使いたい
+    "D415", # `missing-terminal-punctuation` : docstring日本語で書きます
 ]
 
 [tool.ruff.pydocstyle]
