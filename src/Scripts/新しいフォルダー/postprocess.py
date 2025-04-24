@@ -287,7 +287,7 @@ class PostProcess_single:
             "total_impulse  ": self.myrocket.Params.Impulse_total,
             "max_thrust": self.myrocket.Params.Thrust_max,
             "average_thrust": self.myrocket.Params.Thrust_avg,
-            "burn_time": self.myrocket.Params.t_MECO,
+            "burn_time": self.myrocket.Params.t_meco,
             "Isp": Isp,
         }
         self.myrocket.res.update({"engine": tmp_dict})
@@ -304,7 +304,7 @@ class PostProcess_single:
             except:
                 pass
 
-            print(" burn time: ", self.myrocket.Params.t_MECO, "[s]")
+            print(" burn time: ", self.myrocket.Params.t_meco, "[s]")
             print(" max. thrust: ", self.myrocket.Params.Thrust_max, "[N]")
             print(" average thrust: ", self.myrocket.Params.Thrust_avg, "[N]")
             print(" specific impulse: ", Isp, "[s]")
@@ -564,26 +564,26 @@ class PostProcess_single:
         """
 
         # split arrays for each flight mode
-        t_MECO = self.myrocket.Params.t_MECO
+        t_meco = self.myrocket.Params.t_meco
         t_deploy = self.myrocket.trajectory.Params.t_deploy
         # dt = self.myrocket.Params.dt
 
-        # ***_t: thrusted flight (before MECO)
+        # ***_t: thrusted flight (before meco)
         # ***_c: coasting flight
         # ***_p: parachute fall
         try:
-            MECO_id = np.argmin(abs(time - t_MECO))
+            meco_id = np.argmin(abs(time - t_meco))
             deploy_id = np.argmin(abs(time - t_deploy))
-            time_t, time_c, time_p = np.split(time, [MECO_id, deploy_id])
-            xloc_t, xloc_c, xloc_p = np.split(xloc, [MECO_id, deploy_id])
-            yloc_t, yloc_c, yloc_p = np.split(yloc, [MECO_id, deploy_id])
-            zloc_t, zloc_c, zloc_p = np.split(zloc, [MECO_id, deploy_id])
+            time_t, time_c, time_p = np.split(time, [meco_id, deploy_id])
+            xloc_t, xloc_c, xloc_p = np.split(xloc, [meco_id, deploy_id])
+            yloc_t, yloc_c, yloc_p = np.split(yloc, [meco_id, deploy_id])
+            zloc_t, zloc_c, zloc_p = np.split(zloc, [meco_id, deploy_id])
         except:
-            MECO_id = np.argmin(abs(time - t_MECO))
-            time_t, time_c = np.split(time, [MECO_id])
-            xloc_t, xloc_c = np.split(xloc, [MECO_id])
-            yloc_t, yloc_c = np.split(yloc, [MECO_id])
-            zloc_t, zloc_c = np.split(zloc, [MECO_id])
+            meco_id = np.argmin(abs(time - t_meco))
+            time_t, time_c = np.split(time, [meco_id])
+            xloc_t, xloc_c = np.split(xloc, [meco_id])
+            yloc_t, yloc_c = np.split(yloc, [meco_id])
+            zloc_t, zloc_c = np.split(zloc, [meco_id])
 
             # create plot
         fig = plt.figure(2)

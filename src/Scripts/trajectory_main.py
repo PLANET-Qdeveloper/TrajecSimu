@@ -361,11 +361,11 @@ class Trajec_main:
                 # detect nozzle off the rail height
             """
 
-        elif self.flag <= 2 and t >= self.Params.t_MECO:
-            # detect MECO
+        elif self.flag <= 2 and t >= self.Params.t_meco:
+            # detect meco
 
             print("----------------------------")
-            print("  MECO at t = ", np.round(t, 2), "[s]")
+            print("  meco at t = ", np.round(t, 2), "[s]")
             print("  current altitude: ", np.round(x[2], 2), "[m]")
             print("  ground speed:    ", np.round(np.linalg.norm(v), 2), "[m/s]")
             print("----------------------------")
@@ -642,7 +642,7 @@ class Trajec_main:
         #         CG = center of gravity location from the nose tip
         # =======================================
 
-        if t >= self.Params.t_MECO:
+        if t >= self.Params.t_meco:
             # ---------------------------
             # mass for coasting phase (m, I = const.)
             # ---------------------------

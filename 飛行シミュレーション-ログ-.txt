@@ -184,7 +184,7 @@ Wind model:  power-forecast-hybrid
 ----------------------------
 
 ----------------------------
-  MECO at t =  6.01 [s]
+  meco at t =  6.01 [s]
   current altitude:  728.97 [m]
   ground speed:     166.38 [m/s]
 ----------------------------

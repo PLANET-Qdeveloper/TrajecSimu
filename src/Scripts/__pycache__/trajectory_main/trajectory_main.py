@@ -6,19 +6,21 @@ Created on Sat Jul  8 23:06:17 2017
 @author: shugo
 """
 
-import numpy as np
-from scipy.integrate import ode, odeint
-from scipy import integrate
-import quaternion
-#from Scripts.Rocket_simu import Rocket
-#import matplotlib.pyplot as plt
+# from Scripts.Rocket_simu import Rocket
+# import matplotlib.pyplot as plt
 import copy
-#import subprocess
+
+import numpy as np
+import quaternion
+from scipy import integrate
+from scipy.integrate import ode, odeint
+
+# import subprocess
 from Scripts.parameters import Parameters
 
 
 # class
-class Trajec_run():
+class Trajec_run:
     """
     ====================================================
     This is a class for simulation parameter setting, execution of main computation, and post-processing.
@@ -78,28 +80,28 @@ class Trajec_run():
         # self.trajectory = trajec_main(self.params_df)  # provide parameters for sub-class
         self.trajectory = Trajec_main(self.Params)
 
-        #"""
-        print('============================')
-        print('  Completed Parameters Setup')
-        print('============================')
-        print(' ')
-        #"""
+        # """
+        print("============================")
+        print("  Completed Parameters Setup")
+        print("============================")
+        print(" ")
+        # """
 
         # run ODE integration
         self.trajectory.ODE_main()
 
         # quit
-        #"""
-        print('============================')
-        print('  Quit ODE_main')
-        print('============================')
-        print(' ')
-        #"""
+        # """
+        print("============================")
+        print("  Quit ODE_main")
+        print("============================")
+        print(" ")
+        # """
 
         return None
 
 
-class Trajec_main():
+class Trajec_main:
     """
     ====================================================
     Class for rocket trajectory equation of motion (EOM) and its integration
@@ -111,6 +113,7 @@ class Trajec_main():
         Method for initial setup
     ----------------------------------------------------
     """
+
     def __init__(self, Params):
         # =============================================
         # this method is called when instance is created. Parameter setup is also done by this method.
@@ -118,8 +121,8 @@ class Trajec_main():
         # INPUT: Params = instance that contains parameter values
         # =============================================
         # setup parameters in the instance by calling superclasses method
-        #self.get_default()
-        #self.overwrite_parameters(params_df)
+        # self.get_default()
+        # self.overwrite_parameters(params_df)
 
         # copy instance since it will be modified during integration
         self.Params = copy.deepcopy(Params)
@@ -130,13 +133,12 @@ class Trajec_main():
         self.Params.setup_wind()
 
         # initialize a dict for result
-        self.res_trajec_main = {'v_para_deploy': -1}  #, 'v_launch_clear': -1}
+        self.res_trajec_main = {"v_para_deploy": -1}  # , 'v_launch_clear': -1}
 
         # XXX: bad definition (for test)
-        self.max_accel = 0.
+        self.max_accel = 0.0
 
         return None
-
 
     """
     ----------------------------------------------------
@@ -156,15 +158,15 @@ class Trajec_main():
         #      Initialization
         # ---------------------------------------------
         # set initial value
-        t0 = 0.              # start time
-        u0 = self.SetupICs() # initiate state vector
+        t0 = 0.0  # start time
+        u0 = self.SetupICs()  # initiate state vector
 
         # number of iteration
         self.N_iter = 0
 
         # initialize a list for backup
         # backup = [time,flag,u]
-        self.backup = [np.r_[t0,0,u0]]
+        self.backup = [np.r_[t0, 0, u0]]
 
         # landing time initialization:
         self.landing_time = self.Params.t_max
@@ -187,18 +189,18 @@ class Trajec_main():
         self.time_all = np.array([0])
         """
 
-        if self.Params.integ == 'lsoda_odeint':
+        if self.Params.integ == "lsoda_odeint":
             # ---------------------------------------------
             #      use scipy.odeint
             # ---------------------------------------------
             # create time array. Note that dt for initial 3 sec is 10 times smaller than nominal value.
-            self.t = np.r_[ np.arange(t0,3.,self.Params.dt/10), np.arange(3., self.Params.t_max,self.Params.dt) ]
+            self.t = np.r_[np.arange(t0, 3.0, self.Params.dt / 10), np.arange(3.0, self.Params.t_max, self.Params.dt)]
 
             # run ODE integration
             self.solution = odeint(self.f_main, u0, self.t)
 
         else:
-            raise NotImplementedError('Integration scheme not implemented. Please use lsoda_odeint.')
+            raise NotImplementedError("Integration scheme not implemented. Please use lsoda_odeint.")
 
             """
             # ---------------------------------------------
@@ -218,7 +220,7 @@ class Trajec_main():
             #END WHILE
 
             """
-        #END IF
+        # END IF
 
         """
         print('----------------------------')
@@ -229,7 +231,6 @@ class Trajec_main():
         """
 
         return None
-
 
     """
     ----------------------------------------------------
@@ -258,10 +259,10 @@ class Trajec_main():
 
         # compute initial quaternion
         # convert body coord. to local fixed coord.
-        angle1 = (90.-self.Params.azimuth)/2. * (np.pi/180.)
-        qz = np.quaternion(np.cos(angle1),0.,0.,np.sin(angle1))  # around z
-        angle2 = -self.Params.elev_angle/2. * (np.pi/180.)
-        qy = np.quaternion(np.cos(angle2),0.,np.sin(angle2),0.)  # around y
+        angle1 = (90.0 - self.Params.azimuth) / 2.0 * (np.pi / 180.0)
+        qz = np.quaternion(np.cos(angle1), 0.0, 0.0, np.sin(angle1))  # around z
+        angle2 = -self.Params.elev_angle / 2.0 * (np.pi / 180.0)
+        qy = np.quaternion(np.cos(angle2), 0.0, np.sin(angle2), 0.0)  # around y
         # convert local -> rotate around z -> rotate around y -> body
         q0 = qz * qy
 
@@ -269,12 +270,11 @@ class Trajec_main():
         q01 = quaternion.as_float_array(q0)
 
         # initial state "vector"
-        u0 = np.r_[x0,v0,q01,omega0]
+        u0 = np.r_[x0, v0, q01, omega0]
 
         return u0
 
-
-    def f_main(self,u,t):
+    def f_main(self, u, t):
         # =======================================
         # this method is the Right hand side function of ODE (du_dt = f_main(u))
         #
@@ -292,22 +292,22 @@ class Trajec_main():
 
         # if the rocket has already landed, return 0
         if self.flag == 5:
-            return u*0.
+            return u * 0.0
 
         # swap input when we use scipy.integrate.ode
-        if self.Params.integ != 'lsoda_odeint':
+        if self.Params.integ != "lsoda_odeint":
             tmp = u
             u = t
             t = tmp
-        #END IF
+        # END IF
 
         # count the number of function call
         self.N_iter += 1
 
         # backup
         if np.mod(self.N_iter, self.Params.N_record) == 0:
-            self.add_backup(t,u)
-        #END IF
+            self.add_backup(t, u)
+        # END IF
 
         # --------------------------
         #   extract vectors
@@ -316,7 +316,7 @@ class Trajec_main():
         # v =     velocity            :expressed in body coordinate
         # q =     atitude quaternion  :conversion from local-fixed to body
         # omega = angular velocity    :expressed in body coordinate
-        x,v,q,omega = self.state2vecs_quat(u)
+        x, v, q, omega = self.state2vecs_quat(u)
 
         # ----------------------------
         #    Direction Cosine Matrix for input q
@@ -329,21 +329,21 @@ class Trajec_main():
         # ----------------------------
         #   flight mode classification
         # ----------------------------
-        if self.flag==1 and x[2] > self.Params.height_1stlug_off:
+        if self.flag == 1 and x[2] > self.Params.height_1stlug_off:
             # detect 1st launch lug off the rail
             #  -> rocket starts rotation around 2nd-lug, but no translation
 
             # get air speed and AoA
-            air_speed, _, AoA, _ = self.air_state(x,v,Tbl)
-            print('----------------------------')
-            print('  1st lug launcher-clear at t = ',np.round(t, 5),'[s]')
-            print('  ground speed: ',np.round(np.linalg.norm(v), 2),'[m/s]')
-            print('  true air speed: ', np.round(air_speed, 2), '[m/s], AoA: ', np.round(np.rad2deg(AoA), 3), '[deg]')
-            print('----------------------------')
-            print(' ')
+            air_speed, _, AoA, _ = self.air_state(x, v, Tbl)
+            print("----------------------------")
+            print("  1st lug launcher-clear at t = ", np.round(t, 5), "[s]")
+            print("  ground speed: ", np.round(np.linalg.norm(v), 2), "[m/s]")
+            print("  true air speed: ", np.round(air_speed, 2), "[m/s], AoA: ", np.round(np.rad2deg(AoA), 3), "[deg]")
+            print("----------------------------")
+            print(" ")
 
             # record history
-            self.add_backup(t,u)
+            self.add_backup(t, u)
             # record launch clear air speed
             # self.res_trajec_main.update( { 'v_launch_clear' : air_speed } )
 
@@ -353,131 +353,131 @@ class Trajec_main():
         elif self.flag <= 1.1 and x[2] > self.Params.height_2ndlug_off:
             # detect 2nd launch lug off the rail.
             #  -> rocket starts translation and rotation around CG
-            self.flag = 2.
+            self.flag = 2.0
 
             """
             elif self.flag <= 1.2 and x[2] > self.height_nozzle_off:
                 # detect nozzle off the rail height
             """
 
-        elif self.flag <= 2 and t >= self.Params.t_MECO:
-            # detect MECO
+        elif self.flag <= 2 and t >= self.Params.t_meco:
+            # detect meco
 
-            print('----------------------------')
-            print('  MECO at t = ',np.round(t, 2), '[s]')
-            print('  current altitude: ',np.round(x[2], 2), '[m]')
-            print('  ground speed:    ',np.round(np.linalg.norm(v), 2), '[m/s]')
-            print('----------------------------')
-            print(' ')
+            print("----------------------------")
+            print("  meco at t = ", np.round(t, 2), "[s]")
+            print("  current altitude: ", np.round(x[2], 2), "[m]")
+            print("  ground speed:    ", np.round(np.linalg.norm(v), 2), "[m/s]")
+            print("----------------------------")
+            print(" ")
 
             # record history
-            self.add_backup(t,u)
+            self.add_backup(t, u)
             # switch into coasting flight
             self.flag = 3
 
-        elif self.flag==3 and t >= self.Params.t_deploy:
+        elif self.flag == 3 and t >= self.Params.t_deploy:
             # detect 1st parachute deployment
 
             # get air speed and AoA
-            air_speed, _, AoA, _ = self.air_state(x,v,Tbl)
+            air_speed, _, AoA, _ = self.air_state(x, v, Tbl)
             # get air property
-            _,p_tmp,rho_tmp,_ = self.standard_air(x[2])
+            _, p_tmp, rho_tmp, _ = self.standard_air(x[2])
 
-            print('----------------------------')
-            print('  1st parachute deployed at t = ', np.round(t, 2), '[s]')
-            print('  current altitude: ', np.round(x[2], 2), '[m]')
-            print('  ground speed:    ', np.round(np.linalg.norm(v), 2), '[m/s]')
-            print('  true air speed: ', np.round(air_speed, 2), '[m/s], AoA: ', np.round(np.rad2deg(AoA), 3), '[deg]')
-            print('  air density: ', np.round(rho_tmp,3) , '[kg/m^3], pressure: ', np.round(p_tmp,1) ,'[Pa]')
-            print('----------------------------')
-            print(' ')
+            print("----------------------------")
+            print("  1st parachute deployed at t = ", np.round(t, 2), "[s]")
+            print("  current altitude: ", np.round(x[2], 2), "[m]")
+            print("  ground speed:    ", np.round(np.linalg.norm(v), 2), "[m/s]")
+            print("  true air speed: ", np.round(air_speed, 2), "[m/s], AoA: ", np.round(np.rad2deg(AoA), 3), "[deg]")
+            print("  air density: ", np.round(rho_tmp, 3), "[kg/m^3], pressure: ", np.round(p_tmp, 1), "[Pa]")
+            print("----------------------------")
+            print(" ")
 
             # record history
-            self.add_backup(t,u)
+            self.add_backup(t, u)
             # record parachute deploy air speed
-            self.res_trajec_main.update( {'v_para_deploy' : air_speed } )
+            self.res_trajec_main.update({"v_para_deploy": air_speed})
 
             # switch into parachute fall
             if self.Params.flag_2ndpara:
                 # when two stage separation is True
-                self.flag = 3.5  #flag: drogue chute deployed
+                self.flag = 3.5  # flag: drogue chute deployed
             else:
-                self.flag = 4   # flag: main chute deployed
+                self.flag = 4  # flag: main chute deployed
 
             # stop rotation
             omega = np.zeros(3)
 
         # elif self.flag==3.5 and (t >= self.t_deploy_2 or 高度が規定値以下) :
-        elif self.flag==3.5 and (t >= self.Params.t_deploy_2 or x[2]<=self.Params.alt_para_2):
+        elif self.flag == 3.5 and (t >= self.Params.t_deploy_2 or x[2] <= self.Params.alt_para_2):
             # detect 2nd parachute deployment
 
             # get air speed and AoA
-            air_speed, _, AoA, _ = self.air_state(x,v,Tbl)
+            air_speed, _, AoA, _ = self.air_state(x, v, Tbl)
             # get air property
-            _,p_tmp,rho_tmp,_ = self.standard_air(x[2])
+            _, p_tmp, rho_tmp, _ = self.standard_air(x[2])
 
-            print('----------------------------')
-            print('  2nd parachute deployed at t = ', np.round(t, 2), '[s]')
-            print('  current altitude: ', np.round(x[2], 2), '[m]')
-            print('  ground speed:    ', np.round(np.linalg.norm(v), 2), '[m/s]')
-            print('  true air speed: ', np.round(air_speed, 2), '[m/s]' )
-            print('  air density: ', np.round(rho_tmp,3) , '[kg/m^3], pressure: ', np.round(p_tmp,1) ,'[Pa]')
-            print('----------------------------')
-            print(' ')
+            print("----------------------------")
+            print("  2nd parachute deployed at t = ", np.round(t, 2), "[s]")
+            print("  current altitude: ", np.round(x[2], 2), "[m]")
+            print("  ground speed:    ", np.round(np.linalg.norm(v), 2), "[m/s]")
+            print("  true air speed: ", np.round(air_speed, 2), "[m/s]")
+            print("  air density: ", np.round(rho_tmp, 3), "[kg/m^3], pressure: ", np.round(p_tmp, 1), "[Pa]")
+            print("----------------------------")
+            print(" ")
 
             # overwrite parachute properties with 2nd para
             self.Params.Cd_para = self.Params.Cd_para_2
             self.Params.S_para += self.Params.S_para_2
 
             # record history
-            self.add_backup(t,u)
+            self.add_backup(t, u)
 
             # switch into main parachute fall
             self.flag = 4
 
-        elif self.flag > 1 and self.flag < 5 and x[2] < 0. and t>2.:
+        elif self.flag > 1 and self.flag < 5 and x[2] < 0.0 and t > 2.0:
             # detect landing
-            print('----------------------------')
-            print('  Landing at t = ',np.round(t, 2), '[s]')
-            print('  landing ground speed: ', np.round(np.linalg.norm(v), 2), '[m/s]')
-            #wada write 緯度経度を表示させるためのモノ
-            earth_radius = 6378150.0    # [km]
-            point_rail=[40.237674, 140.009121] #INPUT:射点の座標を入れよ
+            print("----------------------------")
+            print("  Landing at t = ", np.round(t, 2), "[s]")
+            print("  landing ground speed: ", np.round(np.linalg.norm(v), 2), "[m/s]")
+            # wada write 緯度経度を表示させるためのモノ
+            earth_radius = 6378150.0  # [km]
+            point_rail = [40.237674, 140.009121]  # INPUT:射点の座標を入れよ
             lat2met = 2 * np.pi * earth_radius / 360.0
             lon2met = 2 * np.pi * earth_radius * np.cos(np.deg2rad(point_rail[0])) / 360.0
-            lat = (np.round(x[1],3)/(lat2met))+point_rail[0]
-            lon = (np.round(x[0],3)/(lon2met))+point_rail[1]
-            point = np.array([x[0],x[1]])
+            lat = (np.round(x[1], 3) / (lat2met)) + point_rail[0]
+            lon = (np.round(x[0], 3) / (lon2met)) + point_rail[1]
+            point = np.array([x[0], x[1]])
             down_range = np.linalg.norm(point)
-            print('          location x = ', np.round(x[0], 2), '[m]')
-            print('                   y = ', np.round(x[1], 2), '[m]')
-            print('               Down range =',(np.round(down_range,2)),'[m]')
-            print('                 latitude =',(lat))
-            print('                longitude =',(lon))
-            print('----------------------------')
-            print(' ')
+            print("          location x = ", np.round(x[0], 2), "[m]")
+            print("                   y = ", np.round(x[1], 2), "[m]")
+            print("               Down range =", (np.round(down_range, 2)), "[m]")
+            print("                 latitude =", (lat))
+            print("                longitude =", (lon))
+            print("----------------------------")
+            print(" ")
             # record landing time
             self.landing_time = t
-            self.res_trajec_main.update( {'landing_time' : t } )
+            self.res_trajec_main.update({"landing_time": t})
 
             # record history
-            self.add_backup(t,u)
+            self.add_backup(t, u)
             # flag -> landed
             self.flag = 5
             # quit integration
-            if self.Params.integ == 'lsoda_odeint':
-                return u*0.
-        #END IF
+            if self.Params.integ == "lsoda_odeint":
+                return u * 0.0
+        # END IF
 
         # ----------------------------
         #    1. Translation
         # ----------------------------
         # translation time rate = velocity
         # convert v from body coord. to fixed coord.
-        dx_dt = np.dot(Tbl.T,v)
+        dx_dt = np.dot(Tbl.T, v)
 
         # call mass properties
-        mass,MOI,d_dt_MOI,CG = self.mass_MOI(t)  # note that jet-damping effect is included in d(MOT)/dt
+        mass, MOI, d_dt_MOI, CG = self.mass_MOI(t)  # note that jet-damping effect is included in d(MOT)/dt
 
         # ----------------------------
         #    2. Velocity
@@ -489,7 +489,7 @@ class Trajec_main():
         #             mass   = mass(t):   function of time t
 
         # get aerodynamic force/moment
-        aeroF, aeroM = self.aero(x,v,omega,Tbl,CG)
+        aeroF, aeroM = self.aero(x, v, omega, Tbl, CG)
         # self.time_all = np.append(self.time_all, t)
         # self.record_tmp = np.append(self.record_tmp, aeroF[0])
 
@@ -497,30 +497,37 @@ class Trajec_main():
         if self.flag <= 1.1:
             # ug on the rail -> du/dx only. Consider rail-rocket friction force
             # total acceleration
-            dv_dt = -np.cross(omega,v) + np.dot(Tbl, self.Params.grav) + (aeroF + self.thrust(t) + self.friction() ) / mass
+            dv_dt = (
+                -np.cross(omega, v) + np.dot(Tbl, self.Params.grav) + (aeroF + self.thrust(t) + self.friction()) / mass
+            )
             # cancell out y,z
-            dv_dt = np.array([dv_dt[0],0.,0.])
+            dv_dt = np.array([dv_dt[0], 0.0, 0.0])
 
-            if dv_dt[0] < 0.:
+            if dv_dt[0] < 0.0:
                 # when du/dx is negative (i.e. weight is greater that thrust)
                 # -> rocket is hold up. return zero acceleration
                 dv_dt = np.zeros(3)
-            #END
+            # END
 
         elif self.flag == 2:
             # thrust ON
             # total acceleration
-            dv_dt = -np.cross(omega,v) + np.dot(Tbl, self.Params.grav) + self.Coriolis(v, Tbl) + (aeroF + self.thrust(t)) / mass
+            dv_dt = (
+                -np.cross(omega, v)
+                + np.dot(Tbl, self.Params.grav)
+                + self.Coriolis(v, Tbl)
+                + (aeroF + self.thrust(t)) / mass
+            )
 
         elif self.flag == 3 or self.flag == 5:
             # coasting phase
             # total acceleration
-            dv_dt = -np.cross(omega,v) + np.dot(Tbl, self.Params.grav) + self.Coriolis(v, Tbl) + aeroF / mass
+            dv_dt = -np.cross(omega, v) + np.dot(Tbl, self.Params.grav) + self.Coriolis(v, Tbl) + aeroF / mass
 
         elif self.flag == 3.5 or self.flag == 4:
             # parachute deployed
-            dv_dt = np.dot(Tbl, self.Params.grav) + self.Coriolis(v, Tbl) + self.parachute_F(x,v,Tbl) / mass
-        #END IF
+            dv_dt = np.dot(Tbl, self.Params.grav) + self.Coriolis(v, Tbl) + self.parachute_F(x, v, Tbl) / mass
+        # END IF
 
         # ----------------------------
         #    3. Atitude
@@ -530,11 +537,11 @@ class Trajec_main():
 
         # stop rotation when parachute ihas deployed
         if self.flag == 3.5 or self.flag == 4:
-            omega *= 0.
-        #END IF
+            omega *= 0.0
+        # END IF
 
         # convert omega to quaternion
-        q_omega = np.r_[[0.], omega]
+        q_omega = np.r_[[0.0], omega]
         q_omega2 = quaternion.as_quat_array(q_omega)
 
         # dq/dt to be returned
@@ -556,20 +563,18 @@ class Trajec_main():
             # both lug on the rail /parachute deployed -> no angular velocity change
             domega_dt = np.zeros(3)
 
-
-
         else:
             if self.flag == 1.1:
                 # 2nd lug on the rail. rotate around this point. Add addtitonal moment
                 # aerodynamic moment correction: move center of rotation from CG > 2nd lug (currently ignore damping correction)
-                aeroM_around_2ndlug = aeroM + np.cross( np.array([self.Params.lug_2nd - CG,0.,0.]) , aeroF )
+                aeroM_around_2ndlug = aeroM + np.cross(np.array([self.Params.lug_2nd - CG, 0.0, 0.0]), aeroF)
                 # gravitaional moment around CG
                 grav_body = mass * np.dot(Tbl, self.Params.grav)  # gravity in body coord.
-                gravM_around_2ndlug = np.cross( np.array([self.Params.lug_2nd - CG,0.,0.]) , grav_body)
+                gravM_around_2ndlug = np.cross(np.array([self.Params.lug_2nd - CG, 0.0, 0.0]), grav_body)
                 # overwrite "aeroM"
                 aeroM = aeroM_around_2ndlug + gravM_around_2ndlug
                 # convert moment of inertia using parallel axis foram
-                MOI += mass * np.array( [0., self.Params.lug_2nd - CG, self.Params.lug_2nd - CG ])**2.
+                MOI += mass * np.array([0.0, self.Params.lug_2nd - CG, self.Params.lug_2nd - CG]) ** 2.0
             # END IF
 
             # MOI1 = MOI(t)           # moment of inertia
@@ -577,22 +582,22 @@ class Trajec_main():
             # aeroM1 = aeroM(u)       # aerodynamic moment
 
             # Euler eqn of rotation
-            #tmp1 = 1./MOI[0] * ( (MOI[1]-MOI[2])*omega[1]*omega[2] - d_dt_MOI[0]*omega[0] + aeroM[0])
-            #tmp2 = 1./MOI[1] * ( (MOI[2]-MOI[0])*omega[0]*omega[2] - d_dt_MOI[1]*omega[1] + aeroM[1])
-            #tmp3 = 1./MOI[2] * ( (MOI[0]-MOI[1])*omega[0]*omega[1] - d_dt_MOI[2]*omega[2] + aeroM[2])
-            #domega_dt = np.array([tmp1,tmp2,tmp3])
-            domega_dt = (-np.cross(omega,MOI*omega) - d_dt_MOI*omega + aeroM) / MOI
+            # tmp1 = 1./MOI[0] * ( (MOI[1]-MOI[2])*omega[1]*omega[2] - d_dt_MOI[0]*omega[0] + aeroM[0])
+            # tmp2 = 1./MOI[1] * ( (MOI[2]-MOI[0])*omega[0]*omega[2] - d_dt_MOI[1]*omega[1] + aeroM[1])
+            # tmp3 = 1./MOI[2] * ( (MOI[0]-MOI[1])*omega[0]*omega[1] - d_dt_MOI[2]*omega[2] + aeroM[2])
+            # domega_dt = np.array([tmp1,tmp2,tmp3])
+            domega_dt = (-np.cross(omega, MOI * omega) - d_dt_MOI * omega + aeroM) / MOI
         # END IF
 
         # ----------------------------
         #    Set variables back in the state vector form
         # ----------------------------
-        du_dt = np.r_[dx_dt,dv_dt,dq_dt,domega_dt]
+        du_dt = np.r_[dx_dt, dv_dt, dq_dt, domega_dt]
 
         # ----------------------------
         #      apogee detection
         # ----------------------------
-        if dx_dt[2] < 0.:
+        if dx_dt[2] < 0.0:
             self.apogee_count += 1
 
             if self.apogee_count >= 10:
@@ -601,20 +606,19 @@ class Trajec_main():
                 # which is either "t_deploy" [s] after ignition or
                 # "t_para_delay" [s] after apogee detection
 
-                self.Params.t_deploy = min( self.Params.t_deploy, t + self.Params.t_para_delay )
-                self.apogee_count = -1.e10
-            #END IF
-        #END IF
+                self.Params.t_deploy = min(self.Params.t_deploy, t + self.Params.t_para_delay)
+                self.apogee_count = -1.0e10
+            # END IF
+        # END IF
 
-        if self.flag >= 0. and self.flag <= 3.0:
+        if self.flag >= 0.0 and self.flag <= 3.0:
             # XXX: bad implment for test
             self.max_accel = max(self.max_accel, np.linalg.norm(dv_dt))
-            #print("accel: {} (max: {})".format(np.linalg.norm(dv_dt), self.max_accel))
+            # print("accel: {} (max: {})".format(np.linalg.norm(dv_dt), self.max_accel))
 
         return du_dt
 
-
-    def mass_MOI(self,t):
+    def mass_MOI(self, t):
         # =======================================
         # this method returns mass properties of rocket
         #
@@ -625,7 +629,7 @@ class Trajec_main():
         #         CG = center of gravity location from the nose tip
         # =======================================
 
-        if t >= self.Params.t_MECO:
+        if t >= self.Params.t_meco:
             # ---------------------------
             # mass for coasting phase (m, I = const.)
             # ---------------------------
@@ -643,43 +647,66 @@ class Trajec_main():
             # mass for powered phase (m = m(t), I = I(t))
             # ---------------------------
             # propellant comsumption rate = (impulse consumed so far) / (total impulse)
-            time_so_far = np.linspace(0., t)
+            time_so_far = np.linspace(0.0, t)
             Impulse_so_far = integrate.trapz(self.Params.thrust_function(time_so_far), time_so_far)
-            r = ( 1 - Impulse_so_far/self.Params.Impulse_total )  # impulse ratio
+            r = 1 - Impulse_so_far / self.Params.Impulse_total  # impulse ratio
 
             # total mass
             mass = self.Params.m_dry + r * self.Params.m_prop
             # total CG location
-            CG = (self.Params.CG_dry*self.Params.m_dry + self.Params.CG_prop*r*self.Params.m_prop) / mass
+            CG = (self.Params.CG_dry * self.Params.m_dry + self.Params.CG_prop * r * self.Params.m_prop) / mass
             # total MOI using parallel axis theorem
-            tmp = np.array([0.,1.,1.])
-            MOI = self.Params.MOI_dry + tmp*self.Params.m_dry*(CG-self.Params.CG_dry)**2. + r*self.Params.MOI_prop + tmp*(r*self.Params.m_prop)*(CG-self.Params.CG_prop)**2.
+            tmp = np.array([0.0, 1.0, 1.0])
+            MOI = (
+                self.Params.MOI_dry
+                + tmp * self.Params.m_dry * (CG - self.Params.CG_dry) ** 2.0
+                + r * self.Params.MOI_prop
+                + tmp * (r * self.Params.m_prop) * (CG - self.Params.CG_prop) ** 2.0
+            )
 
             # ---------------------------------
             # finite differencing for d(MOI)/dt, dm/dt
             # ---------------------------------
-            h = 1.E-3
-            Impulse_so_far = integrate.trapz(self.Params.thrust_function(np.linspace(0., t+h)), np.linspace(0., t+h))
-            r2 = (1- Impulse_so_far/self.Params.Impulse_total)  # impulse ratio
+            h = 1.0e-3
+            Impulse_so_far = integrate.trapz(
+                self.Params.thrust_function(np.linspace(0.0, t + h)), np.linspace(0.0, t + h)
+            )
+            r2 = 1 - Impulse_so_far / self.Params.Impulse_total  # impulse ratio
             # total mass
             # mass2 = self.m_dry + r2 * self.m_prop
             # total CG location
-            CG2 = (self.Params.CG_dry*self.Params.m_dry + self.Params.CG_prop*r2*self.Params.m_prop) / (self.Params.m_dry + r2*self.Params.m_prop)
+            CG2 = (self.Params.CG_dry * self.Params.m_dry + self.Params.CG_prop * r2 * self.Params.m_prop) / (
+                self.Params.m_dry + r2 * self.Params.m_prop
+            )
             # total MOI using parallel axis theorem
-            MOI2 = self.Params.MOI_dry + tmp*self.Params.m_dry*(CG2-self.Params.CG_dry)**2. + r2*self.Params.MOI_prop + tmp*(r2*self.Params.m_prop)*(CG2-self.Params.CG_prop)**2.
+            MOI2 = (
+                self.Params.MOI_dry
+                + tmp * self.Params.m_dry * (CG2 - self.Params.CG_dry) ** 2.0
+                + r2 * self.Params.MOI_prop
+                + tmp * (r2 * self.Params.m_prop) * (CG2 - self.Params.CG_prop) ** 2.0
+            )
 
-            Impulse_so_far = integrate.trapz(self.Params.thrust_function(np.linspace(0., t-h)), np.linspace(0., t-h))
-            r3 = (1- Impulse_so_far/self.Params.Impulse_total)  # impulse ratio
+            Impulse_so_far = integrate.trapz(
+                self.Params.thrust_function(np.linspace(0.0, t - h)), np.linspace(0.0, t - h)
+            )
+            r3 = 1 - Impulse_so_far / self.Params.Impulse_total  # impulse ratio
             # mass3 = self.m_dry + r3 * self.m_prop
-            CG3 = (self.Params.CG_dry*self.Params.m_dry + self.Params.CG_prop*r3*self.Params.m_prop) / (self.Params.m_dry + r3*self.Params.m_prop)
-            MOI3 = self.Params.MOI_dry + tmp*self.Params.m_dry*(CG3-self.Params.CG_dry)**2. + r3*self.Params.MOI_prop + tmp*(r3*self.Params.m_prop)*(CG3-self.Params.CG_prop)**2.
+            CG3 = (self.Params.CG_dry * self.Params.m_dry + self.Params.CG_prop * r3 * self.Params.m_prop) / (
+                self.Params.m_dry + r3 * self.Params.m_prop
+            )
+            MOI3 = (
+                self.Params.MOI_dry
+                + tmp * self.Params.m_dry * (CG3 - self.Params.CG_dry) ** 2.0
+                + r3 * self.Params.MOI_prop
+                + tmp * (r3 * self.Params.m_prop) * (CG3 - self.Params.CG_prop) ** 2.0
+            )
 
             # dm/dt and d(MOI)/dt
             # d_dt_m = (mass2 - mass3) / (2*h)
-            d_dt_MOI = (MOI2 - MOI3) / (2*h)
+            d_dt_MOI = (MOI2 - MOI3) / (2 * h)
 
             return mass, MOI, d_dt_MOI, CG
-        #END IF
+        # END IF
 
     def Coriolis(self, v, Tbl):
         # =======================================
@@ -691,11 +718,11 @@ class Trajec_main():
         # =======================================
 
         # Coriolis  force in body coord. note that self.omega_earth, omega of earth-spin, is given in local coord.
-        Fcor = 2. * np.cross( (Tbl@self.Params.omega_earth), v )
+        Fcor = 2.0 * np.cross((Tbl @ self.Params.omega_earth), v)
 
         return Fcor
 
-    def thrust(self,t):
+    def thrust(self, t):
         # =======================================
         # returns thrust force
         #
@@ -707,13 +734,12 @@ class Trajec_main():
         tmp = self.Params.thrust_function(t)
         if tmp < 0:
             # if thrust is nagative, which might happen because of curve fitting, overwrite with 0
-            tmp = 0.
+            tmp = 0.0
 
         # thrust vector (assume 0 misalignment)
-        T = np.array([tmp,0.,0.])
+        T = np.array([tmp, 0.0, 0.0])
 
         return T
-
 
     def friction(self):
         # =======================================
@@ -725,9 +751,7 @@ class Trajec_main():
 
         return friction
 
-
-
-    def aero(self,x,v,omega,Tbl,CG):
+    def aero(self, x, v, omega, Tbl, CG):
         # =======================================
         # returns aerodynamic force and moment
         #
@@ -743,37 +767,36 @@ class Trajec_main():
         # --------------------------------------------------
         #   Compute air velocity, angle-of-attack, roll-angle
         # --------------------------------------------------
-        air_speed, v_air, alpha, phi = self.air_state(x,v,Tbl)
+        air_speed, v_air, alpha, phi = self.air_state(x, v, Tbl)
 
         # ----------------------------------
         #   aerodynamic force on body ( might exclude fins)
         # ----------------------------------
         # air property at the altitude
-        _,_,rho,a = self.standard_air(x[2])
-
+        _, _, rho, a = self.standard_air(x[2])
 
         # Mach number
-        Mach = air_speed/a
+        Mach = air_speed / a
 
         # drag/lift coefficient, and C.P. location
-        Cd,Cl,CPloc = self.aero_coeff(Mach,alpha)
+        Cd, Cl, CPloc = self.aero_coeff(Mach, alpha)
 
         # convert coefficient to body coord.
         cosa = np.cos(alpha)
         sina = np.sin(alpha)
 
-        #C1b = -Cl*sina + Cd*cosa
-        #C2b = -(Cl*cosa + Cd*sina)*np.sin(phi)
-        #C3b = (Cl*cosa + Cd*sina)*np.cos(phi)
-        C = np.array([ (-Cl*sina + Cd*cosa), \
-                      (Cl*cosa + Cd*sina)*np.sin(phi), \
-                      (Cl*cosa + Cd*sina)*np.cos(phi)])    # need check here
+        # C1b = -Cl*sina + Cd*cosa
+        # C2b = -(Cl*cosa + Cd*sina)*np.sin(phi)
+        # C3b = (Cl*cosa + Cd*sina)*np.cos(phi)
+        C = np.array(
+            [(-Cl * sina + Cd * cosa), (Cl * cosa + Cd * sina) * np.sin(phi), (Cl * cosa + Cd * sina) * np.cos(phi)]
+        )  # need check here
 
         # force acting on CP of the body
-        force_all = 0.5 * rho * air_speed**2. * self.Params.X_area * (-C)
+        force_all = 0.5 * rho * air_speed**2.0 * self.Params.X_area * (-C)
 
         # aerodynamic moment wrt CG
-        moment_all = np.cross( np.array([CG - CPloc[0,0],0.,0.]) , force_all )
+        moment_all = np.cross(np.array([CG - CPloc[0, 0], 0.0, 0.0]), force_all)
 
         # add aerodynamic damping effect  (note: Cm_omega < 0)
         moment_all += 0.25 * rho * air_speed * self.Params.Cm_omega_bar * omega
@@ -936,7 +959,7 @@ class Trajec_main():
         return force_all, moment_all
     """
 
-    def air_state(self,x,v,Tbl):
+    def air_state(self, x, v, Tbl):
         # =======================================
         # returns air speed, air velocity, angle of attack, and roll angle
         #
@@ -949,45 +972,44 @@ class Trajec_main():
 
         # air velocity = -rocket_velocity + wind_velocity
         # NOTE: wind(x) is wind velocity in local coord. need conversion to body coord.
-        v_air = -v + np.dot( Tbl, self.Params.wind(x[2]) )
-        air_speed = np.linalg.norm(v_air) # air speed (positive scalar)
+        v_air = -v + np.dot(Tbl, self.Params.wind(x[2]))
+        air_speed = np.linalg.norm(v_air)  # air speed (positive scalar)
 
         # total angle-of-attack
         if air_speed == 0:
-            alpha = 0.
+            alpha = 0.0
         else:
-            alpha = np.arccos( -v_air[0]/air_speed )
-            #if v_air[0] > 0:
+            alpha = np.arccos(-v_air[0] / air_speed)
+            # if v_air[0] > 0:
             #    alpha = -alpha
-            #END IF
-        #END IF
+            # END IF
+        # END IF
 
         # if np.isnan(alpha):
         #    alpha = 0.
 
         # roll-angle
-        if v_air[2]==0:
+        if v_air[2] == 0:
             # if w = 0, atan(v/w) is not defined
             if -v_air[1] > 0:
-                phi = np.pi /2.
+                phi = np.pi / 2.0
             else:
-                phi = -np.pi /2.
+                phi = -np.pi / 2.0
         else:
-            phi = np.arctan( -v_air[1]/ -v_air[2] )
-            if -v_air[2]<0:
+            phi = np.arctan(-v_air[1] / -v_air[2])
+            if -v_air[2] < 0:
                 # if w<0, that is in 3rd or 4th quadrant in yz-plane, add pi to phi
                 #  so that sign of sin(phi), cos(phi) will be correctly calculated.
                 phi += np.pi
-            #END IF
-        #END IF
+            # END IF
+        # END IF
 
-        #if np.isnan(phi):
+        # if np.isnan(phi):
         #    phi = np.arctan( v_air[1]+0.0001/v_air[2]+0.0001 )
 
         return air_speed, v_air, alpha, phi
 
-
-    def parachute_F(self,x,v,Tbl):
+    def parachute_F(self, x, v, Tbl):
         # =======================================
         # returns aerodynamic force and moment
         #
@@ -999,10 +1021,10 @@ class Trajec_main():
 
         # air velocity = -rocket_velocity + wind_velocity
         #    NOTE: wind(x) is wind velocity in local coord. need conversion to body coord.
-        v_air = -v + np.dot( Tbl,self.Params.wind(x[2]) )
+        v_air = -v + np.dot(Tbl, self.Params.wind(x[2]))
 
         # air property at the altitude
-        _,_,rho,_ = self.standard_air(x[2])
+        _, _, rho, _ = self.standard_air(x[2])
 
         # parachute drag force
         parachute_drag = 0.5 * rho * np.linalg.norm(v_air) * v_air * self.Params.S_para * self.Params.Cd_para
@@ -1010,8 +1032,7 @@ class Trajec_main():
         # print('v_air', v_air, 'speed', np.linalg.norm(v_air))
         return parachute_drag
 
-
-    def standard_air(self,h):
+    def standard_air(self, h):
         # ==============================================
         # returns air property given an altitude
         # INPUT: h = altitude [m]
@@ -1022,108 +1043,108 @@ class Trajec_main():
         # gravitational accel.
         g = 9.81  # [m/s^2]
 
-        if h <= 11.*10**3:
+        if h <= 11.0 * 10**3:
             # *** Troposphere ***
             # temperature lapse rate
             gamma = -0.0065
             # temperature
-            T = self.Params.T0 + gamma * h # [K]
-            #pressure
-            p = self.Params.p0 * (T/self.Params.T0)**(-g/(gamma*R)) #[Pa]
+            T = self.Params.T0 + gamma * h  # [K]
+            # pressure
+            p = self.Params.p0 * (T / self.Params.T0) ** (-g / (gamma * R))  # [Pa]
 
-        elif h <= 20.*10**3:
+        elif h <= 20.0 * 10**3:
             # *** Tropopause ***
             # temperature is const at 11km-20km
             # p11 = pressure at 11km alt.
-            T,p11,_,_ = self.standard_air(11000.)
+            T, p11, _, _ = self.standard_air(11000.0)
             # pressure
-            p = p11 * np.exp( (-g/(R*T)) * (h-11000.) )
+            p = p11 * np.exp((-g / (R * T)) * (h - 11000.0))
 
-        elif h <= 32.*10**3:
+        elif h <= 32.0 * 10**3:
             # *** Stratosphere 1 ***
             # temp, pressure at 20km alt.
-            T20,p20,_,_ = self.standard_air(20000.)
+            T20, p20, _, _ = self.standard_air(20000.0)
             # temperature lapse rate
             gamma = 0.001
             # temperature
-            T = T20 + gamma * (h-20000.) # [K]
-            #pressure
-            p = p20 * (T/T20)**(-g/(gamma*R)) #[Pa]
+            T = T20 + gamma * (h - 20000.0)  # [K]
+            # pressure
+            p = p20 * (T / T20) ** (-g / (gamma * R))  # [Pa]
 
-        elif h <= 47.*10**3:
+        elif h <= 47.0 * 10**3:
             # *** Stratosphere 2 ***
             # temp, pressure at 32km alt.
-            T32,p32,_,_ = self.standard_air(32000.)
+            T32, p32, _, _ = self.standard_air(32000.0)
             # temperature lapse rate
             gamma = 0.0028
             # temperature
-            T = T32 + gamma * (h-32000.) # [K]
-            #pressure
-            p = p32 * (T/T32)**(-g/(gamma*R)) #[Pa]
+            T = T32 + gamma * (h - 32000.0)  # [K]
+            # pressure
+            p = p32 * (T / T32) ** (-g / (gamma * R))  # [Pa]
 
-        elif h <= 51.*10**3:
+        elif h <= 51.0 * 10**3:
             # *** Stratopause ***
             # temp, pressure at 47km alt.
-            T,p47,_,_ = self.standard_air(47000.)
+            T, p47, _, _ = self.standard_air(47000.0)
             # pressure
-            p = p47 * np.exp( (-g/(R*T)) * (h-47000.) )
+            p = p47 * np.exp((-g / (R * T)) * (h - 47000.0))
 
-        elif h <= 71.*10**3:
+        elif h <= 71.0 * 10**3:
             # *** Mesosphere 1 ***
             # temp, pressure at 51km alt.
-            T51,p51,_,_ = self.standard_air(51000.)
+            T51, p51, _, _ = self.standard_air(51000.0)
             # temperature lapse rate
             gamma = -0.0028
             # temperature
-            T = T51 + gamma * (h-51000.) # [K]
-            #pressure
-            p = p51 * (T/T51)**(-g/(gamma*R)) #[Pa]
+            T = T51 + gamma * (h - 51000.0)  # [K]
+            # pressure
+            p = p51 * (T / T51) ** (-g / (gamma * R))  # [Pa]
 
-        elif h <= 85.*10**3:
+        elif h <= 85.0 * 10**3:
             # *** Mesosphere 2 ***
             # temp, pressure at 51km alt.
-            T71,p71,_,_ = self.standard_air(71000.)
+            T71, p71, _, _ = self.standard_air(71000.0)
             # temperature lapse rate
             gamma = -0.002
             # temperature
-            T = T71 + gamma * (h-71000.) # [K]
-            #pressure
-            p = p71 * (T/T71)**(-g/(gamma*R)) #[Pa]
+            T = T71 + gamma * (h - 71000.0)  # [K]
+            # pressure
+            p = p71 * (T / T71) ** (-g / (gamma * R))  # [Pa]
 
-        elif h <= 90.*10**3:
+        elif h <= 90.0 * 10**3:
             # *** Mesopause ***
             # temp, pressure at 47km alt.
-            T,p85,_,_ = self.standard_air(85000.)
+            T, p85, _, _ = self.standard_air(85000.0)
             # pressure
-            p = p85 * np.exp( (-g/(R*T)) * (h-85000.) )
+            p = p85 * np.exp((-g / (R * T)) * (h - 85000.0))
 
-        elif h <= 110.*10**3:
+        elif h <= 110.0 * 10**3:
             # *** Thermosphere  ***
             # temp, pressure at 51km alt.
-            T90,p90,_,_ = self.standard_air(90000.)
+            T90, p90, _, _ = self.standard_air(90000.0)
             # temperature lapse rate
             gamma = 0.0026675
             # temperature
-            T = T90 + gamma * (h-90000.) # [K]
-            #pressure
-            p = p90 * (T/T90)**(-g/(gamma*R)) #[Pa]
+            T = T90 + gamma * (h - 90000.0)  # [K]
+            # pressure
+            p = p90 * (T / T90) ** (-g / (gamma * R))  # [Pa]
 
         else:
-            T110,p110,_,_ = self.standard_air(110000.)
+            T110, p110, _, _ = self.standard_air(110000.0)
             T = T110
             p = p110
 
-        #END IF
+        # END IF
 
         # density
-        rho = p/(R*T) #[kg/m^3]
+        rho = p / (R * T)  # [kg/m^3]
 
         # acoustic speed
-        a = np.sqrt(1.4*R*T) # [m/s]
+        a = np.sqrt(1.4 * R * T)  # [m/s]
 
-        return T,p,rho,a
+        return T, p, rho, a
 
-    def aero_coeff(self, Mach,alpha):
+    def aero_coeff(self, Mach, alpha):
         # ==============================================
         # returns aerodynamic coefficient
         #
@@ -1148,7 +1169,7 @@ class Trajec_main():
         # self.f_cl_alpha(Mach) = slope near AOA=0
         # shape will be lile sin(2*alpha), which means Cl=0 at 90deg
         # therefore, multiply 0.5 to realized the shape sin(2*alpha) as well as slope|AOA=0 = Cl_alpha
-        Cl = self.Params.f_cl_alpha(Mach) * 0.5* np.sin(2*alpha)
+        Cl = self.Params.f_cl_alpha(Mach) * 0.5 * np.sin(2 * alpha)
 
         # -------------------
         # Drag Coefficient
@@ -1162,9 +1183,9 @@ class Trajec_main():
         # END IF
 
         # drag coefficient "amplitude" for cosign curve fit
-        Cd_bar = 15.
+        Cd_bar = 15.0
 
-        Cd = Cd0 + Cd_bar*( np.cos(2*alpha + np.pi) +1.)
+        Cd = Cd0 + Cd_bar * (np.cos(2 * alpha + np.pi) + 1.0)
 
         # -------------------
         # C.P. location
@@ -1173,28 +1194,26 @@ class Trajec_main():
 
         return Cd, Cl, CPloc
 
-
-    def state2vecs_quat(self,u):
+    def state2vecs_quat(self, u):
         # convert state vector u to vectors
-        x = u[0:3]     # translation         :in fixed coordinate
-        v = u[3:6]     # velocity            :in body coordinate
-        q = u[6:10]    # atitude quaternion  :convert from fixed to body
-        omega = u[10:] # angular velocity    :in body coordinate
+        x = u[0:3]  # translation         :in fixed coordinate
+        v = u[3:6]  # velocity            :in body coordinate
+        q = u[6:10]  # atitude quaternion  :convert from fixed to body
+        omega = u[10:]  # angular velocity    :in body coordinate
 
         # convert to quaternion
         q2 = quaternion.as_quat_array(q)
 
-        return x,v,q2,omega
+        return x, v, q2, omega
 
-
-    def add_backup(self,t,u):
+    def add_backup(self, t, u):
         # ==============================================
         # backup time, flag, state u
         # append vectors to the array "history"
         # ==============================================
 
-        tmp = np.r_[t,self.flag,u]
-        #try:
-        self.backup = np.append(self.backup,[tmp],axis=0)
-        #except:
+        tmp = np.r_[t, self.flag, u]
+        # try:
+        self.backup = np.append(self.backup, [tmp], axis=0)
+        # except:
         #    pass

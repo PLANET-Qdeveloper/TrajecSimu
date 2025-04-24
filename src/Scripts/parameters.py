@@ -140,7 +140,7 @@ class Parameters:
             # -----------------------------
             # rocket engine parameters
             # -----------------------------
-            "t_MECO": 9.3,  # Main Engine Cut Off (MECO) time
+            "t_meco": 9.3,  # Main Engine Cut Off (meco) time
             "thrust": 800.0,  # thrust (const.)
             "thrust_input_type": "curve_const_t",  # thrust input csv file type
             "curve_fitting": True,  # True if curvefitting
@@ -378,7 +378,7 @@ class Parameters:
 
             if self.thrust_input_type == "rectangle":
                 # rectangle thrust input (constant thrust * burn time)
-                self.t_MECO = float(self.params_dict["t_MECO"])
+                self.t_meco = float(self.params_dict["t_meco"])
                 self.thrustforce = float(self.params_dict["thrust"])
 
             else:
@@ -464,7 +464,7 @@ class Parameters:
             # rectangle thrust input (constant thrust * burn time)
 
             # setup interp1d function
-            self.time_array = np.array([0, self.t_MECO]) * time_factor
+            self.time_array = np.array([0, self.t_meco]) * time_factor
             self.thrust_array = np.ones(2) * self.thrustforce * thrust_factor
 
         else:
@@ -522,7 +522,7 @@ class Parameters:
         self.Thrust_max = np.max(self.thrust_array)  # maximum thrust
         self.Impulse_total = integrate.trapezoid(self.thrust_array, self.time_array)  # total impulse
         self.Thrust_avg = self.Impulse_total / self.time_array[-1]  # averaged thrust
-        self.t_MECO = self.time_array[-1]  # MECO time
+        self.t_meco = self.time_array[-1]  # meco time
 
         self.It_poly_error = 0.0
 
