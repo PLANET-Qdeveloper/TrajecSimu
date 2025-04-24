@@ -2,8 +2,11 @@
 
 from enum import Enum
 
-import pydantic
 from pydantic import BaseModel, Field
+from shapely.geometry import Point
+
+from schema.rocket import RocketConfigModel
+from schema.transform import Transform
 
 
 class WindModel(str, Enum):
@@ -13,20 +16,33 @@ class WindModel(str, Enum):
     power_forecast_hybrid = "power-forecast-hydrid"
 
 
-class RocketConfigModel(BaseModel):
-    """Rocket simulation configuration parameters model."""
+class AeroFinMode(str, Enum):
+    """Aero fin mode enumeration."""
 
-    # Numerical executive parameters
-    dt: float = Field(0.05, description="Time step [s]")
-    t_max: float = Field(100 * 60, description="Maximum time [s]")
-    N_record: int = Field(500, description="Record history every N_record iteration")
-    integ: str = Field("lsoda_odeint", description="Time integration scheme")
+    indiv = "indiv"
+    integ = "integ"
 
-    # Launch condition parameters
-    elev_angle: float = Field(89.0, description="Angle of elevation [deg]")
-    azimuth: float = Field(0.0, description="North=0, east=90, south=180, west=270 [deg]")
+
+class LaunchSiteModel(BaseModel):
+    """Launch site model."""
+
+    # Launch site name
+    launch_site_name: str = Field(
+        default="noshiro",
+        description="Name of the launch site",
+    )
+
+    # Launch site location
+    rocket_transform: Transform = Field(
+        default=Transform(point=Point(139.421333, 34.736139)),
+        description="Location of launch site",
+    )
+
     rail_length: float = Field(5.0, description="Length of launcher rail")
-    latitude: float = Field(35.0, description="Latitude of launch point [deg]")
+
+
+class EnviromentModel(BaseModel):
+    """Environment model."""
 
     # Atmosphere property
     T0: float = Field(298.0, description="Temperature at 10m altitude [K]")
@@ -42,40 +58,30 @@ class RocketConfigModel(BaseModel):
         "power", description="'power' for Wind Power Method, 'power-forecast-hydrid' for power-forecast hybrid"
     )
 
-    # Rocket aerodynamic parameters
-    aero_fin_mode: Literal["integ", "indiv"] = Field(
-        "integ", description="'indiv' for individual fin computation, 'integ' for compute fin-body at once"
+
+class SimulationParameterModel(BaseModel):
+    """Simulation parameters model."""
+
+    # Numerical executive parameters
+    dt: float = Field(0.05, description="Time step [s]")
+    t_max: float = Field(100 * 60, description="Maximum time [s]")
+    N_record: int = Field(500, description="Record history every N_record iteration")
+    integ: str = Field("lsoda_odeint", description="Time integration scheme")
+
+    # Rocket configuration
+    rocket_config: RocketConfigModel = Field(
+        default=RocketConfigModel(),
+        description="Rocket configuration parameters",
     )
-    Cd0: float = Field(0.6, description="Drag coefficient at Mach 0.1, AoA = 0deg")
-    Cmp: float = Field(-0.0, description="Stability derivative of rolling moment coefficient (aerodynamic damping)")
-    Cmq: float = Field(
-        -4.0, description="Stability derivative of pitching/yawing moment coefficient (aerodynamic damping)"
+
+    # Simulation name
+    simulation_name: str = Field(
+        default="rocket_simulation",
+        description="Name of the simulation instance",
     )
-    Cl_alpha: float = Field(12.0, description="Lift coefficient slope for small AoA [1/rad]")
-    Mach_AOA_dep: bool = Field(True, description="True if aerodynamic parameter depends on Mach/AOA, False if ignore")
 
-    # Rocket engine parameters
-    t_meco: float = Field(9.3, description="Main Engine Cut Off (meco) time")
-    thrust: float = Field(800.0, description="Thrust (const.)")
-    thrust_input_type: str = Field("curve_const_t", description="Thrust input csv file type")
-    curve_fitting: bool = Field(True, description="True if curvefitting")
-    fitting_order: int = Field(15, description="Order of polynomial")
-    thrust_mag_factor: float = Field(1.0, description="Thrust magnification factor")
-    time_mag_factor: float = Field(1.0, description="Burn time magnification factor")
-
-    # Parachute parameters
-    t_deploy: float = Field(1000.0, description="Parachute deployment time from ignition")
-    t_para_delay: float = Field(1000.0, description="1st parachute deployment time from apogee detection")
-    Cd_para: float = Field(1.0, description="Drag coefficient of 1st parachute")
-    S_para: float = Field(0.5, description="Parachute area of 1st parachute [m^2]")
-    second_para: bool = Field(False, description="True if two stage parachute deployment")
-    t_deploy_2: float = Field(2000, description="2nd parachute deployment time from apogee detection")
-    Cd_para_2: float = Field(1, description="Drag coefficient of 2nd parachute")
-    S_para_2: float = Field(6.082, description="Parachute area of 2nd parachute [m^2]")
-    alt_para_2: float = Field(-100, description="Altitude at which 2nd parachute will be deployed")
-
-    # Location parameters
-    loc_lat: float = Field(34.736139)
-    loc_lon: float = Field(139.421333)
-    loc_alt: float = Field(0)
-    loc_mag: float = Field(-7.5)
+    # Simulation instance name
+    launch_site_name: str = Field(
+        default="noshiro",
+        description="Name of the simulation instance",
+    )
