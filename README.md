@@ -1,7 +1,18 @@
 # TrajecSimu
 
+
+
+リファクター中！こちらから移動してきました。[元](https://github.com/PLANET-Q/TrajecSimu)
+
+
+- 今の所ruff、mypyを適応しています。設定はpyproject.tomlを参照してください
+- プロジェクト管理ツールはuvです。
+
+**以下は全て昔の説明です**
+
 6-dof trajectory simulation for high-power rockets.  
 current version: 3.0 (11/1/2018)
+
 
 ## 概要
 Solves a 6-dof equation of motion for a trajectory of a transonic high-power rocket.  
