@@ -5,47 +5,6 @@ from pydantic import BaseModel, field_validator
 from scipy.spatial.transform import Rotation
 
 
-def calculate_rotation_vector(azimuth: float, elevation: float, degrees: bool = True) -> np.ndarray:
-    """Calculate rotation vector from azimuth and elevation angles.
-
-    Parameters:
-    -----------
-    azimuth : float
-        Azimuth angle (rotation around the z-axis, 0 is North/+y, increases clockwise)
-    elevation : float
-        Elevation angle (angle above the horizontal plane)
-    degrees : bool, optional
-        If True, input angles are in degrees, otherwise in radians
-
-    Returns:
-    --------
-    rotation_vector : numpy.ndarray
-        3D rotation vector where the direction represents the axis of rotation
-        and the magnitude represents the angle of rotation in radians
-    """
-    # Convert to radians if needed
-    if degrees:
-        azimuth = np.radians(azimuth)
-        elevation = np.radians(elevation)
-
-    # Calculate the axis of rotation (as a unit vector)
-    axis_x = -np.sin(azimuth)
-    axis_y = np.cos(azimuth)
-    axis_z = 0.0
-
-    # Create rotation around vertical axis (azimuth)
-    vertical_rotation = np.array([0, 0, 1]) * azimuth
-
-    # Create rotation around horizontal axis (elevation)
-    horizontal_axis = np.array([axis_x, axis_y, axis_z])
-    horizontal_rotation = horizontal_axis * elevation
-
-    # Combine rotations using Rodriguez formula
-    # This is a simplified approach - for a complete solution,
-    # consider using quaternions or rotation matrices
-    return vertical_rotation + horizontal_rotation
-
-
 class TransformValidateError(Exception):
     """Location validation error."""
 
@@ -53,8 +12,8 @@ class TransformValidateError(Exception):
         super().__init__(f"Invalid data for Location: {data}")
 
 
-class TransformQuaternionError(Exception):
-    """Location validation error."""
+class TransformRotationError(Exception):
+    """Rotation validation error."""
 
     def __init__(self, data: any) -> None:  # noqa: D107
         super().__init__(f"Invalid data for Location: {data}")
@@ -106,7 +65,7 @@ class Transform(BaseModel):
             if v.shape == (3,):
                 return Rotation.from_euler("xyz", v, degrees=True)
             if v.shape == (2,):
-                return Rotation.from_euler("xyz", calculate_rotation_vector(v[0], v[1]), degrees=True)
+                return cls.generate_rotation_from_azimuth_elevation(v[0], v[1], degrees=True)
         if isinstance(v, Rotation):
             return v
         raise TransformValidateError(v)
@@ -117,6 +76,85 @@ class Transform(BaseModel):
         Returns:
             np.ndarray: Euler angles
         """
-        if self.quartanion is None:
-            raise TransformQuaternionError(self)
+        if self.rotation is None:
+            raise TransformRotationError(self)
         return
+
+    @classmethod
+    def generate_rotation_from_azimuth_elevation(
+        cls, azimuth: float, elevation: float, degrees: bool = True
+    ) -> Rotation:
+        """Generate rotation from azimuth and elevation angles.
+
+        Parameters:
+        -----------
+        azimuth : float
+            Azimuth angle (rotation around the z-axis, 0 is North/+y, increases clockwise)
+        elevation : float
+            Elevation angle (angle above the horizontal plane)
+        degrees : bool, optional
+            If True, input angles are in degrees, otherwise in radians
+
+        Returns:
+        --------
+        rotation : scipy.spatial.transform.Rotation
+            Rotation object representing the rotation defined by the azimuth and elevation angles
+        """
+        # Convert to radians if needed
+        if degrees:
+            azimuth = np.radians(azimuth)
+            elevation = np.radians(elevation)
+
+        # Create rotation object from Euler angles
+        return Rotation.from_euler("xyz", [elevation, 0.0, -azimuth + 90], degrees=False)
+
+    @classmethod
+    def calculate_rotation_vector(cls, azimuth: float, elevation: float, degrees: bool = True) -> np.ndarray:
+        """Calculate rotation vector from azimuth and elevation angles.
+
+        Parameters:
+        -----------
+        azimuth : float
+            Azimuth angle (rotation around the z-axis, 0 is North/+y, increases clockwise)
+        elevation : float
+            Elevation angle (angle above the horizontal plane)
+        degrees : bool, optional
+            If True, input angles are in degrees, otherwise in radians
+
+        Returns:
+        --------
+        rotation_vector : numpy.ndarray
+            3D rotation vector where the direction represents the axis of rotation
+            and the magnitude represents the angle of rotation in radians
+        """
+        # Convert to radians if needed
+        if degrees:
+            azimuth = np.radians(azimuth)
+            elevation = np.radians(elevation)
+
+        # Calculate the axis of rotation (as a unit vector)
+        axis_x = -np.sin(azimuth)
+        axis_y = np.cos(azimuth)
+        axis_z = 0.0
+
+        # Create rotation around vertical axis (azimuth)
+        vertical_rotation = np.array([0, 0, 1]) * azimuth
+
+        # Create rotation around horizontal axis (elevation)
+        horizontal_axis = np.array([axis_x, axis_y, axis_z])
+        horizontal_rotation = horizontal_axis * elevation
+
+        # Combine rotations using Rodriguez formula
+        # This is a simplified approach - for a complete solution,
+        # consider using quaternions or rotation matrices
+        return vertical_rotation + horizontal_rotation
+
+    def get_unit_vector(self) -> np.ndarray:
+        """Get unit vector from quaternion.
+
+        Returns:
+            np.ndarray: Unit vector
+        """
+        if self.rotation is None:
+            raise TransformRotationError(self)
+        return self.rotation.apply(np.array([1, 0, 0]))  # Example unit vector
