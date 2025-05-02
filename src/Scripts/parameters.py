@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from scipy import fftpack, integrate, interpolate
 
-from Scripts.errors import CurveFittingError, ParameterDefineError
+from Scripts.errors import ParameterDefineError
 from Scripts.statistics_wind import (
     getAzimuthWind,
     getAzimuthWindByPlot,
