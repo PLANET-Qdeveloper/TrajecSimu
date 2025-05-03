@@ -105,6 +105,25 @@ wheels = [
 ]
 
 [[package]]
+name = "jsbsim"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e5/f3/687e92edbda5eeb668650080fbe4727122be36725aa813847801e7d5957f/jsbsim-1.2.2.tar.gz", hash = "sha256:645e1c3e2b033ab315ebf95ef273f7d2da12d88e0b5a67957daca4c81717e93c", size = 1239533, upload_time = "2025-03-22T12:12:16.873Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4c/f5/60cca5d5063ef31a0eb224660070bd3c85a5f598700671cb5589fc43a9de/jsbsim-1.2.2-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:a6a149debfc4f7c5d384063f68055e56152eea2dff908f9361ea9b6632ded712", size = 2908851, upload_time = "2025-03-22T12:11:17.216Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/c5/421a724fd1c0932f2fd896c022a001571a1d2c88e379f935832a17bb4417/jsbsim-1.2.2-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0c776c59803846d5e257894b1fdced570248cfda7f411cb23c2949bf60b27d60", size = 15528414, upload_time = "2025-03-22T12:11:18.965Z" },
+    { url = "https://files.pythonhosted.org/packages/83/d5/93307bee5ded1cb19b0e0314f756b4576699644b76bffdb3dfb1c6f44828/jsbsim-1.2.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d65f98b04c59452c403440ed9ccfa3b567b8dba5b7f949ec9948fd927bef4d17", size = 16031413, upload_time = "2025-03-22T12:11:21.154Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/e7/0b52d4c37e1c530265e708c99f7e05864cd3ed407d9345a2dd279cdd3de1/jsbsim-1.2.2-cp312-cp312-win_amd64.whl", hash = "sha256:80f307b71bcc81d9dd88abef9b860ae3457b6ae908862db45e2a8ad9f48234f1", size = 1738047, upload_time = "2025-03-22T12:11:23.675Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/92/a2445946be930c66d940ea7b5bdb0abad2ad6631b27a3c076a93a56e7b1c/jsbsim-1.2.2-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:eddf260a70ebaee67e40a5512fe13753687488f8715001f116a00c63d77f7b9b", size = 2902831, upload_time = "2025-03-22T12:11:25.114Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/3b/5473e855eeba041c89544e706422c2354de3756dbfdabf4368933107e5e1/jsbsim-1.2.2-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:abed1bf1f5128d5c7b7254ff204618fc53e2b6481ca20db39832db3a5a88d346", size = 15527331, upload_time = "2025-03-22T12:11:27.075Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/37/06964e30d666bfeefbc53c65e97879f4ef659a22bd573ad7cbdff01801cd/jsbsim-1.2.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0ace0161e104d59d7ff2bcbc09c25f712c2345044b98a98a097264a9cfff21c0", size = 16027325, upload_time = "2025-03-22T12:11:29.753Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/03/734078c276ce29dc9ae983ef294fd0120c0a229ceee3dd204c961156f3a7/jsbsim-1.2.2-cp313-cp313-win_amd64.whl", hash = "sha256:77cf4b51b8ea8255de656197eb709e057ea70c91862bc908b888d65cc35e205a", size = 1737513, upload_time = "2025-03-22T12:11:31.774Z" },
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.8"
 source = { registry = "https://pypi.org/simple" }
@@ -626,6 +645,7 @@ name = "trajecsimu"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "jsbsim" },
     { name = "matplotlib" },
     { name = "numba" },
     { name = "numpy" },
@@ -649,6 +669,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "jsbsim", specifier = ">=1.2.2" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "numba", specifier = ">=0.61.2" },
     { name = "numpy", specifier = ">=2.2.5" },
