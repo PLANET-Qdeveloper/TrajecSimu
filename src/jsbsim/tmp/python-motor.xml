@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<rocket_engine name="Python Motor">
+  <isp>214.0</isp>
+  <builduptime>0.1</builduptime>
+  <thrust_table name="propulsion/thrust_prop_remain" type="internal">
+    <tableData>
+      0.000 349.578
+      5.445 349.578
+      10.890 349.578
+    </tableData>
+  </thrust_table>
+</rocket_engine>

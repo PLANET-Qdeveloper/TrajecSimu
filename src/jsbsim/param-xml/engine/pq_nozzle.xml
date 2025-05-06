@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<nozzle name="PQ_NOZZLE">
+  <!--
+    area = nozzle exit area
+  -->
+  <area unit="M2">  0.0000785 </area>
+</nozzle>

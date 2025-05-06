@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<fdm_config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Rocket" version="2.0" xsi:noNamespaceSchemaLocation="http://jsbsim.sourceforge.net/JSBSim.xsd" release="ALPHA">
+  <fileheader/>
+  <!--
+
+  Primary Metrics (Ovearall size of vehicle)
+
+  -->
+  <metrics>
+    <wingarea unit="M2">0.0052</wingarea>
+    <wingspan unit="M">0.0814</wingspan>
+    <chord unit="M">0.0</chord>
+    <htailarea unit="M2">0.0</htailarea>
+    <htailarm unit="M">0.0</htailarm>
+    <vtailarea unit="M2">0.0</vtailarea>
+    <vtailarm unit="M">0.0</vtailarm>
+    <location name="AERORP" unit="M">
+      <x>1.5508</x>
+      <y>0.0</y>
+      <z>0.0</z>
+    </location>
+  </metrics>
+  <!--
+
+  Mass Elements: describe dry mass of vehicle
+
+  -->
+  <mass_balance>
+    <pointmass name="Payload">
+      <form shape="tube">
+        <radius unit="M">0.0407</radius>
+        <length unit="M">0.3300</length>
+      </form>
+      <weight unit="KG">2.5000</weight>
+      <location unit="M">
+        <x>0.5719</x>
+        <y>0.0</y>
+        <z>0.0</z>
+      </location>
+    </pointmass>
+    <pointmass name="Body">
+      <form shape="tube">
+        <radius unit="M">0.0407</radius>
+        <length unit="M">0.8139</length>
+      </form>
+      <weight unit="KG">1.5000</weight>
+      <location unit="M">
+        <x>1.1439</x>
+        <y>0.0</y>
+        <z>0.0</z>
+      </location>
+    </pointmass>
+  </mass_balance>
+  <!--
+
+  Propulsion: describe tanks, fuel and link to engine def files
+
+  -->
+  <propulsion>
+    <tank type="FUEL">
+      <location unit="M">
+        <x>1.1439</x>
+        <y>0.0</y>
+        <z>0.0</z>
+      </location>
+      <radius unit="M">0.0407</radius>
+      <grain_config type="CYLINDRICAL">
+        <length unit="M">0.8139</length>
+        <bore_diameter unit="M">0</bore_diameter>
+      </grain_config>
+      <capacity unit="KG">7.4096</capacity>
+      <contents unit="KG">7.4096</contents>
+    </tank>
+    <engine file="python-motor">
+      <feed>0</feed>
+      <location unit="M">
+        <x>0.7369</x>
+        <y>0.0</y>
+        <z>0.0</z>
+      </location>
+      <thruster file="python-motor_nozzle">
+        <location unit="M">
+          <x>1.5508</x>
+          <y>0.0</y>
+          <z>0.0</z>
+        </location>
+      </thruster>
+    </engine>
+  </propulsion>
+  <!--
+
+  Aerodynamics
+
+  -->
+  <aerodynamics>
+    <axis name="DRAG">
+      <function name="aero/force/drag">
+        <description>Coefficient of Drag</description>
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <value>0.600000</value>
+        </product>
+      </function>
+    </axis>
+  </aerodynamics>
+  <!--
+  Ground reactions and systems are not auto-generated.
+  -->
+  <ground_reactions/>
+  <system/>
+</fdm_config>

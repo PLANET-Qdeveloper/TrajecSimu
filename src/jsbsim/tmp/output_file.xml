@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Keep a copy of the sim data to a file --> 
+<output name="data.csv" type="CSV" rate="100">
+  <property caption="Altitude MSL [m]">     position/h-sl-meters            </property>
+  <property caption="Thrust [lbf]">         forces/fbx-prop-lbs             </property>
+  <property caption="Total Weight [lbs]">   inertia/weight-lbs              </property>
+  <property caption="ECEF Velocity [fps]">  velocities/ned-velocity-mag-fps </property>
+  <property caption="ECEF Vel. Down [fps]"> velocities/v-down-fps           </property>
+  <property caption="Downrange [m]">        position/distance-from-start-mag-mt </property>
+  <property caption="Angle of Attack [deg]">aero/alpha-deg                  </property>
+  <property caption="Forces X [lbf]">       forces/fbx-total-lbs            </property>
+</output>
