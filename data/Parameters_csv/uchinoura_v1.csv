@@ -123,7 +123,7 @@ $   'time_curve' 一定間隔でのサンプリングではなくても使用で
 $thrust_input_type, time_curve
 thrust_input_type, rectangle
 $thrust_dt, 0.01
-t_MECO , 6.81
+t_meco , 6.81
 thrust, 1100.735
 
 $ curve_fitting: スラストの多項式近似によるフィッティングを行うかどうか。デフォルトtrue
