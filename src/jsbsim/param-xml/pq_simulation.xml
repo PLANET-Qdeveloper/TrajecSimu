@@ -126,7 +126,7 @@
 
   </run>
 
-  <output name="pq_rocket_output.csv" type="CSV" rate="10" file="unitconversions.xml">
+  <output name="pq_rocket_output.csv" type="CSV" rate="100" file="unitconversions.xml">
     <property apply="convert-lbs-To-N" caption="propulsion/engine[0]/thrust-N">propulsion/engine[0]/thrust-lbs</property>
     <property apply="convert-lbs-To-kg" caption="propulsion/tank[0]/contents-kg">propulsion/tank[0]/contents-lbs</property>
     <property apply="convert-lbs-To-kg" caption="propulsion/tank[1]/contents-kg">propulsion/tank[1]/contents-lbs</property>

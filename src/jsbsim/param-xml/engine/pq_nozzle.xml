@@ -3,5 +3,5 @@
   <!--
     area = nozzle exit area
   -->
-  <area unit="M2">  0.0000785 </area>
+  <area unit="M2">  0.00143201 </area>
 </nozzle>

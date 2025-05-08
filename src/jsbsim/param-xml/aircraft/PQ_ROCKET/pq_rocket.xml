@@ -17,7 +17,7 @@
         <wingarea  unit="M2">   0.015 </wingarea>
         <wingspan  unit="M" >   0.12 </wingspan>
         <wing_incidence>         0.0 </wing_incidence>
-        <chord     unit="M" >   0.0 </chord>
+        <chord     unit="M" >   0.12 </chord>
         <htailarea unit="M2">   0 </htailarea>
         <htailarm  unit="M" >   0 </htailarm>
         <vtailarea unit="M2">   0 </vtailarea>
@@ -72,7 +72,7 @@
           <damping_coeff unit="LBS/FT/SEC"> 10.00 </damping_coeff>
         </contact>
     </ground_reactions>
-<!--
+
     <external_reactions>
         <property>fcs/parachute_reef_pos_norm</property>
         <force name="parachute" frame="WIND">
@@ -97,7 +97,7 @@
             </direction>
         </force>
     </external_reactions>
--->
+
     <propulsion>
         <tank type="FUEL" number="0">
             <location unit="M">
@@ -127,6 +127,26 @@
             </thruster>
         </engine>
     </propulsion>
+    <flight_control name="PQ_ROCKET_CONTROL">
+        <channel name="chute">
+            <fcs_function name="fcs/parachute_reef_pos_norm">
+                <function>
+                    <sum>
+                        <property>inertia/weight-lbs</property>
+                        <property>forces/fbz-buoyancy-lbs</property>
+                    </sum>
+                </function>
+                <clipto>
+                    <min>0.</min>
+                    <max>1.</max>
+                </clipto>
+            </fcs_function>
+            <pure_gain name="metrics/Schute-sqft">
+                <input>fcs/parachute_reef_pos_norm</input>
+                <gain> 8.0 </gain> <!-- Area of braking chute -->
+            </pure_gain>
+        </channel>
+    </flight_control>
 
     <aerodynamics>
         <axis name="DRAG">
@@ -183,7 +203,7 @@
                     <property>metrics/bw-ft</property>
                     <property>aero/bi2vel</property>
                     <property>velocities/p-rad_sec</property>
-                    <value>0.1</value>
+                    <value>-0.0423</value>
                 </product>
             </function>
             <function name="aero/coefficient/Clr">

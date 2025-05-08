@@ -2,8 +2,6 @@
 <rocket_engine name="PQ_ENGINE">
   <isp> 221.1158078  </isp>
   <builduptime> 0.0 </builduptime>
-  <slfuelflowmax unit="KG/SEC"> 0.008985453  </slfuelflowmax>
-  <sloxiflowmax unit="KG/SEC"> 0.554239073  </sloxiflowmax>
   <thrust_table name="propulsion/thrust_prop_remain" type="internal">
     <tableData>
       0	114.616883
