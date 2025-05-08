@@ -73,30 +73,7 @@
         </contact>
     </ground_reactions>
 
-    <external_reactions>
-        <property>fcs/parachute_reef_pos_norm</property>
-        <force name="parachute" frame="WIND">
-            <function>
-                <product>
-                    <property> aero/qbar-psf </property>
-                    <property> fcs/parachute_reef_pos_norm </property>
-                    <value>  1.2 </value> 
-                    <value>  1.18 </value> 
-                </product>
-            </function>
-
-            <location unit="M">
-                <x>2</x>
-                <y>0</y>
-                <z>0</z>
-            </location>
-            <direction>
-                <x>-1</x>
-                <y>0</y>
-                <z>0</z>
-            </direction>
-        </force>
-    </external_reactions>
+    
 
     <propulsion>
         <tank type="FUEL" number="0">
@@ -127,14 +104,19 @@
             </thruster>
         </engine>
     </propulsion>
+    
     <flight_control name="PQ_ROCKET_CONTROL">
         <channel name="chute">
             <fcs_function name="fcs/parachute_reef_pos_norm">
                 <function>
-                    <sum>
-                        <property>inertia/weight-lbs</property>
-                        <property>forces/fbz-buoyancy-lbs</property>
-                    </sum>
+                    <product>
+                        <property>simulation/parachute_full_deploy_time_coeff</property>
+                        <difference>
+                            <property>simulation/sim-time-sec</property>
+                            <property>simulation/parachute_deploy_time</property>
+                        </difference>
+                    </product>
+                    
                 </function>
                 <clipto>
                     <min>0.</min>
@@ -143,10 +125,34 @@
             </fcs_function>
             <pure_gain name="metrics/Schute-sqft">
                 <input>fcs/parachute_reef_pos_norm</input>
-                <gain> 8.0 </gain> <!-- Area of braking chute -->
+                <gain> 4.596 </gain> <!-- Area of braking chute -->
             </pure_gain>
         </channel>
     </flight_control>
+
+    <external_reactions>
+        <property>fcs/parachute_reef_pos_norm</property>
+        <force name="parachute" frame="WIND">
+            <function>
+                <product>
+                    <property> aero/qbar-psf </property>
+                    <property> metrics/Schute-sqft </property>
+                    <value>  1.2 </value> 
+                </product>
+            </function>
+
+            <location unit="M">
+                <x>2</x>
+                <y>0</y>
+                <z>0</z>
+            </location>
+            <direction>
+                <x>-1</x>
+                <y>0</y>
+                <z>0</z>
+            </direction>
+        </force>
+    </external_reactions>
 
     <aerodynamics>
         <axis name="DRAG">

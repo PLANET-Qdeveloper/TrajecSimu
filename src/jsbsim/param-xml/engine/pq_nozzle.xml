@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <nozzle name="PQ_NOZZLE">
   <!--
-    area = nozzle exit area
+    スローです
   -->
   <area unit="M2">  0.00143201 </area>
 </nozzle>
