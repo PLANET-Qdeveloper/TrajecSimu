@@ -18,19 +18,17 @@
 
     <property value="100000000"> simulation/parachute_deploy_time </property>
 
-    <property value="0.33"> simulation/parachute_full_deploy_time_coeff </property>
 
 
     <!-- Ignite -->
     <event name="Ignition">
         <condition>simulation/sim-time-sec  ge  0.1</condition>
-        <set name="fcs/throttle-cmd-norm[0]" value="1.0"/>
         <notify/>
     </event>
 
     <!-- Liftoff -->
     <event name="liftoff">
-      <condition>forces/fbx-prop-lbs gt inertia/weight-lbs</condition>
+      <condition>simulation/sim-time-sec  ge  0.1</condition>
       <set name="forces/hold-down" value="0"/>
     </event>
 
@@ -90,171 +88,8 @@
         1968.5 268.4
         2296.6 403.9
         2624.7 592.5-->
-        0 16.4
-        100 35.34
-        200 39.67
-        300 42.44
-        400 44.53
-        500 46.22
-        600 47.64
-        700 48.88
-        800 49.98
-        900 50.97
-        1000 51.87
-        1100 52.71
-        1200 53.48
-        1300 54.19
-        1400 54.87
-        1500 55.5
-        1600 56.1
-        1700 56.67
-        1800 57.21
-        1900 57.73
-        2000 58.23
-        2100 58.7
-        2200 59.16
-        2300 59.6
-        2400 60.02
-        2500 60.43
-        2600 60.83
-        2700 61.21
-        2800 61.59
-        2900 61.95
-        3000 62.3
-        3100 62.64
-        3200 62.97
-        3300 63.3
-        3400 63.61
-        3500 63.92
-        3600 64.22
-        3700 64.51
-        3800 64.8
-        3900 65.08
-        4000 65.36
-        4100 65.63
-        4200 65.89
-        4300 66.15
-        4400 66.4
-        4500 66.65
-        4600 66.9
-        4700 67.14
-        4800 67.37
-        4900 67.61
-        5000 67.83
-        5100 68.06
-        5200 68.28
-        5300 68.5
-        5400 68.71
-        5500 68.92
-        5600 69.13
-        5700 69.33
-        5800 69.53
-        5900 69.73
-        6000 69.93
-        6100 70.12
-        6200 70.31
-        6300 70.5
-        6400 70.68
-        6500 70.87
-        6600 71.05
-        6700 71.23
-        6800 71.4
-        6900 71.58
-        7000 71.75
-        7100 71.92
-        7200 72.08
-        7300 72.25
-        7400 72.41
-        7500 72.58
-        7600 72.74
-        7700 72.9
-        7800 73.05
-        7900 73.21
-        8000 73.36
-        8100 73.51
-        8200 73.66
-        8300 73.81
-        8400 73.96
-        8500 74.11
-        8600 74.25
-        8700 74.39
-        8800 74.54
-        8900 74.68
-        9000 74.82
-        9100 74.95
-        9200 75.09
-        9300 75.23
-        9400 75.36
-        9500 75.49
-        9600 75.63
-        9700 75.76
-        9800 75.89
-        9900 76.01
-        10000 76.14
-        10100 76.27
-        10200 76.39
-        10300 76.52
-        10400 76.64
-        10500 76.76
-        10600 76.88
-        10700 77.01
-        10800 77.12
-        10900 77.24
-        11000 77.36
-        11100 77.48
-        11200 77.59
-        11300 77.71
-        11400 77.82
-        11500 77.94
-        11600 78.05
-        11700 78.16
-        11800 78.27
-        11900 78.38
-        12000 78.49
-        12100 78.6
-        12200 78.71
-        12300 78.81
-        12400 78.92
-        12500 79.03
-        12600 79.13
-        12700 79.24
-        12800 79.34
-        12900 79.44
-        13000 79.54
-        13100 79.65
-        13200 79.75
-        13300 79.85
-        13400 79.95
-        13500 80.05
-        13600 80.15
-        13700 80.24
-        13800 80.34
-        13900 80.44
-        14000 80.53
-        14100 80.63
-        14200 80.72
-        14300 80.82
-        14400 80.91
-        14500 81.01
-        14600 81.1
-        14700 81.19
-        14800 81.28
-        14900 81.37
-        15000 81.46
-        15100 81.56
-        15200 81.64
-        15300 81.73
-        15400 81.82
-        15500 81.91
-        15600 82
-        15700 82.09
-        15800 82.17
-        15900 82.26
-        16000 82.35
-        16100 82.43
-        16200 82.52
-        16300 82.6
-        16400 82.69
+        0 0
+        100 0
       </tableData>
       </table>
       </function>
@@ -266,7 +101,7 @@
     <event name="Repeating Notify" persistent="true">
       <description>Output message at 5 second intervals</description>
       <notify>
-        <property apply="convert-lbs-To-N" caption="propulsion/engine[0]/thrust-N">propulsion/engine[0]/thrust-lbs</property>
+        <property apply="convert-lbs-To-N" caption="propulsion/engine/thrust-N">external_reactions/thrust/magnitude</property>
         <property apply="convert-lbs-To-kg" caption="propulsion/tank[0]/contents-kg">propulsion/tank[0]/contents-lbs</property>
         <property>position/h-agl-ft</property>
         <property>velocities/vc-kts</property>
@@ -284,8 +119,8 @@
 
   </run>
 
-  <output name="pq_rocket_output.csv" type="CSV" rate="100" file="unitconversions.xml">
-    <property apply="convert-lbs-To-N" caption="propulsion/engine[0]/thrust-N">propulsion/engine[0]/thrust-lbs</property>
+  <output name="pq_rocket_output_raw.csv" type="CSV" rate="100" file="unitconversions.xml">
+    <property apply="convert-lbs-To-N" caption="propulsion/engine/thrust-N">fcs/thrust</property>
     <property apply="convert-lbs-To-kg" caption="propulsion/tank[0]/contents-kg">propulsion/tank[0]/contents-lbs</property>
     <property apply="convert-lbs-To-kg" caption="propulsion/tank[1]/contents-kg">propulsion/tank[1]/contents-lbs</property>
     <property apply="convert-ft-To-m" caption="position/h-agl-m">position/h-agl-ft</property>
@@ -297,12 +132,10 @@
     <property apply="convert-rad-To-deg" caption="attitude/phi-deg">attitude/phi-rad</property>
     <property apply="convert-rad-To-deg" caption="attitude/theta-deg">attitude/theta-rad</property>
     <property apply="convert-rad-To-deg" caption="attitude/psi-deg">attitude/psi-rad</property>
-    <property>simulation/parachute_deploy_time</property>
     <property>fcs/parachute_reef_pos_norm</property>
     <property>position/lat-gc-deg</property>
     <property>position/long-gc-deg</property>
     <property>position/h-sl-meters</property>
-  
+    <property>aero/alpha-rad</property>
   </output>
-
 </runscript>
