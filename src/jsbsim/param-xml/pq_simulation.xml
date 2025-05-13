@@ -132,10 +132,23 @@
     <property apply="convert-rad-To-deg" caption="attitude/phi-deg">attitude/phi-rad</property>
     <property apply="convert-rad-To-deg" caption="attitude/theta-deg">attitude/theta-rad</property>
     <property apply="convert-rad-To-deg" caption="attitude/psi-deg">attitude/psi-rad</property>
-    <property>fcs/parachute_reef_pos_norm</property>
     <property>position/lat-gc-deg</property>
     <property>position/long-gc-deg</property>
     <property>position/h-sl-meters</property>
     <property>aero/alpha-rad</property>
+    <!--
+    <simulation> ON </simulation>
+    <atmosphere> ON </atmosphere>
+    <massprops> ON </massprops>
+    <aerosurface> ON </aerosurface>
+    <rates> ON </rates>
+    <velocities> ON </velocities>
+    <forces> ON </forces>
+    <moments> ON </moments>
+    <position> ON </position>
+    <coefficient> ON </coefficient>
+    <propulsion> ON </propulsion>
+    <fcs> ON </fcs>
+    -->
   </output>
 </runscript>
