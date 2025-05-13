@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<nozzle name="PQ_NOZZLE">
-  <!--
-    スロートです
-  -->
-  <area unit="M2">  0.000286796 </area>
-</nozzle>

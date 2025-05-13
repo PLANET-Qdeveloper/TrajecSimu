@@ -83,8 +83,8 @@
                 <z>0</z>
             </location>
             <radius unit="M">0.132</radius>
-            <capacity unit="KG"> 4.071</capacity>
-            <contents unit="KG"> 4.071</contents>
+            <capacity unit="KG"> 3.528</capacity>
+            <contents unit="KG"> 3.528</contents>
             <density unit="KG/L"> 1.27</density>
         </tank>
         <tank type="FUEL" number="1">
@@ -1151,7 +1151,7 @@
             </fcs_function>
             <pure_gain name="propulsion/tank[0]/contents-lbs">
                 <input>fcs/fuel_remaining</input>
-                <gain>8.9750187</gain>
+                <gain>7.777</gain>
             </pure_gain>
             <pure_gain name="propulsion/tank[1]/contents-lbs">
                 <input>fcs/fuel_remaining</input>
