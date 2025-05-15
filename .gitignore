@@ -13,3 +13,5 @@ wind_forecast_csv/*
 driver_*.py
 *.code-workspace
 statistics_parameters/*
+
+data/result/**
