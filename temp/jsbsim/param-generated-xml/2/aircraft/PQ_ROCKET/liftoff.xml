@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<initialize name="liftoff">
+  <!--
+    This file sets up the aircraft to start off
+    at cruise conditions.
+  -->
+  <ubody     unit="M/SEC">   0.0  </ubody>
+  <vbody     unit="M/SEC">   0.0  </vbody>
+  <wbody     unit="M/SEC">   0.0  </wbody>
+  <phi       unit="DEG">     0.0  </phi>        <!-- Yaw -->
+  <theta     unit="DEG">     75.0  </theta>      <!-- Pitch, 90=pointed up -->
+  <psi       unit="DEG">     292.0  </psi>        <!-- Roll -->
+  <altitude  unit="M">       3.5  </altitude>   <!-- AGL. for height above sea level see elevation, below -->
+
+  <!-- launch site -->
+  <latitude  unit="DEG">     40.242865  </latitude>
+  <longitude unit="DEG">   140.01045  </longitude>
+  <elevation unit="M">     5.3       </elevation>
+  <winddir   unit="DEG">    0.0       </winddir>
+  <vwind     unit="FT/SEC">   6.56168       </vwind>
+</initialize>

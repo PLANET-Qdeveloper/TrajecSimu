@@ -15,18 +15,18 @@ rocket_height, 2.237
 $ rocket diameter [m]
 rocket_diameter, 0.145
 $ dry mass [kg]
-m_dry, 19.570
+m_dry, 15.330
 $ propellant mass [kg]
-m_prop, 4.071
+m_prop, 0.549
 $ center of gravity (CG) location of dry mass from nose tip [m]
-CG_dry, 1.404
+CG_dry, 1.170
 $ center of gravity (CG) location of propellant from nose tip [m]
-CG_prop, 1.401
+CG_prop, 0.953
 
 $ 乾燥時の機体の慣性モーメント [kg-m^2]
-MOI_dry_x, 0.05411 $Roll
-MOI_dry_y, 7.048 $Pitch
-MOI_dry_z, 7.048 $Yaw
+MOI_dry_x, 0.042 $Roll
+MOI_dry_y, 3.403 $Pitch
+MOI_dry_z, 3.403 $Yaw
 
 $ 推進剤の重心周りの慣性モーメント [kg-m^2]
 MOI_prop_x, 0.006613 $Roll
@@ -46,11 +46,11 @@ $ ----------------------------
 $ center of pressure (CP) location from nose tip [m]
 CP_body, 1.661
 $ drag coefficient
-Cd0, 0.484
+Cd0, 0.438
 $ Lift slope [1/rad]
-Cl_alpha, 8.471
+Cl_alpha, 9.283
 $ pitch damping coefficient
-Cmq, -2.488
+Cmq, -2.582
 
 
 $ ----------------------------
@@ -68,9 +68,9 @@ $ ----------------------------
 $ ランチャ仰角[deg]
 $ 普通は70~80度
 $ ここをいじると最高高度やマッハ数、落下点が変わる
-elev_angle,79
+elev_angle, 75
 $ ランチャ方位角[deg], 北=0deg, 東=90deg
-azimuth, 270
+azimuth, 292
 $ launcher rail length [m]
 rail_length, 5.0
 
@@ -88,7 +88,7 @@ $ wind_direction_original: ↓予報誤差分散ループを使う場合だけ�
 $wind_direction_original, -1
 
 $ランチャー方位角基準のRun_Loopにするかどうか　(する:1,しない:0(真北基準))
-azimuth_mode, 1
+azimuth_mode, 0
 
 $ wind_power_coeff: べき則の係数
 wind_power_coeff, 6.0
@@ -145,11 +145,11 @@ $ ----------------------------
 $ parachute parameters
 $ ----------------------------
 $ 1段目のパラシュート展開の頂点検知からの秒数[s]
-t_para_delay,0.5
+t_para_delay, 1.0
 $ 1段目パラシュートの抗力係数
 Cd_para, 1.2
 $ 1段目パラシュートの有効面積
-S_para, 1.18
+S_para, 0.00000001
 
 $ 2段目のパラシュートがあるかどうか。
 second_para, False

@@ -34,7 +34,7 @@ def main(config_file_path: str, launch_site_name: str) -> None:
     # create an instance
     mysim = TrajecSimu_UI(config_file_path, launch_site_name)
     # run the simulation
-    mysim.run_loop(1, 1, 1)
+    mysim.run_loop(8, 8, 1)
 
 
 if __name__ == "__main__":
