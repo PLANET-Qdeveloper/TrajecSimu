@@ -24,7 +24,7 @@ launch:
     - 5.0
     - 6.0
     - 7.0
-  wind_power_factor: 0.1666666
+  wind_power_factor: 0.1666
   winds_table:
 
 rocket:
@@ -71,8 +71,6 @@ rocket:
   # Parachute parameters
   parachute_full_deploy_time: 1.0
   parachute_area: 
-    # - 0.315
-   #  - 0.493 
     - 0.00000001
   parachute_drag_coefficient: 1.2
 
@@ -98,7 +96,7 @@ rocket:
   
 simulation:
   # Simulation configuration
-  flight_duration: 300.0
+  flight_duration: 2000.0
   time_step: 0.001
   parachute_deploy_delay: 1.0
   notify_interval: 5.0

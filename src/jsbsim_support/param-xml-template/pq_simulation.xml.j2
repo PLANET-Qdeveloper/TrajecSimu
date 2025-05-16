@@ -74,7 +74,7 @@
       <table>
       <independentVar lookup="row"> position/h-agl-ft </independentVar>
       <tableData>
-        {% for wind in winds_table -%}
+        {% for wind in winds_table|sort(attribute='0') -%}
         {{ wind[0] }} {{ wind[2]*0.0174533}}
         {% endfor %}
       </tableData>
@@ -86,7 +86,7 @@
       <table>
       <independentVar lookup="row"> position/h-agl-ft </independentVar>
       <tableData>
-        {% for wind in winds_table -%}
+        {% for wind in winds_table|sort(attribute='0') -%}
         {{ wind[0] }} {{ wind[1] *3.280840}}
         {% endfor %}
       </tableData>

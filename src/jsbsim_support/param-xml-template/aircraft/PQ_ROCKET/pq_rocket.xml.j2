@@ -143,7 +143,7 @@
                     <table>
                         <independentVar>simulation/sim-time-sec</independentVar>
                         <tableData>
-                            {% for fuel_remaining in fuel_remaining_table -%}
+                            {% for fuel_remaining in fuel_remaining_table|sort(attribute='0') -%}
                             {{ fuel_remaining[0] }} {{ fuel_remaining[1] }}
                             {% endfor %}
                         </tableData>
@@ -170,7 +170,7 @@
                     <table>
                         <independentVar>simulation/sim-time-sec</independentVar>
                         <tableData>
-                            {% for thrust in thrust_table -%}
+                            {% for thrust in thrust_table|sort(attribute='0') -%}
                             {{ thrust[0] }} {{ thrust[1] * 0.2248089431 }}
                             {% endfor %}
                         </tableData>
@@ -232,7 +232,7 @@
                     <table>
                         <independentVar>aero/alpha-rad</independentVar>
                         <tableData>
-                            {% for cd0 in cd0_table -%}
+                            {% for cd0 in cd0_table|sort(attribute='0') -%}
                             {{ cd0[0] * 0.0174533 }} {{ cd0[1] }}
                             {% endfor %}
                         </tableData>
@@ -248,7 +248,7 @@
                     <table>
                         <independentVar>velocities/mach</independentVar>
                         <tableData>
-                            {% for cdmach in cdmach_table -%}
+                            {% for cdmach in cdmach_table|sort(attribute='0') -%}
                             {{ cdmach[0] }} {{ cdmach[1] }}
                             {% endfor %}
                         </tableData>
