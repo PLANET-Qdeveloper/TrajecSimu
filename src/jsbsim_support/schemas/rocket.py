@@ -6,6 +6,8 @@ from jsbsim_support.schemas.validator import convert_value_to_list, convert_valu
 
 
 class PQ_ROCKETSchema(BaseModel):
+    wing_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+
     # Inertia parameters
     inertia_xx: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     inertia_yy: Annotated[list[float], BeforeValidator(convert_value_to_list)]

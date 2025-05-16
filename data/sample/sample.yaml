@@ -1,7 +1,7 @@
 launch:
   # Liftoff configuration
   yaw: 0.0
-  pitch: 81.0
+  pitch: 75.0
   roll: 292.0
   latitude: 40.242865
   longitude: 140.010450
@@ -29,6 +29,7 @@ launch:
 
 rocket:
   # Rocket configuration
+  wing_area: 0.0161
   # Inertia parameters
   inertia_xx: 0.042 
   inertia_yy: 3.403 
