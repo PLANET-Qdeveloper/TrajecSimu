@@ -3,12 +3,15 @@
 import argparse
 from pathlib import Path
 
+import jsbsim
 import pandas as pd
+from tqdm import tqdm
 
-from jsbsim_support.generate_param_xml import generate_param_xml
-from jsbsim_support.jsb_runner import run_jsb
-from util.kml_generator import KMLGenerator
-from util.summarize import summarize_output_info_df
+from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
+from trajecsim.jsbsim_support.jsb_runner import run_jsb
+from trajecsim.util.kml_generator import KMLGenerator
+from trajecsim.util.logger import setup_logging
+from trajecsim.util.summarize import summarize_output_info_df
 
 
 def get_arguments() -> argparse.Namespace:
@@ -36,24 +39,33 @@ def get_arguments() -> argparse.Namespace:
 
 def main(config_file_path: str, output_dir: str) -> None:
     """メイン関数"""
+    _ = jsbsim.FGFDMExec(None)
+
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
 
+    logger = setup_logging(output_dir / "log.txt")
+    logger.info(f"シミュレーションを開始します: {config_file_path}")
     simulation_df = generate_param_xml(config_file_path)
 
+    logger.info("シミュレーションを実行します")
+    tqdm.pandas(desc="シミュレーションを実行中🚀")
     simulation_df = pd.concat(
-        [simulation_df, simulation_df.apply(run_jsb, axis=1, output_dir=output_dir / "raw_result")], axis=1
+        [simulation_df, simulation_df.progress_apply(run_jsb, axis=1, output_dir=output_dir / "raw_result")], axis=1
     )
 
+    logger.info("シミュレーションの結果を集計します")
+    tqdm.pandas(desc="シミュレーションの結果を集計中")
     simulation_df = pd.concat(
-        [simulation_df, simulation_df.apply(summarize_output_info_df, axis=1, output_dir=output_dir)], axis=1
+        [simulation_df, simulation_df.progress_apply(summarize_output_info_df, axis=1, output_dir=output_dir)], axis=1
     )
-    print(simulation_df)
 
+    logger.info("シミュレーションの結果を保存します")
     simulation_df[simulation_df.columns[-6:]].to_csv(output_dir / "summary.csv", index=False)
-    simulation_df.to_csv(output_dir / "simulation_params.csv", index=True)
+    simulation_df.select_dtypes(include=["number"]).to_csv(output_dir / "simulation_params.csv", index=False)
 
+    logger.info("KMLファイルを生成します")
     kml_generator = KMLGenerator()
     grouped_by_wind_speed = simulation_df.groupby(("launch", "ground_wind_speed"))
     kml_generator.generate_grouped_points_polygons(grouped_by_wind_speed)
