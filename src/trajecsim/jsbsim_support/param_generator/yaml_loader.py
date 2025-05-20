@@ -5,9 +5,9 @@ from pathlib import Path
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
-from jsbsim_support.schemas.launch import LaunchConfig
-from jsbsim_support.schemas.rocket import PQ_ROCKETSchema
-from jsbsim_support.schemas.simulation import JSBSimConfig
+from trajecsim.jsbsim_support.schemas.launch import LaunchConfig
+from trajecsim.jsbsim_support.schemas.rocket import PQ_ROCKETSchema
+from trajecsim.jsbsim_support.schemas.simulation import JSBSimConfig
 
 
 def load_yaml_parameters(yaml_path: Path | str) -> DictConfig | ListConfig:

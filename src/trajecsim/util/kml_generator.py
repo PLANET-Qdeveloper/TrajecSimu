@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import simplekml
 
 
@@ -26,7 +25,7 @@ class KMLGenerator:
     def add_point(self, point: tuple[float, float], name: str, rgb: tuple[int, int, int] = (255, 0, 0)) -> None:
         pnt = self.kml.newpoint(name=name)
         pnt.coords = [(point[0], point[1])]
-        pnt.style.iconstyle.color = simplekml.Color.rgb(rgb[0], rgb[1], rgb[2])
+        pnt.style.iconstyle.icon.href = None
 
     def add_line(
         self,

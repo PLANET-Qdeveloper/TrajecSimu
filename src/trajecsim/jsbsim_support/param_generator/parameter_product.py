@@ -27,8 +27,15 @@ def generate_dicts_product(data_input: dict[str, dict[str, list[int]]]) -> pd.Da
         sorted_inner_keys = sorted(inner_dict.keys())
         for inner_key in sorted_inner_keys:
             value_list = inner_dict[inner_key]
+            # Skip empty lists
+            if not value_list:
+                continue
             lists_for_product.append(value_list)
             product_column_names.append((outer_key, inner_key))
+
+    # If no valid parameters remain after filtering, return empty DataFrame
+    if not lists_for_product:
+        return pd.DataFrame(columns=pd.MultiIndex.from_tuples(product_column_names))
 
     if lists_for_product and all(len(lst) == 1 for lst in lists_for_product):
         single_row = [lst[0] for lst in lists_for_product]

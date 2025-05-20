@@ -2,11 +2,13 @@ from typing import Annotated, Self
 
 from pydantic import BaseModel, BeforeValidator, FilePath, model_validator
 
-from jsbsim_support.schemas.validator import convert_value_to_list, convert_value_to_list_optional
+from trajecsim.jsbsim_support.schemas.validator import convert_value_to_list, convert_value_to_list_optional
 
 
 class PQ_ROCKETSchema(BaseModel):
-    wing_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    projected_frontal_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    wing_span: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    wing_chord: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     # Inertia parameters
     inertia_xx: Annotated[list[float], BeforeValidator(convert_value_to_list)]
@@ -21,6 +23,12 @@ class PQ_ROCKETSchema(BaseModel):
     cg_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     cg_y: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     cg_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+
+    cp_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    cp_y: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    cp_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+
+    diameter: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     # Tank parameters
     tank_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
@@ -60,14 +68,13 @@ class PQ_ROCKETSchema(BaseModel):
 
     # Aerodynamic coefficients
     lift_coefficient_alpha: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    roll_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    roll_coefficient_p: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    roll_coefficient_r: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    side_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
+    roll_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    pitch_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     pitch_coefficient_alpha: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    pitch_coefficient_q: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    yaw_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
-    yaw_coefficient_r: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
 
+    yaw_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
+    yaw_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     # Tables
     fuel_remaining_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list_optional)] = []
     thrust_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
@@ -80,8 +87,11 @@ class PQ_ROCKETSchema(BaseModel):
             self.tank_contents = self.tank_capacity
         if not self.fuel_contents:
             self.fuel_contents = self.fuel_capacity
+        if not self.side_coefficient_beta:
+            self.side_coefficient_beta = self.lift_coefficient_alpha
+        if not self.yaw_damping_coefficient:
+            self.yaw_damping_coefficient = self.roll_damping_coefficient
         if not self.yaw_coefficient_beta:
-            self.yaw_coefficient_beta = self.pitch_coefficient_alpha
-        if not self.yaw_coefficient_r:
-            self.yaw_coefficient_r = self.pitch_coefficient_q
+            self.yaw_coefficient_beta = self.side_coefficient_beta
+
         return self

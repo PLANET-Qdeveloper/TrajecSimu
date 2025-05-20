@@ -55,4 +55,6 @@ def render_and_save_xml_files(
     with (aircraft_output_dir / "liftoff.xml").open("w") as f:
         f.write(launch_xml)
 
-    copy(Path("src/jsbsim_support/param-xml-template/unitconversions.xml"), output_dir / "unitconversions.xml")
+    copy(
+        Path("src/trajecsim/jsbsim_support/param-xml-template/unitconversions.xml"), output_dir / "unitconversions.xml"
+    )

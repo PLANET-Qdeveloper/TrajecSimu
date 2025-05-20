@@ -1,7 +1,6 @@
 from typing import TypeVar
 
 from omegaconf import ListConfig
-from pydantic import ValidationError
 
 T = TypeVar("T")
 

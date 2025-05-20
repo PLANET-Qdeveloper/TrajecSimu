@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator
 
-from jsbsim_support.schemas.validator import convert_value_to_list
+from trajecsim.jsbsim_support.schemas.validator import convert_value_to_list
 
 
 class JSBSimConfig(BaseModel):

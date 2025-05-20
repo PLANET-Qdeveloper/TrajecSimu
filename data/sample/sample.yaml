@@ -1,11 +1,12 @@
 launch:
   # Liftoff configuration
-  yaw: 0.0
+  yaw: 292.0
   pitch: 75.0
-  roll: 292.0
+  roll: 0.0
   latitude: 40.242865
   longitude: 140.010450
   elevation: 5.3
+  launcher_length: 1.0
   ground_wind_dir: 
     - 0.0
     - 45.0
@@ -29,7 +30,10 @@ launch:
 
 rocket:
   # Rocket configuration
-  wing_area: 0.0161
+  projected_frontal_area: 0.0161
+  wing_span: 0.14
+  wing_chord: 0.09
+  
   # Inertia parameters
   inertia_xx: 0.042 
   inertia_yy: 3.403 
@@ -43,6 +47,12 @@ rocket:
   cg_x: 1.17
   cg_y: 0.0
   cg_z: 0.0
+
+  cp_x: 1.379
+  cp_y: 0.0
+  cp_z: 0.0
+
+  diameter: 0.143
 
   # Tank parameters
   tank_x: 0.866238
@@ -80,12 +90,11 @@ rocket:
   thruster_z: 0.0
 
   # Aerodynamic coefficients
-  lift_coefficient_alpha: 9.283 
-  roll_coefficient_beta: 0.0
-  roll_coefficient_p: -0.0423
-  roll_coefficient_r: 0.0
+  lift_coefficient_alpha: 9.283
+  side_coefficient_beta: 0.0
+  roll_damping_coefficient: -0.0423
+  pitch_damping_coefficient: -2.582
   pitch_coefficient_alpha: 0.0
-  pitch_coefficient_q: -2.582
 
   # Table paths
   fuel_remaining_table: 
@@ -96,7 +105,7 @@ rocket:
   
 simulation:
   # Simulation configuration
-  flight_duration: 2000.0
+  flight_duration: 4000.0
   time_step: 0.001
   parachute_deploy_delay: 1.0
   notify_interval: 5.0

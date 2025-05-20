@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, FilePath
 
-from jsbsim_support.schemas.validator import convert_value_to_list, convert_value_to_list_optional
+from trajecsim.jsbsim_support.schemas.validator import convert_value_to_list, convert_value_to_list_optional
 
 
 class LaunchConfig(BaseModel):
@@ -16,3 +16,4 @@ class LaunchConfig(BaseModel):
     winds_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list_optional)] = []
     ground_wind_dir: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     ground_wind_speed: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    launcher_length: Annotated[list[float], BeforeValidator(convert_value_to_list)]
