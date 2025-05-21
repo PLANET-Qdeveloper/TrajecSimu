@@ -1,0 +1,10 @@
+__pycache__
+.vscode
+*.code-workspace
+result/*
+tools/MSMtool/bin
+tools/MSMtool/csv
+tools/MSMtool/tmp
+wind_MSM/*
+wind_Rawin/*
+outputs/*
