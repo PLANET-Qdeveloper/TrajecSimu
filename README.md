@@ -1,15 +1,5 @@
 # TrajecSimu
 
-
-- 今の所ruff、mypyを適応しています。設定はpyproject.tomlを参照してください
-- プロジェクト管理ツールはuvです。
-
-**以下は全て昔の説明です**
-
-6-dof trajectory simulation for high-power rockets.  
-current version: 3.0 (11/1/2018)
-
-
 ## 概要
 6自由度飛行シミュレーションツールである[JSBSim](https://github.com/JSBSim-Team/jsbsim)を利用してロケットの飛行経路をシミュレーションします
 
