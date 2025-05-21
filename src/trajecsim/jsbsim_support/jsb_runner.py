@@ -1,12 +1,12 @@
 import logging
-from os import PathLike
+import time
+from os import PathLike, environ
 from pathlib import Path
 from shutil import copy
 from typing import Any
 
 import jsbsim
 import pandas as pd
-from tqdm import tqdm
 
 from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
 
@@ -20,6 +20,7 @@ def run_jsb(simulation_param_df: pd.Series | dict[str, Any], output_dir: PathLik
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
     temp_dir = Path(str(simulation_param_df.loc["param_dir"].iloc[0]))
+    environ["JSBSIM_DEBUG"] = "0"
     fdm = jsbsim.FGFDMExec(str(temp_dir))
     # Disable debug output
     fdm.set_debug_level(0)

@@ -1,6 +1,5 @@
 """パラメータ生成のメイン機能を提供するモジュール"""
 
-import concurrent.futures
 import logging
 import math
 from os import cpu_count
@@ -25,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 def _process_parameter_combination(args):
     """個別のパラメータ組み合わせを処理する関数"""
-    index, row, templates, rendered_param_dir = args
+    index, row, templates, rendered_param_dir, unitconversions_template_path = args
     output_dir = rendered_param_dir / f"{index}"
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -56,11 +55,12 @@ def _process_parameter_combination(args):
         rocket_param,
         simulation_param,
         launch_param,
+        unitconversions_template_path,
     )
     return index, output_dir
 
 
-def generate_param_xml(yaml_path: Path | str) -> pd.DataFrame:
+def generate_param_xml(yaml_path: Path | str, template_dir: Path | str) -> pd.DataFrame:
     """Generate parameter XML files for the simulation.
 
     Args:
@@ -84,7 +84,7 @@ def generate_param_xml(yaml_path: Path | str) -> pd.DataFrame:
         raise
 
     LOGGER.info("テンプレートファイルを読み込みます")
-    template_dir = Path("src/trajecsim/jsbsim_support/param-xml-template")
+    template_dir = Path(template_dir)
     aircraft_dir = Path("aircraft/PQ_ROCKET")
 
     try:
@@ -124,8 +124,9 @@ def generate_param_xml(yaml_path: Path | str) -> pd.DataFrame:
 
     LOGGER.info("XMLファイルの生成を行います")
     rendered_param_dir = Path("temp/jsbsim/param-generated-xml")
+    unitconversions_template_path = template_dir / "unitconversions.xml"
     args_list = [
-        (index, row, templates, rendered_param_dir)
+        (index, row, templates, rendered_param_dir, unitconversions_template_path)
         for index, row in tqdm(all_parameter_products.iterrows(), desc="パラメータの組み合わせを生成中")
     ]
 

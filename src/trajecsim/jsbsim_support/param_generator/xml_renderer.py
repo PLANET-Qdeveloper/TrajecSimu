@@ -28,6 +28,7 @@ def render_and_save_xml_files(
     rocket_param: dict,
     simulation_param: dict,
     launch_param: dict,
+    unitconversions_template_path: Path,
 ) -> None:
     """Render and save XML files for the simulation.
 
@@ -55,6 +56,4 @@ def render_and_save_xml_files(
     with (aircraft_output_dir / "liftoff.xml").open("w") as f:
         f.write(launch_xml)
 
-    copy(
-        Path("src/trajecsim/jsbsim_support/param-xml-template/unitconversions.xml"), output_dir / "unitconversions.xml"
-    )
+    copy(unitconversions_template_path, output_dir / "unitconversions.xml")
