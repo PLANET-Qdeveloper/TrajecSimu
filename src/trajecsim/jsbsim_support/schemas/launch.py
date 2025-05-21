@@ -1,3 +1,5 @@
+"""起動のパラメータのスキーマ."""
+
 from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, FilePath
@@ -6,6 +8,8 @@ from trajecsim.jsbsim_support.schemas.validator import convert_value_to_list, co
 
 
 class LaunchConfig(BaseModel):
+    """打場パラメータ"""
+
     yaw: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     pitch: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     roll: Annotated[list[float], BeforeValidator(convert_value_to_list)]

@@ -1,5 +1,6 @@
+"""JSBSimのシミュレーションを実行する."""
+
 import logging
-import time
 from os import PathLike, environ
 from pathlib import Path
 from shutil import copy
@@ -8,14 +9,21 @@ from typing import Any
 import jsbsim
 import pandas as pd
 
-from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
-
 # Get the directory where this script is located
 WORKING_DIR = Path("temp/")
 LOGGER = logging.getLogger(__name__)
 
 
 def run_jsb(simulation_param_df: pd.Series | dict[str, Any], output_dir: PathLike[Any] | str) -> pd.Series:
+    """JSBSimのシミュレーションを実行する.
+
+    Args:
+        simulation_param_df (pd.Series | dict[str, Any]): シミュレーションパラメータ.
+        output_dir (PathLike[Any] | str): 出力ディレクトリ.
+
+    Returns:
+        pd.Series: シミュレーションの結果.
+    """
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)

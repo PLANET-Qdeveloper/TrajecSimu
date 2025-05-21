@@ -6,8 +6,8 @@ import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from trajecsim.jsbsim_support.schemas.launch import LaunchConfig
-from trajecsim.jsbsim_support.schemas.rocket import PQ_ROCKETSchema
-from trajecsim.jsbsim_support.schemas.simulation import JSBSimConfig
+from trajecsim.jsbsim_support.schemas.rocket import PqRocketSchema
+from trajecsim.jsbsim_support.schemas.simulation import SimulationSchema
 
 
 def load_yaml_parameters(yaml_path: Path | str) -> DictConfig | ListConfig:
@@ -30,7 +30,7 @@ def load_yaml_parameters(yaml_path: Path | str) -> DictConfig | ListConfig:
 
 def convert_omegaconf_to_schema(
     params: DictConfig | ListConfig,
-) -> tuple[PQ_ROCKETSchema, JSBSimConfig, LaunchConfig]:
+) -> tuple[PqRocketSchema, SimulationSchema, LaunchConfig]:
     """Convert the YAML parameters to the schema.
 
     Args:
@@ -47,8 +47,8 @@ def convert_omegaconf_to_schema(
     if missing_keys:
         raise KeyError(missing_keys)
 
-    rocket_params = PQ_ROCKETSchema(**params.rocket)
-    simulation_params = JSBSimConfig(**params.simulation)
+    rocket_params = PqRocketSchema(**params.rocket)
+    simulation_params = SimulationSchema(**params.simulation)
     launch_params = LaunchConfig(**params.launch)
     return rocket_params, simulation_params, launch_params
 

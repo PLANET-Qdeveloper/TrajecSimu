@@ -1,3 +1,5 @@
+"""シミュレーションの結果をまとめる."""
+
 from pathlib import Path
 
 import pandas as pd
@@ -6,6 +8,7 @@ from trajecsim.util.kml_generator import KMLGenerator
 
 
 def summarize_output_info_df(output_info_df: pd.Series, output_dir: Path) -> pd.Series:
+    """シミュレーションの結果をまとめる."""
     output_file = output_info_df["raw_output_file"]
     output_df = pd.read_csv(output_file)
 

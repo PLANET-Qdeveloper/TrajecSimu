@@ -1,5 +1,8 @@
+"""ログの設定."""
+
 import contextlib
 import logging
+from collections.abc import Generator
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -11,11 +14,11 @@ PROJECT_NAME = "trajecsim"
 
 
 @contextlib.contextmanager
-def tqdm_joblib(tqdm_object):
-    """Context manager to patch joblib to report into tqdm progress bar given as argument"""
+def tqdm_joblib(tqdm_object: tqdm) -> Generator[tqdm, None, None]:
+    """joblibの進捗をtqdmで表示するコンテキストマネージャー."""
 
     class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
-        def __call__(self, *args, **kwargs):
+        def __call__(self, *args, **kwargs):  # noqa: ANN002, ANN003, ANN204
             tqdm_object.update(n=self.batch_size)
             return super().__call__(*args, **kwargs)
 
@@ -45,7 +48,6 @@ class TqdmLoggingHandler(logging.Handler):
 
 def setup_logging(log_file: PathLike[Any] | str) -> logging.Logger:
     """ルートロガーの設定。他のすべてのロガーに設定が伝搬する"""
-
     log_file = Path(log_file)
     # ルートロガーを取得
     logger = logging.getLogger(PROJECT_NAME)

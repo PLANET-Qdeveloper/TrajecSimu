@@ -30,16 +30,17 @@ def render_and_save_xml_files(
     launch_param: dict,
     unitconversions_template_path: Path,
 ) -> None:
-    """Render and save XML files for the simulation.
+    """シミュレーションのXMLファイルをレンダリングして保存する.
 
     Args:
-        output_dir (Path): The output directory.
-        rocket_template (str): The rocket XML template.
-        simulation_template (str): The simulation XML template.
-        launch_template (str): The launch XML template.
-        rocket_param (dict): The rocket parameters.
-        simulation_param (dict): The simulation parameters.
-        launch_param (dict): The launch parameters.
+        output_dir (Path): 出力ディレクトリ.
+        rocket_template (str): ロケットのXMLテンプレート.
+        simulation_template (str): シミュレーションのXMLテンプレート.
+        launch_template (str): 起動のXMLテンプレート.
+        rocket_param (dict): ロケットのパラメータ.
+        simulation_param (dict): シミュレーションのパラメータ.
+        launch_param (dict): 起動のパラメータ.
+        unitconversions_template_path (Path): 単位変換のテンプレートパス.
     """
     aircraft_output_dir = output_dir / "aircraft" / "PQ_ROCKET"
     if not aircraft_output_dir.exists():

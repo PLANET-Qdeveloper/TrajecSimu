@@ -1,3 +1,5 @@
+"""ロケットのパラメータのスキーマ."""
+
 from typing import Annotated, Self
 
 from pydantic import BaseModel, BeforeValidator, FilePath, model_validator
@@ -5,7 +7,9 @@ from pydantic import BaseModel, BeforeValidator, FilePath, model_validator
 from trajecsim.jsbsim_support.schemas.validator import convert_value_to_list, convert_value_to_list_optional
 
 
-class PQ_ROCKETSchema(BaseModel):
+class PqRocketSchema(BaseModel):
+    """ロケットのパラメータ"""
+
     projected_frontal_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     wing_span: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     wing_chord: Annotated[list[float], BeforeValidator(convert_value_to_list)]
@@ -83,12 +87,13 @@ class PQ_ROCKETSchema(BaseModel):
 
     @model_validator(mode="after")
     def set_default_values(self) -> Self:
+        """一部パラメータはデフォルト値がある"""
         if not self.tank_contents:
-            self.tank_contents = self.tank_capacity
+            self.tank_contents = self.tank_capacity  # 満タンを仮定
         if not self.fuel_contents:
-            self.fuel_contents = self.fuel_capacity
+            self.fuel_contents = self.fuel_capacity  # 満タンを仮定
         if not self.side_coefficient_beta:
-            self.side_coefficient_beta = self.lift_coefficient_alpha
+            self.side_coefficient_beta = self.lift_coefficient_alpha  # ロケットはピッチ、ヨー対称
         if not self.yaw_damping_coefficient:
             self.yaw_damping_coefficient = self.roll_damping_coefficient
         if not self.yaw_coefficient_beta:

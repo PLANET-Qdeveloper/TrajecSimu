@@ -110,3 +110,8 @@ simulation:
   parachute_deploy_delay: 1.0
   notify_interval: 5.0
   output_rate: 10
+
+misc:
+  kml_group_by:
+    - ground_wind_speed
+    - ground_wind_dir

@@ -6,6 +6,7 @@ from os import cpu_count
 from pathlib import Path
 
 import pandas as pd
+from omegaconf import DictConfig
 from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map as tqdm_process_map
 
@@ -16,13 +17,12 @@ from trajecsim.jsbsim_support.param_generator.xml_renderer import render_and_sav
 from trajecsim.jsbsim_support.param_generator.yaml_loader import (
     convert_omegaconf_to_schema,
     load_csv_to_dict,
-    load_yaml_parameters,
 )
 
 LOGGER = logging.getLogger(__name__)
 
 
-def _process_parameter_combination(args):
+def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], Path, Path]) -> tuple[int, Path]:
     """個別のパラメータ組み合わせを処理する関数"""
     index, row, templates, rendered_param_dir, unitconversions_template_path = args
     output_dir = rendered_param_dir / f"{index}"
@@ -60,27 +60,20 @@ def _process_parameter_combination(args):
     return index, output_dir
 
 
-def generate_param_xml(yaml_path: Path | str, template_dir: Path | str) -> pd.DataFrame:
+def generate_param_xml(params: DictConfig, template_dir: Path | str) -> pd.DataFrame:
     """Generate parameter XML files for the simulation.
 
     Args:
-        yaml_path (Path | str): The path to the YAML configuration file.
+        params (DictConfig): The parameters to generate the XML files.
+        template_dir (Path | str): The path to the template directory.
 
     Returns:
         pd.DataFrame: DataFrame containing all parameter combinations.
     """
-    LOGGER.info(f"パラメータを {yaml_path} から読み込みます")
-
-    try:
-        params = load_yaml_parameters(yaml_path)
-    except FileNotFoundError:
-        LOGGER.exception(f"パラメータファイルが見つかりません: {yaml_path}")
-        raise
-
     try:
         rocket_params_schema, simulation_params_schema, launch_params_schema = convert_omegaconf_to_schema(params)
     except KeyError:
-        LOGGER.exception(f"パラメータファイルが不正です: {yaml_path}")
+        LOGGER.exception(f"パラメータファイルが不正です: {params}")
         raise
 
     LOGGER.info("テンプレートファイルを読み込みます")
@@ -119,7 +112,7 @@ def generate_param_xml(yaml_path: Path | str, template_dir: Path | str) -> pd.Da
             "rocket": rocket_params,
             "simulation": simulation_params,
             "launch": launch_params,
-        }
+        },
     )
 
     LOGGER.info("XMLファイルの生成を行います")
