@@ -1,0 +1,55 @@
+site_name: PQ-TrajecSimu
+site_description: ロケットの飛行経路シミュレーションツール
+site_url: https://planet-q.github.io/TrajecSimu
+
+theme:
+  name: material
+  language: ja
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          selection:
+            inherited_members: true
+          rendering:
+            show_source: true
+            show_category_heading: true
+            show_if_no_docstring: true
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.snippets
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - ホーム: index.md
+  - コード概要: code.md
+    - メイン: main.md
+    - サポート機能: util.md
+    - シミュレーション:
+      - パラメータ処理: generate_param_xml.md
+        - 組み合わせ生成: parameter_product.md
+        - 風速データ生成: wind_table.md
+        - 燃料データ生成: fuel_table.md
+        - XML生成: xml_renderer.md
+        - yaml読み込み: yaml_loader.md
+      - コンフィグスキーマ: schema.md
+      - シミュレーション実行: jsb_runner.md
+  - 使い方: usage.md

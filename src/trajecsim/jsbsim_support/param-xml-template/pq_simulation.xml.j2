@@ -61,7 +61,7 @@
       <table>
       <independentVar lookup="row"> position/h-agl-ft </independentVar>
       <tableData>
-        {% for wind in winds_table|sort(attribute='0') -%}
+        {% for wind in winds_table|sort(attribute='0')|unique(attribute='0') -%}
         {{ wind[0] *3.280840 }} {{ wind[2]*0.0174533}}
         {% endfor %}
       </tableData>
@@ -73,7 +73,7 @@
       <table>
       <independentVar lookup="row"> position/h-agl-ft </independentVar>
       <tableData>
-        {% for wind in winds_table|sort(attribute='0') -%}
+        {% for wind in winds_table|sort(attribute='0')|unique(attribute='0') -%}
         {{ wind[0]  *3.280840 }} {{ wind[1] *3.280840}}
         {% endfor %}
       </tableData>
@@ -86,15 +86,17 @@
   </run>
 
   <output name="pq_rocket_output_raw.csv" type="CSV" rate="100" file="unitconversions.xml">
-    <property>position/lat-gc-deg</property>
-    <property>position/long-gc-deg</property>
-    <property>position/h-sl-meters</property>
-    <property>aero/alpha-rad</property>
-    <property apply="convert-fps-To-ms" caption="velocities/vtrue-ms">velocities/vtrue-fps</property>
-    <property apply="convert-fps-To-m_s" caption="velocities/vg-ms">velocities/vg-fps</property>
-    <property apply="convert-rad-To-deg" caption="attitude/phi-deg">attitude/phi-rad</property>
-    <property apply="convert-rad-To-deg" caption="attitude/theta-deg">attitude/theta-rad</property>
-    <property apply="convert-rad-To-deg" caption="attitude/psi-deg">attitude/psi-rad</property>
-    <property apply="convert-psf-To-Pa" caption="aero/qbar-Pa">aero/qbar-psf</property>
+    <property caption="Latitude">position/lat-gc-deg</property>
+    <property caption="Longitude">position/long-gc-deg</property>
+    <property caption="Altitude">position/h-sl-meters</property>
+    <property caption="Angle of Attack">aero/alpha-rad</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="Acceleration">accelerations/udot-ft_sec2</property>
+    <property apply="convert-lbs-To-N" caption="Thrust">external_reactions/thrust/magnitude</property>
+    <property apply="convert-fps-To-ms" caption="True Velocity">velocities/vtrue-fps</property>
+    <property apply="convert-fps-To-m_s" caption="Ground Velocity">velocities/vg-fps</property>
+    <property apply="convert-rad-To-deg" caption="Pitch">attitude/phi-rad</property>
+    <property apply="convert-rad-To-deg" caption="Roll">attitude/theta-rad</property>
+    <property apply="convert-rad-To-deg" caption="Yaw">attitude/psi-rad</property>
+    <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
   </output>
 </runscript>

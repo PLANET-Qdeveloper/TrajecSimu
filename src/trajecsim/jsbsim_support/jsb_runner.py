@@ -14,7 +14,9 @@ WORKING_DIR = Path("temp/")
 LOGGER = logging.getLogger(__name__)
 
 
-def run_jsb(simulation_param_df: pd.Series | dict[str, Any], output_dir: PathLike[Any] | str) -> pd.Series:
+def run_jsb(
+    simulation_param_df: pd.Series | dict[str, Any], output_dir: PathLike[Any] | str, file_name_prefix: str = ""
+) -> pd.Series:
     """JSBSimのシミュレーションを実行する.
 
     Args:
@@ -37,7 +39,7 @@ def run_jsb(simulation_param_df: pd.Series | dict[str, Any], output_dir: PathLik
     while fdm.run():
         pass
 
-    output_file = output_dir / f"{simulation_param_df.name}_pq_rocket_output_raw.csv"
+    output_file = output_dir / f"{simulation_param_df.name}_{file_name_prefix}_.csv"
     copy(
         temp_dir / "pq_rocket_output_raw.csv",
         output_file,

@@ -137,13 +137,37 @@
             </pure_gain>
         </channel>
 
+        <channel name="sw-fall">
+            <fcs_function name="fcs/sw-fall">
+                <function>
+                    <difference>
+                        <value>1</value>
+                        <product>
+                            <value> {{ 1 / (parachute_full_deploy_time + 0.00000001) }} </value>
+                            <difference>
+                                <property>simulation/sim-time-sec</property>
+                                <property>simulation/parachute_deploy_time</property>
+                            </difference>
+                        </product>
+                    </difference>
+                </function>
+                <clipto>
+                    <min>0.</min>
+                    <max>1.</max>
+                </clipto>
+            </fcs_function>
+            <pure_gain name="metrics/Sw-sqft">
+                <input>fcs/sw-fall</input>
+                <gain> {{ projected_frontal_area * 10.7639104 }} </gain>
+            </pure_gain>
+        </channel>
         <channel name="fuel_remaining">
             <fcs_function name="fcs/fuel_remaining">
                 <function>
                     <table>
                         <independentVar>simulation/sim-time-sec</independentVar>
                         <tableData>
-                            {% for fuel_remaining in fuel_remaining_table|sort(attribute='0') -%}
+                            {% for fuel_remaining in fuel_remaining_table|sort(attribute='0')|unique(attribute='0') -%}
                             {{ fuel_remaining[0] }} {{ fuel_remaining[1] }}
                             {% endfor %}
                         </tableData>
@@ -170,7 +194,7 @@
                     <table>
                         <independentVar>simulation/sim-time-sec</independentVar>
                         <tableData>
-                            {% for thrust in thrust_table|sort(attribute='0') -%}
+                            {% for thrust in thrust_table|sort(attribute='0')|unique(attribute='0') -%}
                             {{ thrust[0] }} {{ thrust[1] * 0.2248089431 }}
                             {% endfor %}
                         </tableData>
@@ -197,7 +221,7 @@
             </function>
 
             <location unit="M">
-                <x>0</x>
+                <x>10</x>
                 <y>0</y>
                 <z>0</z>
             </location>
@@ -232,7 +256,7 @@
                     <table>
                         <independentVar>aero/alpha-rad</independentVar>
                         <tableData>
-                            {% for cd0 in cd0_table|sort(attribute='0') -%}
+                            {% for cd0 in cd0_table|sort(attribute='0')|unique(attribute='0') -%}
                             {{ cd0[0] * 0.0174533 }} {{ cd0[1] }}
                             {% endfor %}
                         </tableData>
@@ -247,7 +271,7 @@
                     <table>
                         <independentVar>velocities/mach</independentVar>
                         <tableData>
-                            {% for cdmach in cdmach_table|sort(attribute='0') -%}
+                            {% for cdmach in cdmach_table|sort(attribute='0')|unique(attribute='0') -%}
                             {{ cdmach[0] }} {{ cdmach[1] }}
                             {% endfor %}
                         </tableData>

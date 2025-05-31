@@ -45,6 +45,7 @@ class KMLGenerator:
         pnt = self.kml.newpoint(name=name)
         pnt.coords = [(point[0], point[1])]
         pnt.style.iconstyle.icon.href = None
+        pnt.style.iconstyle.scale = 0.0
 
     def add_line(
         self,

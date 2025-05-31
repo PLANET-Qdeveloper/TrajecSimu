@@ -1,5 +1,6 @@
 """シミュレーションの結果をまとめる."""
 
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -12,12 +13,19 @@ def summarize_output_info_df(output_info_df: pd.Series, output_dir: Path) -> pd.
     output_file = output_info_df["raw_output_file"]
     output_df = pd.read_csv(output_file)
 
-    altitude_col = "/fdm/jsbsim/position/h-sl-meters"
-    speed_col = "velocities/vtrue-ms"
-    pressure_col = "aero/qbar-Pa"
-    lat_col = "/fdm/jsbsim/position/lat-gc-deg"
-    long_col = "/fdm/jsbsim/position/long-gc-deg"
+    altitude_col = "Altitude"
+    speed_col = "True Velocity"
+    pressure_col = "Dynamic Pressure"
+    lat_col = "Latitude"
+    long_col = "Longitude"
 
+    launch_clear_height = output_info_df[("launch", "elevation")] + output_info_df[
+        ("launch", "launcher_length")
+    ] * math.sin(
+        output_info_df[("launch", "pitch")] * math.pi / 180,
+    )
+
+    launch_clear_speed = output_df[output_df[altitude_col] > launch_clear_height].iloc[0][speed_col]
     max_altitude = output_df[altitude_col].max()
     max_speed = output_df[speed_col].max()
     max_pressure = output_df[pressure_col].max()
@@ -43,5 +51,6 @@ def summarize_output_info_df(output_info_df: pd.Series, output_dir: Path) -> pd.
         "landed_latitude": landed_lat,
         "landed_longitude": landed_long,
         "max_pressure": max_pressure,
+        "launch_clear_speed": launch_clear_speed,
     }
     return pd.Series(summary_row)

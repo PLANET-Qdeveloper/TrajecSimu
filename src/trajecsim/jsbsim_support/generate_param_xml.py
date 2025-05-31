@@ -20,6 +20,14 @@ from trajecsim.jsbsim_support.param_generator.yaml_loader import (
 )
 
 LOGGER = logging.getLogger(__name__)
+GRAVITY_ACCELERATION = 9.80665
+AIR_DENSITY = 1.225
+
+
+def _tuple_to_str_optional(val: tuple[float, ...] | float) -> str:
+    if isinstance(val, float):
+        return str(val)
+    return "_".join(map(str, val))
 
 
 def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], Path, Path]) -> tuple[int, Path]:
@@ -45,6 +53,19 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
         launch_param["elevation"],
         launch_param["wind_power_factor"],
     )
+
+    # パラシュートの面積を計算
+    if not rocket_param.get("parachute_area"):
+        rocket_param["parachute_area"] = (
+            (
+                2
+                * (rocket_param["dry_weight"] - rocket_param["fuel_contents"])
+                * GRAVITY_ACCELERATION
+                / (rocket_param["terminal_velocity"] ** 2 * rocket_param["parachute_drag_coefficient"] * AIR_DENSITY)
+            )
+            if rocket_param.get("terminal_velocity") != 0
+            else 0
+        )
 
     # XMLファイルの生成
     render_and_save_xml_files(

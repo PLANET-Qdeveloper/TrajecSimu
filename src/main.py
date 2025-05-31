@@ -47,7 +47,6 @@ def get_arguments() -> argparse.Namespace:
 
 def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
     """メイン関数"""
-    _ = jsbsim.FGFDMExec(None)
 
     output_dir = Path(output_dir)
     if not output_dir.exists():
@@ -66,9 +65,15 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
 
     all_params_keys = list(params.launch.keys()) + list(params.simulation.keys()) + list(params.rocket.keys())
     kml_group_by = params.misc.kml_group_by
+    result_each = params.misc.result_each
+
     if not all(group_key in all_params_keys for group_key in kml_group_by):
         invalid_keys = [key for key in kml_group_by if key not in all_params_keys]
-        logger.exception(f"KMLファイルを生成するためのキーが不正です: {invalid_keys}")
+        logger.exception(f"kml_group_byキーが不正です: {invalid_keys}")
+        raise ValueError(invalid_keys)
+    if not all(result_key in all_params_keys for result_key in result_each):
+        invalid_keys = [key for key in result_each if key not in all_params_keys]
+        logger.exception(f"result_eachキーが不正です: {invalid_keys}")
         raise ValueError(invalid_keys)
 
     simulation_df = generate_param_xml(params, template_dir)
@@ -83,31 +88,51 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
     simulation_df = pd.concat([simulation_df, results_df], axis=1)
 
     logger.info("シミュレーションの結果を集計します")
-    tqdm.pandas(desc="シミュレーションの結果を集計中")
-    simulation_df = pd.concat(
-        [simulation_df, simulation_df.progress_apply(summarize_output_info_df, axis=1, output_dir=output_dir)],
-        axis=1,
-    )
 
-    logger.info("シミュレーションの結果を保存します")
-    simulation_df[simulation_df.columns[-6:]].to_csv(output_dir / "summary.csv", index=False)
-    simulation_df.select_dtypes(include=["number"]).to_csv(output_dir / "simulation_params.csv", index=False)
+    for result_key in tqdm(result_each, desc="シミュレーションの結果を集計中"):
+        result_keys = [col for col in simulation_df.columns if result_key in col]
+        result_df = simulation_df.groupby(result_keys)
+        for group_key, group_df in result_df:
+            result_output_dir = output_dir / result_key / str(group_key)
+            if not result_output_dir.exists():
+                result_output_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info("KMLファイルを生成します")
-    for group_key in kml_group_by:
-        kml_generator = KMLGenerator()
-        group_keys = [col for col in simulation_df.columns if group_key in col]
-        grouped_by_group_key = simulation_df.groupby(group_keys)
-        kml_generator.generate_grouped_points_polygons(grouped_by_group_key)
+            tqdm.pandas(
+                desc=f"シミュレーションの結果を集計中: {result_key} = {group_key}",
+                total=len(group_df),
+                leave=False,
+            )
+            group_df = pd.concat(
+                [
+                    group_df,
+                    group_df.progress_apply(
+                        summarize_output_info_df,
+                        axis=1,
+                        output_dir=result_output_dir,
+                    ),
+                ],
+                axis=1,
+            )
 
-        simulation_df.apply(
-            lambda x, kg=kml_generator: kg.add_point(
-                (x["landed_longitude"], x["landed_latitude"]),
-                x.name,
-            ),
-            axis=1,
-        )
-        kml_generator.save(output_dir / f"result_{group_key}.kml")
+            logger.info("シミュレーションの結果を保存します")
+            summary_columns = [
+                "max_altitude",
+                "max_speed",
+                "landed_latitude",
+                "landed_longitude",
+                "max_pressure",
+                "launch_clear_speed",
+            ]
+            group_df[summary_columns].to_csv(result_output_dir / "summary.csv", index=False)
+            group_df.select_dtypes(include=["number"]).to_csv(result_output_dir / "simulation_params.csv", index=False)
+
+            logger.info("KMLファイルを生成します")
+            for kml_group_key in kml_group_by:
+                kml_generator = KMLGenerator()
+                group_keys = [col for col in group_df.columns if kml_group_key in col]
+                grouped_by_group_key = group_df.groupby(group_keys)
+                kml_generator.generate_grouped_points_polygons(grouped_by_group_key)
+                kml_generator.save(result_output_dir / f"result_{kml_group_key}.kml")
 
 
 if __name__ == "__main__":

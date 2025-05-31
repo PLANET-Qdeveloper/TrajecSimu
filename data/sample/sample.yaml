@@ -6,7 +6,7 @@ launch:
   latitude: 40.242865
   longitude: 140.010450
   elevation: 5.3
-  launcher_length: 1.0
+  launcher_length: 5.0
   ground_wind_dir: 
     - 0.0
     - 45.0
@@ -25,6 +25,8 @@ launch:
     - 5.0
     - 6.0
     - 7.0
+    - 8.0
+    - 9.0
   wind_power_factor: 0.1666
   winds_table:
 
@@ -81,7 +83,11 @@ rocket:
   # Parachute parameters
   parachute_full_deploy_time: 1.0
   parachute_area: 
-    - 0.00000001
+  terminal_velocity:
+    - 0.0
+    - 15.0
+    - 20.0
+    - 25.0
   parachute_drag_coefficient: 1.2
 
   # Thrust parameters
@@ -115,3 +121,6 @@ misc:
   kml_group_by:
     - ground_wind_speed
     - ground_wind_dir
+
+  result_each:
+    - terminal_velocity

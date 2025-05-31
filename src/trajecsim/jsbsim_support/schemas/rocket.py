@@ -62,7 +62,8 @@ class PqRocketSchema(BaseModel):
 
     # Parachute parameters
     parachute_full_deploy_time: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    parachute_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    parachute_area: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
+    terminal_velocity: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     parachute_drag_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     # Thrust parameters
@@ -98,5 +99,6 @@ class PqRocketSchema(BaseModel):
             self.yaw_damping_coefficient = self.roll_damping_coefficient
         if not self.yaw_coefficient_beta:
             self.yaw_coefficient_beta = self.side_coefficient_beta
-
+        if not (self.parachute_area or self.terminal_velocity):
+            raise ValueError("parachute_areaまたはterminal_velocityがひとつも指定されていません")
         return self
