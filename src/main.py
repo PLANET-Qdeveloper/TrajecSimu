@@ -42,10 +42,16 @@ def get_arguments() -> argparse.Namespace:
         default="src/trajecsim/jsbsim_support/param-xml-template",
         help="Template directory",
     )
+    parser.add_argument(
+        "--chart_output",
+        type=bool,
+        default=False,
+        help="Output charts",
+    )
     return parser.parse_args()
 
 
-def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path) -> None:
+def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path, chart_output: bool) -> None:
     """メイン関数"""
     output_dir = Path(output_dir)
     if not output_dir.exists():
@@ -132,10 +138,11 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
                 [df for df in extrema_results if isinstance(df, pd.DataFrame) and not df.empty], ignore_index=True
             )
 
-            group_df.progress_apply(
-                create_time_series_plots,
-                axis=1,
-            )
+            if chart_output:
+                group_df.progress_apply(
+                    create_time_series_plots,
+                    axis=1,
+                )
 
             logger.info("シミュレーションの結果を保存します")
             summary_columns = [
@@ -179,4 +186,5 @@ if __name__ == "__main__":
     config_file_path = args.config_file_path
     output_dir = args.output_dir
     template_dir = args.template_dir
-    main(config_file_path, output_dir, template_dir)
+    chart_output = args.chart_output
+    main(config_file_path, output_dir, template_dir, chart_output)

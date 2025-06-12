@@ -155,7 +155,3 @@ class KMLGenerator:
                 f"{group_key}",
                 rgb=current_color,
             )
-            kmz_path = Path(group_df[("launch", "range_kmz")])
-            if not kmz_path.exists():
-                LOGGER.warning(f"KMLファイルが見つかりません: {kmz_path}")
-                continue

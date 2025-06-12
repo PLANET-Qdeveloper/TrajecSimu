@@ -66,7 +66,9 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
             if rocket_param.get("terminal_velocity") != 0
             else 0
         )
-
+    rocket_param["parachute_full_deploy_time"] = (
+        1e10 if rocket_param["parachute_area"] < 10e-5 else rocket_param["parachute_full_deploy_time"]
+    )
     # XMLファイルの生成
     render_and_save_xml_files(
         output_dir,
