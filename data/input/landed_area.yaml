@@ -82,6 +82,7 @@ rocket:
   parachute_full_deploy_time: 1.0
   parachute_area: # パラシュート面積: 設計担当に聞いて
     - 0.0
+    - 0.315
   terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
   parachute_drag_coefficient: 1.2
 
