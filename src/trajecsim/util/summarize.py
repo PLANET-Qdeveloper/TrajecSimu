@@ -186,6 +186,14 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
         "metric": "altitude",
     }
 
+    # 7. パラシュート展開の点
+    parachute_deploy_idx = df["parachute_deploy_gain"].idxmax()
+    extrema_points["parachute_deploy"] = {
+        "index": parachute_deploy_idx,
+        "value": df.loc[parachute_deploy_idx, "parachute_deploy_gain"],
+        "metric": "parachute_deploy_gain",
+    }
+
     # 各極値点での詳細データを収集
     result_data = []
 

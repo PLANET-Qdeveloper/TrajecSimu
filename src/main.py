@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -13,7 +12,7 @@ from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
 from trajecsim.jsbsim_support.jsb_runner import run_jsb
 from trajecsim.jsbsim_support.param_generator.yaml_loader import load_yaml_parameters
 from trajecsim.util.create_chart import create_time_series_plots
-from trajecsim.util.kml_generator import KMLGenerator, merge_kmz_to_kml
+from trajecsim.util.kml_generator import KMLGenerator
 from trajecsim.util.logger import setup_logging, tqdm_joblib
 from trajecsim.util.summarize import calculate_aoa, get_extrema_analysis, summarize_output_info_df
 
@@ -28,7 +27,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config_file_path",
         type=str,
-        default="data/input/gust_wind.yaml",
+        default="data/input/landed_area.yaml",
         help="Path to the configuration file",
     )
     parser.add_argument(
@@ -48,7 +47,6 @@ def get_arguments() -> argparse.Namespace:
 
 def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path) -> None:
     """メイン関数"""
-
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -79,8 +77,7 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
 
     simulation_df = generate_param_xml(params, template_dir)
     # Clear output directory
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
+
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info("シミュレーションを実行します")
     with tqdm_joblib(tqdm(desc="シミュレーションを実行中🚀", total=len(simulation_df))):

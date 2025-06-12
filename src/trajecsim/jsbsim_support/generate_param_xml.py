@@ -55,7 +55,7 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
     )
 
     # パラシュートの面積を計算
-    if not rocket_param.get("parachute_area"):
+    if rocket_param.get("parachute_area") is None:
         rocket_param["parachute_area"] = (
             (
                 2

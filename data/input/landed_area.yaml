@@ -7,7 +7,7 @@ launch:
   longitude: 140.010450 # 経度
   elevation: 5.3 # ランチャ標高
   launcher_length: 5.0 # ランチャ長さ
-  ground_wind_dir: 
+  ground_wind_dir:   
     - 0.0
     - 45.0
     - 90.0
@@ -82,7 +82,6 @@ rocket:
   parachute_full_deploy_time: 1.0
   parachute_area: # パラシュート面積: 設計担当に聞いて
     - 0.0
-    - 0.315
   terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
   parachute_drag_coefficient: 1.2
 
@@ -119,4 +118,4 @@ misc:
     - ground_wind_dir
 
   result_each:
-    - terminal_velocity
+    - parachute_area
