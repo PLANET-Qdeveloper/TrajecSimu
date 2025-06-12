@@ -9,26 +9,11 @@ launch:
   launcher_length: 5.0
   ground_wind_dir: 
     - 0.0
-    - 45.0
-    - 90.0
-    - 135.0
-    - 180.0
-    - 225.0
-    - 270.0
-    - 315.0
   ground_wind_speed: 
     - 0.0
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8.0
-    - 9.0
   wind_power_factor: 0.1666
   winds_table:
+  range_kmz: data/input/21stNSE保安域案_海射場.kmz
 
 rocket:
   # Rocket configuration
@@ -104,9 +89,9 @@ rocket:
 
   # Table paths
   fuel_remaining_table: 
-  thrust_table: "data/sample/tables/thrust.csv"
-  cd0_table: "data/sample/tables/cd0.csv"
-  cdmach_table: "data/sample/tables/cdmach.csv" 
+  thrust_table: "data/input/tables/thrust.csv"
+  cd0_table: "data/input/tables/cd0.csv"
+  cdmach_table: "data/input/tables/cdmach.csv" 
 
   
 simulation:

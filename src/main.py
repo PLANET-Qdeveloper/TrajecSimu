@@ -2,9 +2,9 @@
 
 import argparse
 import os
+import shutil
 from pathlib import Path
 
-import jsbsim
 import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -12,9 +12,10 @@ from tqdm import tqdm
 from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
 from trajecsim.jsbsim_support.jsb_runner import run_jsb
 from trajecsim.jsbsim_support.param_generator.yaml_loader import load_yaml_parameters
-from trajecsim.util.kml_generator import KMLGenerator
+from trajecsim.util.create_chart import create_time_series_plots
+from trajecsim.util.kml_generator import KMLGenerator, merge_kmz_to_kml
 from trajecsim.util.logger import setup_logging, tqdm_joblib
-from trajecsim.util.summarize import summarize_output_info_df
+from trajecsim.util.summarize import calculate_aoa, get_extrema_analysis, summarize_output_info_df
 
 
 def get_arguments() -> argparse.Namespace:
@@ -27,7 +28,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config_file_path",
         type=str,
-        default="data/sample/sample.yaml",
+        default="data/input/gust_wind.yaml",
         help="Path to the configuration file",
     )
     parser.add_argument(
@@ -45,7 +46,7 @@ def get_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
+def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path) -> None:
     """メイン関数"""
 
     output_dir = Path(output_dir)
@@ -77,7 +78,10 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
         raise ValueError(invalid_keys)
 
     simulation_df = generate_param_xml(params, template_dir)
-
+    # Clear output directory
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     logger.info("シミュレーションを実行します")
     with tqdm_joblib(tqdm(desc="シミュレーションを実行中🚀", total=len(simulation_df))):
         results = Parallel(n_jobs=os.cpu_count())(
@@ -96,7 +100,15 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
             result_output_dir = output_dir / result_key / str(group_key)
             if not result_output_dir.exists():
                 result_output_dir.mkdir(parents=True, exist_ok=True)
-
+            tqdm.pandas(
+                desc=f"AoAを計算中: {result_key} = {group_key}",
+                total=len(group_df),
+                leave=False,
+            )
+            group_df.progress_apply(
+                calculate_aoa,
+                axis=1,
+            )
             tqdm.pandas(
                 desc=f"シミュレーションの結果を集計中: {result_key} = {group_key}",
                 total=len(group_df),
@@ -114,6 +126,20 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
                 axis=1,
             )
 
+            extrema_results = group_df.progress_apply(
+                get_extrema_analysis,
+                axis=1,
+            )
+
+            extrema_df = pd.concat(
+                [df for df in extrema_results if isinstance(df, pd.DataFrame) and not df.empty], ignore_index=True
+            )
+
+            group_df.progress_apply(
+                create_time_series_plots,
+                axis=1,
+            )
+
             logger.info("シミュレーションの結果を保存します")
             summary_columns = [
                 "max_altitude",
@@ -126,13 +152,27 @@ def main(config_file_path: str, output_dir: str, template_dir: str) -> None:
             group_df[summary_columns].to_csv(result_output_dir / "summary.csv", index=False)
             group_df.select_dtypes(include=["number"]).to_csv(result_output_dir / "simulation_params.csv", index=False)
 
+            # Export complete extrema_df with all columns
+            extrema_df.to_csv(
+                result_output_dir / "extrema.csv",
+                index=False,
+                float_format="%.6f",  # Use 6 decimal places for float values
+                encoding="utf-8",  # Ensure proper encoding
+            )
+
             logger.info("KMLファイルを生成します")
             for kml_group_key in kml_group_by:
                 kml_generator = KMLGenerator()
                 group_keys = [col for col in group_df.columns if kml_group_key in col]
                 grouped_by_group_key = group_df.groupby(group_keys)
                 kml_generator.generate_grouped_points_polygons(grouped_by_group_key)
-                kml_generator.save(result_output_dir / f"result_{kml_group_key}.kml")
+                representation_df = grouped_by_group_key.first()
+                kmz_path = representation_df[("launch", "range_kmz")].iloc[0]
+                if not kmz_path.exists():
+                    continue
+
+                kml_output_path = result_output_dir / f"result_{kml_group_key}.kml"
+                kml_generator.save(kml_output_path)
 
 
 if __name__ == "__main__":

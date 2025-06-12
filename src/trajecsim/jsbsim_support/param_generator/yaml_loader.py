@@ -53,7 +53,7 @@ def convert_omegaconf_to_schema(
     return rocket_params, simulation_params, launch_params
 
 
-def load_csv_to_tuple_list(csv_path: Path | str) -> list[tuple[float, float]]:
+def load_csv_to_tuple_list(csv_path: Path | str) -> list[tuple[float, float]] | Path:
     """Load the CSV file to a list of tuples.
 
     Args:
@@ -64,6 +64,8 @@ def load_csv_to_tuple_list(csv_path: Path | str) -> list[tuple[float, float]]:
     """
     if not Path(csv_path).exists():
         raise FileNotFoundError(csv_path)
+    if not Path(csv_path).suffix.lower() == ".csv":
+        return Path(csv_path)
 
     # まず先頭行だけ読み込んで内容を確認
     df_temp = pd.read_csv(csv_path, header=None, nrows=1)

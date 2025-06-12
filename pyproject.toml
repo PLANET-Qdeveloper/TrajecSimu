@@ -21,6 +21,9 @@ dependencies = [
     "mkdocstrings>=0.29.1",
     "pymdown-extensions>=10.15",
     "mkdocstrings-python>=1.16.10",
+    "fastkml>=1.1.0",
+    "geopy>=2.4.1",
+    "seaborn>=0.13.2",
 ]
 
 [tool.hatch.build.targets.wheel]

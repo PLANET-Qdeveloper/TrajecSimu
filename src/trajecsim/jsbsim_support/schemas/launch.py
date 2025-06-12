@@ -21,3 +21,4 @@ class LaunchConfig(BaseModel):
     ground_wind_dir: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     ground_wind_speed: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     launcher_length: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    range_kmz: Annotated[list[FilePath], BeforeValidator(convert_value_to_list_optional)] = []

@@ -38,8 +38,9 @@ def run_jsb(
     fdm.run_ic()
     while fdm.run():
         pass
-
-    output_file = output_dir / f"{simulation_param_df.name}_{file_name_prefix}_.csv"
+    output_dir_path = output_dir / f"{simulation_param_df.name}_{file_name_prefix}"
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir_path / "pq_rocket_output_raw.csv"
     copy(
         temp_dir / "pq_rocket_output_raw.csv",
         output_file,

@@ -1,10 +1,45 @@
 """KMLファイルを生成する."""
 
+import logging
+import zipfile
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import simplekml
+from fastkml import kml
 
 DEFAULT_LINE_WIDTH = 3
+LOGGER = logging.getLogger(__name__)
+
+
+def merge_kmz_to_kml(existing_kml_path: Path, kmz_path: Path, output_path: Path) -> None:
+    # 既存のKMLファイルを読み込み
+    with open(existing_kml_path, "r", encoding="utf-8") as f:
+        existing_kml = kml.KML()
+        existing_kml.from_string(f.read())
+
+    # KMZファイルを読み込み
+    with zipfile.ZipFile(kmz_path, "r") as kmz, kmz.open("doc.kml") as kml_file:
+        loaded_string = kml_file.read().decode("utf-8")
+        loaded_string = loaded_string.replace('xmlns:kml="http://www.opengis.net/kml/2.2"', "")
+        kmz_kml = kml.KML()
+        kmz_kml.from_string(loaded_string)
+
+    # 新しいKMLオブジェクトを作成
+    merged_kml = kml.KML()
+
+    # 既存のKMLの要素を追加
+    for feature in existing_kml.features:
+        merged_kml.append(feature)
+
+    # KMZの要素を追加
+    for feature in kmz_kml.features:
+        merged_kml.append(feature)
+
+    # マージされたKMLを保存
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(merged_kml.to_string(prettyprint=True))
 
 
 class KMLGenerator:
@@ -120,3 +155,7 @@ class KMLGenerator:
                 f"{group_key}",
                 rgb=current_color,
             )
+            kmz_path = Path(group_df[("launch", "range_kmz")])
+            if not kmz_path.exists():
+                LOGGER.warning(f"KMLファイルが見つかりません: {kmz_path}")
+                continue
