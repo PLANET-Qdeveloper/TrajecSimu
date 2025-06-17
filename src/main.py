@@ -115,9 +115,6 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
     logger = setup_logging(output_dir / "log.txt")
     logger.info(f"シミュレーションを開始します: {config_file_path}")
 
-    # 出力ディレクトリをクリア
-    clear_directory_safe(output_dir, logger)
-
     # ディレクトリを再作成
     output_dir.mkdir(parents=True, exist_ok=True)
 

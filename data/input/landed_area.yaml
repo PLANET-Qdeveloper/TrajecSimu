@@ -9,23 +9,8 @@ launch:
   launcher_length: 5.0 # ランチャ長さ
   ground_wind_dir:   
     - 15.0
-    - 60.0
-    - 105.0
-    - 150.0
-    - 195.0
-    - 240.0
-    - 285.0
-    - 330.0
   ground_wind_speed: 
     - 0.0
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8.0
   wind_power_factor: 0.1666
   winds_table:
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
