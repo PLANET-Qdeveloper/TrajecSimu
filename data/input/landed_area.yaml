@@ -8,14 +8,14 @@ launch:
   elevation: 5.3 # ランチャ標高
   launcher_length: 5.0 # ランチャ長さ
   ground_wind_dir:   
-    - 0.0
-    - 45.0
-    - 90.0
-    - 135.0
-    - 180.0
-    - 225.0
-    - 270.0
-    - 315.0
+    - 15.0
+    - 60.0
+    - 105.0
+    - 150.0
+    - 195.0
+    - 240.0
+    - 285.0
+    - 330.0
   ground_wind_speed: 
     - 0.0
     - 1.0
@@ -83,10 +83,9 @@ rocket:
   # Parachute parameters
   parachute_full_deploy_time: 1.0
   parachute_area: # パラシュート面積: 設計担当に聞いて
-  terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
     - 0.0
-    - 20.0
-    - 25.0
+    - 0.315
+  terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
 
   parachute_drag_coefficient: 1.2
 
@@ -123,4 +122,4 @@ misc:
     - ground_wind_dir
 
   result_each:
-    - terminal_velocity
+    - parachute_area

@@ -2,6 +2,9 @@
 
 import argparse
 import os
+import shutil
+import stat
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -12,7 +15,7 @@ from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
 from trajecsim.jsbsim_support.jsb_runner import run_jsb
 from trajecsim.jsbsim_support.param_generator.yaml_loader import load_yaml_parameters
 from trajecsim.util.create_chart import create_time_series_plots
-from trajecsim.util.kml_generator import KMLGenerator
+from trajecsim.util.kml_generator import KMLGenerator, merge_kmz_to_kml
 from trajecsim.util.logger import setup_logging, tqdm_joblib
 from trajecsim.util.summarize import calculate_aoa, get_extrema_analysis, summarize_output_info_df
 
@@ -51,14 +54,72 @@ def get_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def clear_directory_safe(directory: Path, logger) -> None:
+    """安全にディレクトリをクリアする（Windows対応、権限エラー対応）
+
+    Args:
+        directory: クリアするディレクトリ
+        logger: ロガー
+    """
+    if not directory.exists():
+        return
+
+    logger.info(f"出力ディレクトリをクリアします: {directory}")
+
+    max_retries = 3
+    retry_delay = 0.5
+
+    for attempt in range(max_retries):
+        try:
+
+            def handle_remove_readonly(func, path, exc):
+                """読み取り専用ファイルを削除できるようにする（Windows対応）"""
+                if os.path.exists(path):
+                    os.chmod(path, stat.S_IWRITE)
+                    func(path)
+
+            for item in directory.iterdir():
+                if item.is_file():
+                    # ファイルの場合、読み取り専用属性を解除してから削除
+                    try:
+                        item.chmod(stat.S_IWRITE)
+                        item.unlink()
+                    except PermissionError:
+                        # Windowsで使用中のファイルの場合、少し待ってから再試行
+                        time.sleep(retry_delay)
+                        item.chmod(stat.S_IWRITE)
+                        item.unlink()
+                elif item.is_dir():
+                    # ディレクトリの場合、再帰的に削除
+                    shutil.rmtree(item, onerror=handle_remove_readonly)
+
+            logger.info("出力ディレクトリのクリアが完了しました")
+            break
+
+        except (PermissionError, OSError) as e:
+            logger.warning(f"ディレクトリクリア試行 {attempt + 1}/{max_retries} 失敗: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay * (attempt + 1))  # 指数バックオフ
+            else:
+                logger.error(f"ディレクトリクリアに失敗しました。手動でクリアしてください: {directory}")
+                raise
+
+
 def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path, chart_output: bool) -> None:
     """メイン関数"""
     output_dir = Path(output_dir)
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True, exist_ok=True)
+
+    # 出力ディレクトリを作成（存在しない場合）
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     logger = setup_logging(output_dir / "log.txt")
     logger.info(f"シミュレーションを開始します: {config_file_path}")
+
+    # 出力ディレクトリをクリア
+    clear_directory_safe(output_dir, logger)
+
+    # ディレクトリを再作成
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"パラメータを {config_file_path} から読み込みます")
 
@@ -82,9 +143,6 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
         raise ValueError(invalid_keys)
 
     simulation_df = generate_param_xml(params, template_dir)
-    # Clear output directory
-
-    output_dir.mkdir(parents=True, exist_ok=True)
     logger.info("シミュレーションを実行します")
     with tqdm_joblib(tqdm(desc="シミュレーションを実行中🚀", total=len(simulation_df))):
         results = Parallel(n_jobs=os.cpu_count())(
@@ -177,6 +235,8 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
 
                 kml_output_path = result_output_dir / f"result_{kml_group_key}.kml"
                 kml_generator.save(kml_output_path)
+
+                merge_kmz_to_kml(kml_output_path, kmz_path, kml_output_path)
 
 
 if __name__ == "__main__":

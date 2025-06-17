@@ -1,6 +1,7 @@
 """KMLファイルを生成する."""
 
 import logging
+import re
 import zipfile
 from pathlib import Path
 
@@ -16,30 +17,39 @@ LOGGER = logging.getLogger(__name__)
 def merge_kmz_to_kml(existing_kml_path: Path, kmz_path: Path, output_path: Path) -> None:
     # 既存のKMLファイルを読み込み
     with open(existing_kml_path, "r", encoding="utf-8") as f:
-        existing_kml = kml.KML()
-        existing_kml.from_string(f.read())
+        existing_content = f.read()
 
-    # KMZファイルを読み込み
+    # KMZファイルからKMLを読み込み
     with zipfile.ZipFile(kmz_path, "r") as kmz, kmz.open("doc.kml") as kml_file:
-        loaded_string = kml_file.read().decode("utf-8")
-        loaded_string = loaded_string.replace('xmlns:kml="http://www.opengis.net/kml/2.2"', "")
-        kmz_kml = kml.KML()
-        kmz_kml.from_string(loaded_string)
+        kmz_content = kml_file.read().decode("utf-8")
 
-    # 新しいKMLオブジェクトを作成
-    merged_kml = kml.KML()
+    # 文字列操作でマージ
+    # 既存KMLのDocument内容を抽出
 
-    # 既存のKMLの要素を追加
-    for feature in existing_kml.features:
-        merged_kml.append(feature)
+    # 既存KMLのDocument開始タグと終了タグを見つける
+    existing_doc_match = re.search(r"<Document[^>]*>(.*)</Document>", existing_content, re.DOTALL)
+    kmz_doc_match = re.search(r"<Document[^>]*>(.*)</Document>", kmz_content, re.DOTALL)
 
-    # KMZの要素を追加
-    for feature in kmz_kml.features:
-        merged_kml.append(feature)
+    if not existing_doc_match or not kmz_doc_match:
+        LOGGER.warning("Could not find Document elements in KML files")
+        # Fallback: just copy existing content
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(existing_content)
+        return
+
+    existing_doc_content = existing_doc_match.group(1)
+    kmz_doc_content = kmz_doc_match.group(1)
+
+    # 既存KMLのヘッダーを取得
+    kml_header = existing_content[: existing_doc_match.start(1)]
+    kml_footer = existing_content[existing_doc_match.end(1) :]
+
+    # マージされたコンテンツを作成
+    merged_content = kml_header + existing_doc_content + kmz_doc_content + kml_footer
 
     # マージされたKMLを保存
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(merged_kml.to_string(prettyprint=True))
+        f.write(merged_content)
 
 
 class KMLGenerator:
@@ -84,7 +94,7 @@ class KMLGenerator:
 
     def add_line(
         self,
-        points: list[any],
+        points: list[tuple[float, float]],
         name: str,
         rgb: tuple[int, int, int] = (255, 0, 0),
         width: int = 3,
