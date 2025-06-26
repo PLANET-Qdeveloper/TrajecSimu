@@ -130,8 +130,24 @@ class KMLGenerator:
             rgb: ポリゴンの色
             width: ポリゴンの幅
         """
+        # Sort points using Graham scan to form convex hull
+        if len(points) < 3:
+            sorted_points = points
+        else:
+            # 重心を計算
+            center_x = sum(p[0] for p in points) / len(points)
+            center_y = sum(p[1] for p in points) / len(points)
+
+            # 重心を基準とした角度でソート
+            def angle_from_center(point):
+                dx = point[0] - center_x
+                dy = point[1] - center_y
+                return np.arctan2(dy, dx)
+
+            sorted_points = sorted(points, key=angle_from_center)
+
         ls = self.kml.newpolygon(name=name)
-        ls.outerboundaryis = [*points, points[0]]
+        ls.outerboundaryis = [*sorted_points, sorted_points[0]] if sorted_points else []
         ls.altitudemode = simplekml.AltitudeMode.clamptoground
         ls.style.linestyle.color = simplekml.Color.rgb(rgb[0], rgb[1], rgb[2])
         ls.style.linestyle.width = width

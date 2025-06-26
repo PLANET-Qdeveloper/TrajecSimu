@@ -25,8 +25,8 @@ def generate_wind_table(
     Returns:
         list[tuple[float, float, float]]: List of (altitude_m, speed_mps, direction_deg) tuples.
     """
-    # Generate altitudes from 0 to 10,000 meters, every 100 meters.
-    altitudes_m_list = list(range(0, 10001, 100))
+    # Generate altitudes from 0 to 10,000 meters, every 10 meters.
+    altitudes_m_list = list(range(0, 10001, 10))
     altitudes_s = pd.Series(altitudes_m_list, dtype=float)
 
     # Calculate relative heights (h / H_REF).

@@ -233,8 +233,6 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
                 kml_output_path = result_output_dir / f"result_{kml_group_key}.kml"
                 kml_generator.save(kml_output_path)
 
-                merge_kmz_to_kml(kml_output_path, kmz_path, kml_output_path)
-
 
 if __name__ == "__main__":
     # コマンドライン引数を取得

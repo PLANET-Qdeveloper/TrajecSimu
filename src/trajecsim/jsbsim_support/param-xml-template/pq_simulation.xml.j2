@@ -5,11 +5,11 @@
     name="Rocket flight.">
 
 
-  <use aircraft="PQ_ROCKET" initialize="liftoff"/> 
+  <use aircraft="PQ_ROCKET" initialize="liftoff"/>
 
   <run start="0" end="{{ flight_duration }}" dt="{{ time_step }}">
 
-    
+
 
     <!-- start off on the ground -->
     <property value="1"> forces/hold-down </property>
@@ -17,6 +17,8 @@
     <property value="0"> simulation/notify-time-trigger </property>
 
     <property value="100000000"> simulation/parachute_deploy_time </property>
+
+    <property value="0"> simulation/wind_direction_parachute_deploy </property>
 
 
 
@@ -39,6 +41,7 @@
     <!-- Zero Vertical Velocity -->
     <event name="Apogee">
       <condition>velocities/v-down-fps gt 1</condition>
+      <set name="simulation/wind_direction_parachute_deploy" value="{{ wind_direction_parachute_deploy }}"/>
       <set name="simulation/parachute_deploy_time" >
         <function>
           <sum>
@@ -58,6 +61,8 @@
       <condition>position/h-agl-ft gt {{ launcher_height * 3.280840 }}</condition>
       <set name="atmosphere/psiw-rad">
       <function>
+      <sum>
+      <property>simulation/wind_direction_parachute_deploy</property>
       <table>
       <independentVar lookup="row"> position/h-agl-ft </independentVar>
       <tableData>
@@ -66,6 +71,7 @@
         {% endfor %}
       </tableData>
       </table>
+      </sum>
       </function>
       </set>
       <set name="atmosphere/wind-mag-fps">
@@ -100,5 +106,6 @@
     <property apply="convert-rad-To-deg" caption="Yaw">attitude/psi-rad</property>
     <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
     <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
+    <property apply="convert-fps-To-m_s" caption="Wind Speed">atmosphere/wind-mag-fps</property>
   </output>
 </runscript>

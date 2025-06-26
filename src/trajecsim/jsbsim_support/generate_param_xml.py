@@ -50,7 +50,7 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
     simulation_param["winds_table"] = generate_wind_table(
         launch_param["ground_wind_dir"],
         launch_param["ground_wind_speed"],
-        launch_param["elevation"],
+        launch_param["wind_ref_altitude"],
         launch_param["wind_power_factor"],
     )
 
@@ -67,8 +67,13 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
             else 0
         )
     rocket_param["parachute_full_deploy_time"] = (
-        1e10 if rocket_param["parachute_area"] < 10e-5 else rocket_param["parachute_full_deploy_time"]
+        1000000 if rocket_param["parachute_area"] < 10e-5 else rocket_param["parachute_full_deploy_time"]
     )
+    simulation_param["parachute_deploy_delay"] = (
+        1000000 if rocket_param["parachute_area"] < 10e-5 else simulation_param["parachute_deploy_delay"]
+    )
+    simulation_param["wind_direction_parachute_deploy"] = 0.0 if rocket_param["parachute_area"] < 10e-5 else 0.0
+
     # XMLファイルの生成
     render_and_save_xml_files(
         output_dir,

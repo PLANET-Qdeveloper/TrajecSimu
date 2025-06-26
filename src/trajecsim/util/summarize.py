@@ -70,6 +70,7 @@ def calculate_aoa(row: pd.Series) -> None:
                     / np.sqrt(vtrue * vtrue + vgust * vgust * np.cos(beta) * np.cos(beta))
                 )
             ),
+            "True Velocity(gust)": vtrue + vgust * np.sin(beta),
         }
     )
 
@@ -192,6 +193,14 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
         "index": parachute_deploy_idx,
         "value": df.loc[parachute_deploy_idx, "parachute_deploy_gain"],
         "metric": "parachute_deploy_gain",
+    }
+
+    # 8. 最大推力の点
+    max_thrust_idx = df["thrust"].idxmax()
+    extrema_points["max_thrust"] = {
+        "index": max_thrust_idx,
+        "value": df.loc[max_thrust_idx, "thrust"],
+        "metric": "thrust",
     }
 
     # 各極値点での詳細データを収集

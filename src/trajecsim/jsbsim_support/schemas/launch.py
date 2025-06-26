@@ -18,6 +18,7 @@ class LaunchConfig(BaseModel):
     elevation: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     wind_power_factor: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     winds_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list_optional)] = []
+    wind_ref_altitude: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     ground_wind_dir: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     ground_wind_speed: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     launcher_length: Annotated[list[float], BeforeValidator(convert_value_to_list)]
