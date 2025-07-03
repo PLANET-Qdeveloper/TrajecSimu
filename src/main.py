@@ -15,7 +15,7 @@ from trajecsim.jsbsim_support.generate_param_xml import generate_param_xml
 from trajecsim.jsbsim_support.jsb_runner import run_jsb
 from trajecsim.jsbsim_support.param_generator.yaml_loader import load_yaml_parameters
 from trajecsim.util.create_chart import create_time_series_plots
-from trajecsim.util.kml_generator import KMLGenerator, merge_kmz_to_kml
+from trajecsim.util.kml_generator import KMLGenerator
 from trajecsim.util.logger import setup_logging, tqdm_joblib
 from trajecsim.util.summarize import calculate_aoa, get_extrema_analysis, summarize_output_info_df
 
@@ -48,7 +48,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--chart_output",
         type=bool,
-        default=False,
+        default=True,
         help="Output charts",
     )
     return parser.parse_args()

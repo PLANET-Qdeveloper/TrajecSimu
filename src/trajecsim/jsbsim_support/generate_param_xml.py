@@ -74,6 +74,14 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
     )
     simulation_param["wind_direction_parachute_deploy"] = 0.0 if rocket_param["parachute_area"] < 10e-5 else 0.0
 
+    simulation_param["liftoff_time"] = next(
+        (
+            thrust[0]
+            for thrust in rocket_param["thrust_table"]
+            if thrust[1] > rocket_param["dry_weight"] * GRAVITY_ACCELERATION
+        ),
+        0,
+    )
     # XMLファイルの生成
     render_and_save_xml_files(
         output_dir,

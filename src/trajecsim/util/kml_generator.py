@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import simplekml
-from fastkml import kml
 
 DEFAULT_LINE_WIDTH = 3
 LOGGER = logging.getLogger(__name__)

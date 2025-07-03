@@ -29,7 +29,7 @@
 
     <!-- Liftoff -->
     <event name="liftoff">
-      <condition>simulation/sim-time-sec  ge  {{ time_step * 10}}</condition>
+      <condition>simulation/sim-time-sec  ge  {{ liftoff_time }}</condition>
       <set name="forces/hold-down" value="0"/>
     </event>
 
