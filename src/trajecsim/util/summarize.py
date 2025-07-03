@@ -80,6 +80,25 @@ def calculate_aoa(row: pd.Series) -> None:
     combined_df.to_csv(output_file, index=False)
 
 
+def delete_final_point(row: pd.Series) -> None:
+    """最終点を削除する."""
+    output_file = row["raw_output_file"]
+    output_df = pd.read_csv(output_file)
+    output_df = output_df[output_df["Time"] < output_df["Time"].max()]
+    output_df.to_csv(output_file, index=False)
+
+
+def calculate_acceleration(row: pd.Series) -> None:
+    """加速度を計算する."""
+    output_file = row["raw_output_file"]
+    output_df = pd.read_csv(output_file)
+
+    output_df["Acceleration"] = np.sqrt(
+        output_df["X-Acceleration"] ** 2 + output_df["Y-Acceleration"] ** 2 + output_df["Z-Acceleration"] ** 2
+    )
+    output_df.to_csv(output_file, index=False)
+
+
 def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
     """シミュレーション結果の極値分析を行う."""
     output_file = output_info_df["raw_output_file"]
@@ -94,6 +113,10 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
         "Angle of Attack(gust)": "angle_of_attack_gust",
         "Angle of Attack(total)": "angle_of_attack_total",
         "Acceleration": "acceleration",
+        "X-Acceleration": "x_acceleration",
+        "Y-Acceleration": "y_acceleration",
+        "Z-Acceleration": "z_acceleration",
+        "Mach": "mach",
         "Thrust": "thrust",
         "True Velocity": "true_velocity",
         "Ground Velocity": "ground_velocity",
@@ -105,7 +128,6 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
 
     # データフレームの列名を変更
     df = output_df.rename(columns=cols)
-
     # 風速を計算（対気速度から対地速度を引いた差の大きさ）
     df["wind_speed"] = abs(df["true_velocity"] - df["ground_velocity"])
 

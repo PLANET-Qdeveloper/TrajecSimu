@@ -17,7 +17,13 @@ from trajecsim.jsbsim_support.param_generator.yaml_loader import load_yaml_param
 from trajecsim.util.create_chart import create_time_series_plots
 from trajecsim.util.kml_generator import KMLGenerator
 from trajecsim.util.logger import setup_logging, tqdm_joblib
-from trajecsim.util.summarize import calculate_aoa, get_extrema_analysis, summarize_output_info_df
+from trajecsim.util.summarize import (
+    calculate_acceleration,
+    calculate_aoa,
+    delete_final_point,
+    get_extrema_analysis,
+    summarize_output_info_df,
+)
 
 
 def get_arguments() -> argparse.Namespace:
@@ -164,7 +170,15 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
                 leave=False,
             )
             group_df.progress_apply(
+                delete_final_point,
+                axis=1,
+            )
+            group_df.progress_apply(
                 calculate_aoa,
+                axis=1,
+            )
+            group_df.progress_apply(
+                calculate_acceleration,
                 axis=1,
             )
             tqdm.pandas(

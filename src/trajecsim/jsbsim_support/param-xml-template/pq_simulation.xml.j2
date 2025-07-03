@@ -97,7 +97,10 @@
     <property caption="Altitude">position/h-sl-meters</property>
     <property caption="Angle of Attack">aero/alpha-rad</property>
     <property caption="Angle of Sideslip">aero/beta-rad</property>
-    <property apply="convert-ft_sec2-To-m_sec2" caption="Acceleration">accelerations/udot-ft_sec2</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="X-Acceleration">accelerations/udot-ft_sec2</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="Y-Acceleration">accelerations/vdot-ft_sec2</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="Z-Acceleration">accelerations/wdot-ft_sec2</property>
+
     <property apply="convert-lbs-To-N" caption="Thrust">external_reactions/thrust/magnitude</property>
     <property apply="convert-fps-To-ms" caption="True Velocity">velocities/vtrue-fps</property>
     <property apply="convert-fps-To-m_s" caption="Ground Velocity">velocities/vg-fps</property>
@@ -107,5 +110,7 @@
     <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
     <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
     <property apply="convert-fps-To-m_s" caption="Wind Speed">atmosphere/wind-mag-fps</property>
+    <property caption="Mach">velocities/mach</property>
+
   </output>
 </runscript>
