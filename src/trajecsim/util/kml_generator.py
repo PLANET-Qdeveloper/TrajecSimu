@@ -70,6 +70,7 @@ class KMLGenerator:
     ) -> list[tuple[int, int, int]]:
         """グラデーションを作成する."""
         start = np.array(start_color)
+
         end = np.array(end_color)
 
         # 0から1までのn個の等間隔の値を作成
@@ -153,7 +154,11 @@ class KMLGenerator:
         ls.style.polystyle.fill = 0
         ls.style.polystyle.outline = 1
 
-    def generate_grouped_points_polygons(self, grouped_df: pd.DataFrame) -> None:
+    def generate_grouped_points_polygons(
+        self,
+        grouped_df: pd.DataFrame,
+        point_output: bool = True,
+    ) -> None:
         """グループごとの着地点ポリゴンを生成する
 
         Args:
@@ -174,6 +179,10 @@ class KMLGenerator:
                 continue
 
             current_color = color_gradient[i] if color_gradient else (255, 0, 0)
+
+            if point_output:
+                for point in points:
+                    self.add_point(point, "")
 
             self.generate_groundpoint_polygon(
                 points,

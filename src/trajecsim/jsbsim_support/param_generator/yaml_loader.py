@@ -9,6 +9,8 @@ from trajecsim.jsbsim_support.schemas.launch import LaunchConfig
 from trajecsim.jsbsim_support.schemas.rocket import PqRocketSchema
 from trajecsim.jsbsim_support.schemas.simulation import SimulationSchema
 
+STRING_LIST_KEYS = ["landing_range_script"]
+
 
 def load_yaml_parameters(yaml_path: Path | str) -> DictConfig | ListConfig:
     """Load the YAML parameters from the given path.
@@ -107,7 +109,6 @@ def load_csv_to_dict(param_dict: any) -> dict[str, any]:
         # リストの場合、各項目を再帰的に処理
         return [load_csv_to_dict(item) for item in param_dict]
     elif isinstance(param_dict, (Path, str)):
-        # 数値の場合、2倍にする
         return load_csv_to_tuple_list(param_dict)
     else:
         # その他の型の場合、そのまま返す

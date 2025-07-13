@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from geopy import Point
 
+from trajecsim.landing_range.launch_sites import LAUNCH_SITES
 from trajecsim.util.kml_generator import KMLGenerator
 
 VGUST = 9.0
@@ -99,8 +100,14 @@ def calculate_acceleration(row: pd.Series) -> None:
     output_df.to_csv(output_file, index=False)
 
 
-def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
+def get_extrema_analysis(output_info_df: pd.Series, landing_range_script: str) -> pd.DataFrame:
     """シミュレーション結果の極値分析を行う."""
+
+    landing_range_class = LAUNCH_SITES.get(landing_range_script)
+    if landing_range_class is None:
+        return pd.DataFrame({"landing_range": [0]})
+    landing_range_obj = landing_range_class()
+
     output_file = output_info_df["raw_output_file"]
     output_df = pd.read_csv(output_file)
 
@@ -147,6 +154,12 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
     # 動圧*atan(風速/速度)の計算
     df["qbar_atan_aoa"] = df["dynamic_pressure"] * np.degrees(df["angle_of_attack_gust"])
 
+    launch_clear_height = output_info_df[("launch", "elevation")] + output_info_df[
+        ("launch", "launcher_length")
+    ] * math.sin(
+        output_info_df[("launch", "pitch")] * math.pi / 180,
+    )
+
     # 4つの極値点を見つける
     extrema_points = {}
 
@@ -160,6 +173,14 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
 
     initial_point_lat = df.loc[initial_point_idx, "latitude"]
     initial_point_long = df.loc[initial_point_idx, "longitude"]
+
+    # 0.5 ランチクリアの点
+    launch_clear_idx = int(df[df["altitude"] > launch_clear_height]["time"].idxmin())
+    extrema_points["launch_clear"] = {
+        "index": launch_clear_idx,
+        "value": df.loc[launch_clear_idx, "altitude"],
+        "metric": "altitude",
+    }
 
     # 1. 最高速度の点
     max_speed_idx = df["true_velocity"].idxmax()
@@ -256,6 +277,7 @@ def get_extrema_analysis(output_info_df: pd.Series) -> pd.DataFrame:
             "lat_m": lat_m,
             "long_m": long_m,
             "range_m": range_m,
+            "landing_range": landing_range_obj.landing_range(df.loc[idx, "latitude"], df.loc[idx, "longitude"]),
         }
         result_data.append(row_data)
 
@@ -308,3 +330,29 @@ def summarize_output_info_df(output_info_df: pd.Series, output_dir: Path) -> pd.
         "launch_clear_speed": launch_clear_speed,
     }
     return pd.Series(summary_row)
+
+
+def generate_final_points_dataframe(
+    grouped_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """グループごとの最終点データフレームを生成する
+
+    Args:
+        grouped_df: グループ化されたDataFrame
+
+    Returns:
+        pd.DataFrame: 最終点のデータフレーム
+    """
+    final_points_data = []
+
+    for i, (group_key, group_df) in enumerate(grouped_df):
+        # 各グループの最終点データを取得
+        for _, row in group_df.iterrows():
+            final_point_data = {
+                "group_key": group_key,
+                "landed_longitude": row["landed_longitude"],
+                "landed_latitude": row["landed_latitude"],
+            }
+            final_points_data.append(final_point_data)
+
+    return pd.DataFrame(final_points_data)

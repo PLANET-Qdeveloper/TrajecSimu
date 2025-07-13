@@ -1,14 +1,16 @@
 launch:
   # Liftoff configuration
-  yaw: 283.0  # ランチャ包囲角 包囲角- 磁気偏角
-  pitch: 80.0 # 射角
+  yaw:
+    - 283.0  # ランチャ包囲角 包囲角- 磁気偏角
+  pitch: 
+    - 82.0
   roll: 0.0
   latitude: 40.242865 # 緯度
   longitude: 140.010450 # 経度
   elevation: 5.3 # ランチャ標高
   launcher_length: 5.0 # ランチャ長さ
   wind_ref_altitude: 2.0
-  ground_wind_dir:   
+  ground_wind_dir:
     - 13.0
     - 58.0
     - 103.0
@@ -17,7 +19,7 @@ launch:
     - 238.0
     - 283.0
     - 328.0
-  ground_wind_speed: 
+  ground_wind_speed:
     - 0.0
     - 1.0
     - 2.0
@@ -31,16 +33,17 @@ launch:
   winds_table:
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
 
+
 rocket:
   # Rocket configuration
   projected_frontal_area: 0.0161 # 代表面積: 設計担当に聞いて
-  wing_span: 0.14 
+  wing_span: 0.14
   wing_chord: 0.09 # 機体翼弦長: 設計担当に聞いて
-  
+
   # Inertia parameters
   inertia_xx: 0.042  # 慣性モーメント
-  inertia_yy: 3.403 
-  inertia_zz: 3.403 
+  inertia_yy: 3.403
+  inertia_zz: 3.403
   inertia_xy: 0.0
   inertia_xz: 0.0
   inertia_yz: 0.0
@@ -84,10 +87,9 @@ rocket:
   # Parachute parameters
   parachute_full_deploy_time: 0.01
   parachute_area: # パラシュート面積: 設計担当に聞いて
-    - 0.0
-    - 0.358
-    - 0.56
   terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
+    - 0.0
+    - 20
 
   parachute_drag_coefficient: 1.2
 
@@ -121,7 +123,6 @@ simulation:
 misc:
   kml_group_by:
     - ground_wind_speed
-    - ground_wind_dir
-
   result_each:
-    - parachute_area
+    - terminal_velocity
+  landing_range_script: noshiro_sea

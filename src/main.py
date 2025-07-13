@@ -21,6 +21,7 @@ from trajecsim.util.summarize import (
     calculate_acceleration,
     calculate_aoa,
     delete_final_point,
+    generate_final_points_dataframe,
     get_extrema_analysis,
     summarize_output_info_df,
 )
@@ -54,8 +55,14 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--chart_output",
         type=bool,
-        default=True,
+        default=False,
         help="Output charts",
+    )
+    parser.add_argument(
+        "--point_output",
+        type=bool,
+        default=False,
+        help="Output points",
     )
     return parser.parse_args()
 
@@ -111,7 +118,13 @@ def clear_directory_safe(directory: Path, logger) -> None:
                 raise
 
 
-def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str | Path, chart_output: bool) -> None:
+def main(
+    config_file_path: str | Path,
+    output_dir: str | Path,
+    template_dir: str | Path,
+    chart_output: bool,
+    point_output: bool,
+) -> None:
     """メイン関数"""
     output_dir = Path(output_dir)
 
@@ -135,6 +148,7 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
     all_params_keys = list(params.launch.keys()) + list(params.simulation.keys()) + list(params.rocket.keys())
     kml_group_by = params.misc.kml_group_by
     result_each = params.misc.result_each
+    landing_range_script = params.misc.landing_range_script
 
     if not all(group_key in all_params_keys for group_key in kml_group_by):
         invalid_keys = [key for key in kml_group_by if key not in all_params_keys]
@@ -201,6 +215,7 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
             extrema_results = group_df.progress_apply(
                 get_extrema_analysis,
                 axis=1,
+                landing_range_script=landing_range_script,
             )
 
             extrema_df = pd.concat(
@@ -214,17 +229,6 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
                 )
 
             logger.info("シミュレーションの結果を保存します")
-            summary_columns = [
-                "max_altitude",
-                "max_speed",
-                "landed_latitude",
-                "landed_longitude",
-                "max_pressure",
-                "launch_clear_speed",
-            ]
-            group_df[summary_columns].to_csv(result_output_dir / "summary.csv", index=False)
-            group_df.select_dtypes(include=["number"]).to_csv(result_output_dir / "simulation_params.csv", index=False)
-
             # Export complete extrema_df with all columns
             extrema_df.to_csv(
                 result_output_dir / "extrema.csv",
@@ -238,11 +242,14 @@ def main(config_file_path: str | Path, output_dir: str | Path, template_dir: str
                 kml_generator = KMLGenerator()
                 group_keys = [col for col in group_df.columns if kml_group_key in col]
                 grouped_by_group_key = group_df.groupby(group_keys)
-                kml_generator.generate_grouped_points_polygons(grouped_by_group_key)
+
+                kml_generator.generate_grouped_points_polygons(grouped_by_group_key, point_output)
+                final_points_df = generate_final_points_dataframe(grouped_by_group_key)
                 representation_df = grouped_by_group_key.first()
                 kmz_path = representation_df[("launch", "range_kmz")].iloc[0]
                 if not kmz_path.exists():
                     continue
+                final_points_df.to_csv(result_output_dir / "final_points.csv", index=False)
 
                 kml_output_path = result_output_dir / f"result_{kml_group_key}.kml"
                 kml_generator.save(kml_output_path)
@@ -256,4 +263,5 @@ if __name__ == "__main__":
     output_dir = args.output_dir
     template_dir = args.template_dir
     chart_output = args.chart_output
-    main(config_file_path, output_dir, template_dir, chart_output)
+    point_output = args.point_output
+    main(config_file_path, output_dir, template_dir, chart_output, point_output)
