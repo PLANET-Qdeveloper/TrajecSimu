@@ -29,6 +29,7 @@ class PqRocketSchema(BaseModel):
     cg_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     cp_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    cp_mach_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
     cp_y: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     cp_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
@@ -85,6 +86,8 @@ class PqRocketSchema(BaseModel):
     thrust_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
     cd0_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
     cdmach_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
+    cnmach_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
+    csmach_table: Annotated[list[FilePath], BeforeValidator(convert_value_to_list)]
 
     @model_validator(mode="after")
     def set_default_values(self) -> Self:

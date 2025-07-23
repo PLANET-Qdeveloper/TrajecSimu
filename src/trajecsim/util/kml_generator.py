@@ -79,7 +79,7 @@ class KMLGenerator:
         # 線形補間でグラデーションを作成
         return [tuple(map(int, (1 - t_i) * start + t_i * end)) for t_i in t]
 
-    def add_point(self, point: tuple[float, float], name: str) -> None:
+    def add_point(self, point: tuple[float, float], name: str, rgb: tuple[int, int, int] | None = None) -> None:
         """点を追加する.
 
         Args:
@@ -89,8 +89,11 @@ class KMLGenerator:
         """
         pnt = self.kml.newpoint(name=name)
         pnt.coords = [(point[0], point[1])]
-        pnt.style.iconstyle.icon.href = None
-        pnt.style.iconstyle.scale = 0.0
+        if rgb:
+            pnt.style.iconstyle.color = simplekml.Color.rgb(rgb[0], rgb[1], rgb[2])
+        else:
+            pnt.style.iconstyle.icon.href = None
+            pnt.style.iconstyle.scale = 0.0
 
     def add_line(
         self,
@@ -175,17 +178,17 @@ class KMLGenerator:
                 (lon, lat) for lon, lat in zip(group_df["landed_longitude"], group_df["landed_latitude"], strict=False)
             ]
 
-            if len(set(points)) <= 3:
+            if len(set(points)) <= 3 and not point_output:
                 continue
 
             current_color = color_gradient[i] if color_gradient else (255, 0, 0)
 
             if point_output:
                 for point in points:
-                    self.add_point(point, "")
-
-            self.generate_groundpoint_polygon(
-                points,
-                f"{group_key}",
-                rgb=current_color,
-            )
+                    self.add_point(point, "", rgb=current_color)
+            if len(points) > 3:
+                self.generate_groundpoint_polygon(
+                    points,
+                    f"{group_key}",
+                    rgb=current_color,
+                )

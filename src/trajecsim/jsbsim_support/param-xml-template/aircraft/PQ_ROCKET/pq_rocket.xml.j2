@@ -161,6 +161,25 @@
                 <gain> {{ projected_frontal_area * 10.7639104 }} </gain>
             </pure_gain>
         </channel>
+
+        <channel name="cp_x">
+            <fcs_function name="fcs/cp_x">
+                <function>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for cp_x in cp_mach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ cp_x[0] }} {{ cp_x[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </function>
+            </fcs_function>
+            <pure_gain name="metrics/aero-rp-x-in">
+                <input>fcs/cp_x</input>
+                <gain>  39.37007874015748 </gain>
+            </pure_gain>
+        </channel>
         <channel name="fuel_remaining">
             <fcs_function name="fcs/fuel_remaining">
                 <function>
@@ -290,6 +309,22 @@
                     <value> {{ lift_coefficient_alpha }} </value>
                 </product>
             </function>
+            <function name="aero/coefficient/CNmach">
+                <description>Lift_due_to_Mach_number</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>aero/alpha-rad</property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for cnmach in cnmach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ cnmach[0] }} {{ cnmach[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </product>
+            </function>
         </axis>
 
         <axis name="SIDE">
@@ -300,6 +335,22 @@
                     <property> metrics/Sw-sqft </property>
                     <property>aero/beta-rad</property>
                     <value> {{ side_coefficient_beta }} </value>
+                </product>
+            </function>
+            <function name="aero/coefficient/CSmach">
+                <description>SIDE_due_to_Mach_number</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>aero/beta-rad</property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for csmach in csmach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ csmach[0] }} {{ csmach[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
                 </product>
             </function>
         </axis>

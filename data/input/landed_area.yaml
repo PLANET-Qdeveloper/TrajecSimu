@@ -3,7 +3,7 @@ launch:
   yaw:
     - 283.0  # ランチャ包囲角 包囲角- 磁気偏角
   pitch: 
-    - 82.0
+    - 80.0
   roll: 0.0
   latitude: 40.242865 # 緯度
   longitude: 140.010450 # 経度
@@ -12,23 +12,8 @@ launch:
   wind_ref_altitude: 2.0
   ground_wind_dir:
     - 13.0
-    - 58.0
-    - 103.0
-    - 148.0
-    - 193.0
-    - 238.0
-    - 283.0
-    - 328.0
   ground_wind_speed:
     - 0.0
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8.0
   wind_power_factor: 0.1666
   winds_table:
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
@@ -54,7 +39,8 @@ rocket:
   cg_y: 0.0
   cg_z: 0.0
 
-  cp_x: 1.379 # 空力中心: 設計担当に聞いて ノーズから
+  cp_x: 1.6285 # 空力中心: 設計担当に聞いて ノーズから
+  cp_mach_table: "data/input/tables/cp_mach.csv"
   cp_y: 0.0
   cp_z: 0.0
 
@@ -89,7 +75,7 @@ rocket:
   parachute_area: # パラシュート面積: 設計担当に聞いて
   terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
     - 0.0
-    - 20
+    - 25.0
 
   parachute_drag_coefficient: 1.2
 
@@ -99,7 +85,7 @@ rocket:
   thruster_z: 0.0
 
   # Aerodynamic coefficients
-  lift_coefficient_alpha: 9.283 # よう力傾斜
+  lift_coefficient_alpha: 8.551025057 # よう力傾斜
   side_coefficient_beta: 0.0 # 0
   roll_damping_coefficient: -0.0423 # ロール減衰係数
   pitch_damping_coefficient: -2.306 # ピッチ減衰係数
@@ -109,7 +95,9 @@ rocket:
   fuel_remaining_table: 
   thrust_table: "data/input/tables/thrust.csv"
   cd0_table: "data/input/tables/cd0.csv"
-  cdmach_table: "data/input/tables/cdmach.csv" 
+  cdmach_table: "data/input/tables/cdmach.csv"
+  cnmach_table: "data/input/tables/cnmach.csv"
+  csmach_table: "data/input/tables/csmach.csv"
 
   
 simulation:
@@ -122,7 +110,7 @@ simulation:
 
 misc:
   kml_group_by:
-    - ground_wind_speed
-  result_each:
     - terminal_velocity
+  result_each:
+    - yaw
   landing_range_script: noshiro_sea

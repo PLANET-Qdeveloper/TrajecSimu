@@ -61,7 +61,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--point_output",
         type=bool,
-        default=False,
+        default=True,
         help="Output points",
     )
     return parser.parse_args()
