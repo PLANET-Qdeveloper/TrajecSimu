@@ -178,12 +178,9 @@ class KMLGenerator:
                 (lon, lat) for lon, lat in zip(group_df["landed_longitude"], group_df["landed_latitude"], strict=False)
             ]
 
-            if len(set(points)) <= 3 and not point_output:
-                continue
-
             current_color = color_gradient[i] if color_gradient else (255, 0, 0)
 
-            if point_output:
+            if point_output and len(points) <= 3:
                 for point in points:
                     self.add_point(point, "", rgb=current_color)
             if len(points) > 3:
