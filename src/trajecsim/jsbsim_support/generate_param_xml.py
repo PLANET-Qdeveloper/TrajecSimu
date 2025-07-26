@@ -47,12 +47,15 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
         launch_param["pitch"] * math.pi / 180,
     )
     # 風テーブルの生成
-    simulation_param["winds_table"] = generate_wind_table(
-        launch_param["ground_wind_dir"],
-        launch_param["ground_wind_speed"],
-        launch_param["wind_ref_altitude"],
-        launch_param["wind_power_factor"],
-    )
+    if not launch_param.get("winds_table"):
+        simulation_param["winds_table"] = generate_wind_table(
+            launch_param["ground_wind_dir"],
+            launch_param["ground_wind_speed"],
+            launch_param["wind_ref_altitude"],
+            launch_param["wind_power_factor"],
+        )
+    else:
+        simulation_param["winds_table"] = launch_param["winds_table"]
 
     # パラシュートの面積を計算
     if rocket_param.get("parachute_area") is None:
