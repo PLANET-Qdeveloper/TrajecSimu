@@ -11,11 +11,11 @@ launch:
   launcher_length: 5.0 # ランチャ長さ
   wind_ref_altitude: 2.0
   ground_wind_dir:
-    - 13.0
+    - 20.0
   ground_wind_speed:
     - 0.0
   wind_power_factor: 0.1666
-  winds_table: data/input/tables/wind_table.csv
+  winds_table: 
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
 
 
