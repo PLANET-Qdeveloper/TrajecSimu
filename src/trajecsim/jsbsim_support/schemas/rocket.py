@@ -11,8 +11,6 @@ class PqRocketSchema(BaseModel):
     """ロケットのパラメータ"""
 
     projected_frontal_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    wing_span: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    wing_chord: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     # Inertia parameters
     inertia_xx: Annotated[list[float], BeforeValidator(convert_value_to_list)]
@@ -34,7 +32,6 @@ class PqRocketSchema(BaseModel):
     cp_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     diameter: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-
     # Tank parameters
     tank_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     tank_y: Annotated[list[float], BeforeValidator(convert_value_to_list)]
@@ -77,7 +74,6 @@ class PqRocketSchema(BaseModel):
     side_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     roll_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     pitch_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list)]
-    pitch_coefficient_alpha: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     yaw_damping_coefficient: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
     yaw_coefficient_beta: Annotated[list[float], BeforeValidator(convert_value_to_list_optional)] = []
@@ -99,7 +95,7 @@ class PqRocketSchema(BaseModel):
         if not self.side_coefficient_beta:
             self.side_coefficient_beta = self.lift_coefficient_alpha  # ロケットはピッチ、ヨー対称
         if not self.yaw_damping_coefficient:
-            self.yaw_damping_coefficient = self.roll_damping_coefficient
+            self.yaw_damping_coefficient = self.pitch_damping_coefficient
         if not self.yaw_coefficient_beta:
             self.yaw_coefficient_beta = self.side_coefficient_beta
         if not (self.parachute_area or self.terminal_velocity):

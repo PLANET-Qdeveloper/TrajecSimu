@@ -15,9 +15,9 @@
 
     <metrics>
         <wingarea  unit="M2">  {{ projected_frontal_area }} </wingarea>
-        <wingspan  unit="M" >   {{ wing_span }} </wingspan>
+        <wingspan  unit="M" >   {{ diameter }} </wingspan>
         <wing_incidence>         0.0 </wing_incidence>
-        <chord     unit="M" >    {{ wing_chord }} </chord>
+        <chord     unit="M" >    {{ diameter }} </chord>
         <htailarea unit="M2">   0 </htailarea>
         <htailarm  unit="M" >   0 </htailarm>
         <vtailarea unit="M2">   0 </vtailarea>
@@ -156,10 +156,7 @@
                     <max>1.</max>
                 </clipto>
             </fcs_function>
-            <pure_gain name="metrics/Sw-sqft">
-                <input>fcs/sw-fall</input>
-                <gain> {{ projected_frontal_area * 10.7639104 }} </gain>
-            </pure_gain>
+
         </channel>
 
         <channel name="cp_x">
@@ -240,9 +237,9 @@
             </function>
 
             <location unit="M">
-                <x>0</x>
-                <y>0</y>
-                <z>0</z>
+                <x> {{ cg_x }} </x>
+                <y> {{ cg_y }} </y>
+                <z> {{ cg_z }} </z>
             </location>
             <direction>
                 <x>-1</x>
@@ -334,7 +331,7 @@
                     <property>aero/qbar-psf</property>
                     <property> metrics/Sw-sqft </property>
                     <property>aero/beta-rad</property>
-                    <value> {{ side_coefficient_beta }} </value>
+                    <value> {{ side_coefficient_beta*-1 }} </value>
                 </product>
             </function>
             <function name="aero/coefficient/CSmach">
@@ -347,7 +344,7 @@
                         <independentVar>velocities/mach</independentVar>
                         <tableData>
                             {% for csmach in csmach_table|sort(attribute='0')|unique(attribute='0') -%}
-                            {{ csmach[0] }} {{ csmach[1] }}
+                            {{ csmach[0] }} {{ csmach[1] * -1 }}
                             {% endfor %}
                         </tableData>
                     </table>
@@ -360,7 +357,7 @@
                 <description>Roll_moment_due_to_roll_rate_(roll_damping)</description>
                 <product>
                     <property>aero/qbar-psf</property>
-                    <value> {{ projected_frontal_area * 10.7639104 }} </value>
+                    <property> metrics/Sw-sqft </property>
                     <value> {{ diameter }} </value>
                     <property>velocities/p-rad_sec</property>
                     <value> {{ roll_damping_coefficient }} </value>
@@ -368,46 +365,26 @@
             </function>
         </axis>
         <axis name="PITCH">
-            <function name="aero/coefficient/Cmalpha">
-                <description>Pitch_moment_due_to_alpha</description>
-                <product>
-                    <property>aero/qbar-psf</property>
-                    <property>metrics/Sw-sqft</property>
-                    <property>metrics/cbarw-ft</property>
-                    <property>aero/alpha-rad</property>
-                    <value> {{ pitch_coefficient_alpha }} </value>
-                </product>
-            </function>
             <function name="aero/coefficient/Cmq">
                 <description>Pitch_moment_due_to_pitch_rate</description>
                 <product>
                     <property>aero/qbar-psf</property>
                     <property>metrics/Sw-sqft</property>
-                    <property>metrics/cbarw-ft</property>
-                    <property>aero/ci2vel</property>
+                    <property> metrics/bw-ft </property>
+                    <property> aero/bi2vel </property>
                     <property>velocities/q-aero-rad_sec</property>
                     <value> {{ pitch_damping_coefficient }} </value>
                 </product>
             </function>
         </axis>
         <axis name="YAW">
-            <function name="aero/coefficient/Cnb">
-                <description>Yaw_moment_due_to_beta</description>
-                <product>
-                    <property>aero/qbar-psf</property>
-                    <property>metrics/Sw-sqft</property>
-                    <property>metrics/bw-ft</property>
-                    <property>aero/beta-rad</property>
-                    <value> {{ yaw_coefficient_beta }} </value>
-                </product>
-            </function>
             <function name="aero/coefficient/Cnr">
                 <description>Yaw_moment_due_to_yaw_rate</description>
                 <product>
                     <property>aero/qbar-psf</property>
                     <property>metrics/Sw-sqft</property>
-                    <property>metrics/bw-ft</property>
-                    <property>aero/bi2vel</property>
+                    <property> metrics/bw-ft </property>
+                    <property> aero/bi2vel </property>
                     <property>velocities/r-aero-rad_sec</property>
                     <value> {{ yaw_damping_coefficient }} </value>
                 </product>

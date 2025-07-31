@@ -31,6 +31,7 @@
     <event name="liftoff">
       <condition>simulation/sim-time-sec  ge  {{ liftoff_time }}</condition>
       <set name="forces/hold-down" value="0"/>
+      <set name="atmosphere/turb-type" value="0"/>
     </event>
 
     <!-- Burnout -->
@@ -104,8 +105,8 @@
     <property apply="convert-lbs-To-N" caption="Thrust">external_reactions/thrust/magnitude</property>
     <property apply="convert-fps-To-ms" caption="True Velocity">velocities/vtrue-fps</property>
     <property apply="convert-fps-To-m_s" caption="Ground Velocity">velocities/vg-fps</property>
-    <property apply="convert-rad-To-deg" caption="Pitch">attitude/phi-rad</property>
-    <property apply="convert-rad-To-deg" caption="Roll">attitude/theta-rad</property>
+    <property apply="convert-rad-To-deg" caption="Pitch">attitude/theta-rad</property>
+    <property apply="convert-rad-To-deg" caption="Roll">attitude/phi-rad</property>
     <property apply="convert-rad-To-deg" caption="Yaw">attitude/psi-rad</property>
     <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
     <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
