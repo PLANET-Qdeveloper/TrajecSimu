@@ -12,6 +12,9 @@ class PqRocketSchema(BaseModel):
 
     projected_frontal_area: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
+    wing_span: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    wing_chord: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+
     # Inertia parameters
     inertia_xx: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     inertia_yy: Annotated[list[float], BeforeValidator(convert_value_to_list)]

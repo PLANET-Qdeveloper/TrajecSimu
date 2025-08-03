@@ -49,8 +49,7 @@ def generate_wind_table(
     wind_speeds_s = ground_wind_speed * power_terms_s
 
     # Wind direction is assumed constant with altitude, equal to ground_wind_dir.
-    wind_directions_list = [float(ground_wind_dir)] * len(altitudes_m_list)
-
+    wind_directions_list = [float(360.0 - ground_wind_dir)] * len(altitudes_m_list)
     return [
         (altitude, speed, direction)
         for altitude, speed, direction in zip(altitudes_s, wind_speeds_s, wind_directions_list, strict=False)

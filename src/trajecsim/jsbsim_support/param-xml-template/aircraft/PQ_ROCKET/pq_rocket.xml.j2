@@ -15,9 +15,9 @@
 
     <metrics>
         <wingarea  unit="M2">  {{ projected_frontal_area }} </wingarea>
-        <wingspan  unit="M" >   {{ diameter }} </wingspan>
+        <wingspan  unit="M" >   {{ wing_span + diameter / 2 }} </wingspan>
         <wing_incidence>         0.0 </wing_incidence>
-        <chord     unit="M" >    {{ diameter }} </chord>
+        <chord     unit="M" >    {{ wing_chord }} </chord>
         <htailarea unit="M2">   0 </htailarea>
         <htailarm  unit="M" >   0 </htailarm>
         <vtailarea unit="M2">   0 </vtailarea>
@@ -357,8 +357,8 @@
                 <description>Roll_moment_due_to_roll_rate_(roll_damping)</description>
                 <product>
                     <property>aero/qbar-psf</property>
-                    <property> metrics/Sw-sqft </property>
-                    <value> {{ diameter }} </value>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
                     <property>velocities/p-rad_sec</property>
                     <value> {{ roll_damping_coefficient }} </value>
                 </product>
@@ -370,8 +370,8 @@
                 <product>
                     <property>aero/qbar-psf</property>
                     <property>metrics/Sw-sqft</property>
-                    <property> metrics/bw-ft </property>
-                    <property> aero/bi2vel </property>
+                    <property> metrics/cbarw-ft </property>
+                    <property> aero/ci2vel </property>
                     <property>velocities/q-aero-rad_sec</property>
                     <value> {{ pitch_damping_coefficient }} </value>
                 </product>
@@ -383,8 +383,8 @@
                 <product>
                     <property>aero/qbar-psf</property>
                     <property>metrics/Sw-sqft</property>
-                    <property> metrics/bw-ft </property>
-                    <property> aero/bi2vel </property>
+                    <property> metrics/cbarw-ft </property>
+                    <property> aero/ci2vel </property>
                     <property>velocities/r-aero-rad_sec</property>
                     <value> {{ yaw_damping_coefficient }} </value>
                 </product>

@@ -1,9 +1,9 @@
 launch:
   # Liftoff configuration
   yaw:
-    - 283.0  # ランチャ包囲角 包囲角- 磁気偏角
+    - 281.0  # ランチャ包囲角 包囲角- 磁気偏角
   pitch: 
-    - 80.0
+    - 82.0
   roll: 0.0
   latitude: 40.242865 # 緯度
   longitude: 140.010450 # 経度
@@ -23,7 +23,7 @@ rocket:
   # Rocket configuration
   projected_frontal_area: 0.0163 # 代表面積: 設計担当に聞いて
   wing_span: 0.14
-  wing_chord: 0.09 # 機体翼弦長: 設計担当に聞いて
+  wing_chord: 0.135 # 機体翼弦長: 設計担当に聞いて
 
   # Inertia parameters
   inertia_xx: 0.042  # 慣性モーメント
@@ -35,11 +35,11 @@ rocket:
 
   # Mass parameters
   dry_weight: 17.059 # 機体乾燥重量: 設計担当に聞いて
-  cg_x: 1.17 # 重心位置: 設計担当に聞いて ノーズから
+  cg_x: 1.097 # 重心位置: 設計担当に聞いて ノーズから
   cg_y: 0.0
   cg_z: 0.0
 
-  cp_x: 1.6285 # 空力中心: 設計担当に聞いて ノーズから
+  cp_x: 1.3645 # 空力中心: 設計担当に聞いて ノーズから
   cp_mach_table: "data/input/tables/cp_mach.csv"
   cp_y: 0.0
   cp_z: 0.0
@@ -48,7 +48,7 @@ rocket:
   height: 1.878
 
   # Tank parameters
-  tank_x: 0.866238 # 酸化剤タンク重心位置: 設計担当に聞いて ノーズから
+  tank_x: 1.018 # 酸化剤タンク重心位置: 設計担当に聞いて ノーズから
   tank_y: 0.0
   tank_z: 0.0
   tank_drain_x: 1.1
@@ -59,7 +59,7 @@ rocket:
   tank_density: 1.226 # 酸化剤タンク密度: 設計担当に聞いて
 
   # Fuel parameters
-  fuel_x: 0.953278 # 燃料重心位置: 設計担当に聞いて ノーズから
+  fuel_x: 1.562 # 燃料重心位置: 設計担当に聞いて ノーズから
   fuel_y: 0.0
   fuel_z: 0.0
   fuel_drain_x: 1.78 # 燃料排水口位置: 設計担当に聞いて ノーズから
@@ -88,8 +88,8 @@ rocket:
   # Aerodynamic coefficients
   lift_coefficient_alpha: 8.387848333 # よう力傾斜
   side_coefficient_beta: 8.387848333
-  roll_damping_coefficient: 0.0 # ロール減衰係数-0.0423
-  pitch_damping_coefficient: 0.0 # ピッチ減衰係数-2.306 
+  roll_damping_coefficient: -0.09 # ロール減衰係数
+  pitch_damping_coefficient: -2.524 # ピッチ減衰係数
   pitch_coefficient_alpha: 0.0 # ピッチ傾斜
 
   # Table paths
