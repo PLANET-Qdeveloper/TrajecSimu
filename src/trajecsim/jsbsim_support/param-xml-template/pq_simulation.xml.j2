@@ -51,6 +51,9 @@
           </sum>
         </function>
       </set>
+      {% if apogee_mode == 1 %}
+      <set name="simulation/terminate" value="1"/>
+      {% endif %}
     </event>
 
     <event name="Landed">
@@ -96,8 +99,8 @@
     <property caption="Latitude">position/lat-gc-deg</property>
     <property caption="Longitude">position/long-gc-deg</property>
     <property caption="Altitude">position/h-sl-meters</property>
-    <property caption="Angle of Attack">aero/alpha-rad</property>
-    <property caption="Angle of Sideslip">aero/beta-rad</property>
+    <property apply="convert-rad-To-deg" caption="Angle of Attack">aero/alpha-rad</property>
+    <property apply="convert-rad-To-deg" caption="Angle of Sideslip">aero/beta-rad</property>
     <property apply="convert-ft_sec2-To-m_sec2" caption="X-Acceleration">accelerations/udot-ft_sec2</property>
     <property apply="convert-ft_sec2-To-m_sec2" caption="Y-Acceleration">accelerations/vdot-ft_sec2</property>
     <property apply="convert-ft_sec2-To-m_sec2" caption="Z-Acceleration">accelerations/wdot-ft_sec2</property>
@@ -112,6 +115,10 @@
     <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
     <property apply="convert-fps-To-m_s" caption="Wind Speed">atmosphere/wind-mag-fps</property>
     <property caption="Mach">velocities/mach</property>
-
+    <!-- Debug  -->
+    <property caption="omega_x">velocities/p-rad_sec</property>
+    <property caption="omega_y">velocities/q-rad_sec</property>
+    <property caption="omega_z">velocities/r-rad_sec</property>
+    <property caption="Cmq">aero/coefficient/Cmq</property>
   </output>
 </runscript>

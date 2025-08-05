@@ -1,9 +1,9 @@
 launch:
   # Liftoff configuration
   yaw:
-    - 281.0  # ランチャ包囲角 包囲角- 磁気偏角
+    - 283.0  # ランチャ包囲角 包囲角- 磁気偏角
   pitch: 
-    - 82.0
+    - 80.0
   roll: 0.0
   latitude: 40.242865 # 緯度
   longitude: 140.010450 # 経度
@@ -11,9 +11,24 @@ launch:
   launcher_length: 5.0 # ランチャ長さ
   wind_ref_altitude: 2.0
   ground_wind_dir:
+    - 13.0
+    - 58.0
     - 103.0
+    - 148.0
+    - 193.0
+    - 238.0
+    - 283.0
+    - 328.0
+
   ground_wind_speed:
+    - 1.0
+    - 2.0
+    - 3.0
+    - 4.0
+    - 5.0
     - 6.0
+    - 7.0
+    - 8.0
   wind_power_factor: 0.16666
   winds_table: 
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
@@ -104,11 +119,11 @@ rocket:
 simulation:
   # Simulation configuration
   flight_duration: 4000.0
-  time_step: 0.001
+  time_step: 0.0001
   parachute_deploy_delay: 0.01
   notify_interval: 5.0
   output_rate: 10
-
+  apogee_mode: 0
 misc:
   kml_group_by:
     - ground_wind_speed

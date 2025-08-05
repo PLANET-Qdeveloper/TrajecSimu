@@ -1,4 +1,6 @@
 from geopy.distance import geodesic
+from shapely.geometry import Point, Polygon
+from shapely.ops import nearest_points
 
 from trajecsim.landing_range.landing_range import LandingRange
 
@@ -47,79 +49,37 @@ class NoshiroSea(LandingRange):
         if config is None:
             config = {}
         super().__init__(config)
-
-    def _point_in_polygon(self, latitude: float, longitude: float) -> bool:
-        """Check if a point is inside the polygon using ray casting algorithm."""
-        point = (latitude, longitude)
-        n = len(POLYGON_COORDINATES)
-        inside = False
-
-        p1_lat, p1_lon = POLYGON_COORDINATES[0]
-        for i in range(1, n + 1):
-            p2_lat, p2_lon = POLYGON_COORDINATES[i % n]
-            if point[1] > min(p1_lon, p2_lon):
-                if point[1] <= max(p1_lon, p2_lon):
-                    if point[0] <= max(p1_lat, p2_lat):
-                        if p1_lon != p2_lon:
-                            xinters = (point[1] - p1_lon) * (p2_lat - p1_lat) / (p2_lon - p1_lon) + p1_lat
-                        if p1_lat == p2_lat or point[0] <= xinters:
-                            inside = not inside
-            p1_lat, p1_lon = p2_lat, p2_lon
-
-        return inside
-
-    def _distance_to_polygon_boundary(self, latitude: float, longitude: float) -> float:
-        """Calculate the minimum distance from a point to the polygon boundary using geopy."""
-        point = (latitude, longitude)
-        min_distance = float("inf")
-
-        for i in range(len(POLYGON_COORDINATES)):
-            p1 = POLYGON_COORDINATES[i]
-            p2 = POLYGON_COORDINATES[(i + 1) % len(POLYGON_COORDINATES)]
-
-            # Calculate distance to line segment
-            distance = self._distance_to_line_segment(point, p1, p2)
-            min_distance = min(min_distance, distance)
-
-        return min_distance
-
-    def _distance_to_line_segment(
-        self, point: tuple[float, float], line_start: tuple[float, float], line_end: tuple[float, float]
-    ) -> float:
-        """Calculate the distance from a point to a line segment using geopy."""
-        # Calculate distances to endpoints
-        dist_to_start = geodesic(point, line_start).meters
-        dist_to_end = geodesic(point, line_end).meters
-
-        # Calculate the projection of the point onto the line
-        line_length = geodesic(line_start, line_end).meters
-        if line_length == 0:
-            return dist_to_start
-
-        # Use dot product to find the projection point
-        lat_diff = line_end[0] - line_start[0]
-        lon_diff = line_end[1] - line_start[1]
-        point_lat_diff = point[0] - line_start[0]
-        point_lon_diff = point[1] - line_start[1]
-
-        # Calculate the parameter t for the projection
-        t = (point_lat_diff * lat_diff + point_lon_diff * lon_diff) / (lat_diff * lat_diff + lon_diff * lon_diff)
-
-        if t < 0:
-            return dist_to_start
-        if t > 1:
-            return dist_to_end
-
-        # Calculate the projection point
-        proj_lat = line_start[0] + t * lat_diff
-        proj_lon = line_start[1] + t * lon_diff
-        projection_point = (proj_lat, proj_lon)
-
-        return geodesic(point, projection_point).meters
+        # ShapelyのPolygonは (経度, 緯度) の順で座標を保持
+        self.polygon = Polygon([(lon, lat) for lat, lon in POLYGON_COORDINATES])
+        # 内部の点から境界までの距離を計算するために、あらかじめ境界線オブジェクトを取得
+        self.boundary = self.polygon.boundary
 
     def landing_range(self, latitude: float, longitude: float) -> float:
-        """Calculate landing range value (positive inside polygon, negative outside)."""
-        is_inside = self._point_in_polygon(latitude, longitude)
-        distance_to_boundary = self._distance_to_polygon_boundary(latitude, longitude)
+        """
+        ポリゴンの境界までの距離を計算します。
+        点がポリゴンの内側にあれば正の値、外側にあれば負の値を返します。
+        """
+        point = Point(longitude, latitude)
 
-        return distance_to_boundary if is_inside else -distance_to_boundary
+        is_inside = self.polygon.contains(point)
+
+        if is_inside:
+            # 点が内側にある場合、境界線 (boundary) への距離を計算
+            target_geometry = self.boundary
+        else:
+            # 点が外側にある場合、ポリゴン (polygon) への距離を計算
+            # (これは実質的に境界線への距離と同じ)
+            target_geometry = self.polygon
+
+        # 対象ジオメトリ上の最近傍点を取得
+        # nearest_pointsは (ジオメトリ上の最近傍点, 元の点) のタプルを返す
+        nearest_p_on_geom = nearest_points(target_geometry, point)[0]
+
+        # 測地線距離をメートル単位で計算
+        distance = geodesic(
+            (latitude, longitude),  # 元の点の座標 (緯度, 経度)
+            (nearest_p_on_geom.y, nearest_p_on_geom.x),  # 最近傍点の座標 (緯度, 経度)
+        ).meters
+
+        # 内側なら正の距離、外側なら負の距離を返す
+        return distance if is_inside else -distance

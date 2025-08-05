@@ -22,6 +22,7 @@ from trajecsim.util.summarize import (
     calculate_aoa,
     delete_final_point,
     generate_final_points_dataframe,
+    generate_landing_range_table,
     get_extrema_analysis,
     summarize_output_info_df,
 )
@@ -55,7 +56,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--chart_output",
         type=bool,
-        default=True,
+        default=False,
         help="Output charts",
     )
     parser.add_argument(
@@ -244,7 +245,7 @@ def main(
                 grouped_by_group_key = group_df.groupby(group_keys)
 
                 kml_generator.generate_grouped_points_polygons(grouped_by_group_key, point_output)
-                final_points_df = generate_final_points_dataframe(grouped_by_group_key)
+                final_points_df = generate_final_points_dataframe(grouped_by_group_key, landing_range_script)
                 representation_df = grouped_by_group_key.first()
                 kmz_path = representation_df[("launch", "range_kmz")].iloc[0]
                 if not kmz_path.exists():
@@ -253,6 +254,15 @@ def main(
 
                 kml_output_path = result_output_dir / f"result_{kml_group_key}.kml"
                 kml_generator.save(kml_output_path)
+
+            logger.info("着地範囲テーブルを生成します")
+            landing_range_table = generate_landing_range_table(group_df, landing_range_script)
+            if not landing_range_table.empty:
+                landing_range_table.to_csv(
+                    result_output_dir / "landing_range_table.csv",
+                    float_format="%.6f",
+                    encoding="utf-8",
+                )
 
 
 if __name__ == "__main__":

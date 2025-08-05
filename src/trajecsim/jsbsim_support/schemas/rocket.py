@@ -35,6 +35,7 @@ class PqRocketSchema(BaseModel):
     cp_z: Annotated[list[float], BeforeValidator(convert_value_to_list)]
 
     diameter: Annotated[list[float], BeforeValidator(convert_value_to_list)]
+    height: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     # Tank parameters
     tank_x: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     tank_y: Annotated[list[float], BeforeValidator(convert_value_to_list)]

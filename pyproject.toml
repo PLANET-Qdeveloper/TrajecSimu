@@ -24,6 +24,7 @@ dependencies = [
     "fastkml>=1.1.0",
     "geopy>=2.4.1",
     "seaborn>=0.13.2",
+    "shapely>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -33,6 +34,7 @@ packages = [
 
 [dependency-groups]
 dev = [
+    "pytest>=8.4.1",
     "ruff>=0.11.6",
 ]
 

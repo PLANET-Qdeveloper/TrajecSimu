@@ -17,7 +17,7 @@
         <wingarea  unit="M2">  {{ projected_frontal_area }} </wingarea>
         <wingspan  unit="M" >   {{ wing_span + diameter / 2 }} </wingspan>
         <wing_incidence>         0.0 </wing_incidence>
-        <chord     unit="M" >    {{ wing_chord }} </chord>
+        <chord     unit="M" >    {{ height }} </chord>
         <htailarea unit="M2">   0 </htailarea>
         <htailarm  unit="M" >   0 </htailarm>
         <vtailarea unit="M2">   0 </vtailarea>
@@ -218,7 +218,7 @@
                 </function>
                 <clipto>
                     <min>0.</min>
-                    <max>100000000.</max>
+                    <max>10000000000.</max>
                 </clipto>
                 <output>external_reactions/thrust/magnitude</output>
             </fcs_function>
@@ -250,9 +250,9 @@
 
         <force name="thrust" frame="BODY">
             <location unit="M">
-                <x> {{ thruster_x }} </x>
-                <y> {{ thruster_y }} </y>
-                <z> {{ thruster_z }} </z>
+                <x> {{ thruster_x - cg_x }} </x>
+                <y> {{ thruster_y - cg_y }} </y>
+                <z> {{ thruster_z - cg_z }} </z>
             </location>
             <direction>
                 <x>1</x>
@@ -273,7 +273,7 @@
                         <independentVar>aero/alpha-rad</independentVar>
                         <tableData>
                             {% for cd0 in cd0_table|sort(attribute='0')|unique(attribute='0') -%}
-                            {{ cd0[0] * 0.0174533 }} {{ cd0[1] }}
+                            {{ cd0[0]}} {{ cd0[1] }}
                             {% endfor %}
                         </tableData>
                     </table>

@@ -332,9 +332,7 @@ def summarize_output_info_df(output_info_df: pd.Series, output_dir: Path) -> pd.
     return pd.Series(summary_row)
 
 
-def generate_final_points_dataframe(
-    grouped_df: pd.DataFrame,
-) -> pd.DataFrame:
+def generate_final_points_dataframe(grouped_df: pd.DataFrame, landing_range_script: str) -> pd.DataFrame:
     """グループごとの最終点データフレームを生成する
 
     Args:
@@ -344,6 +342,10 @@ def generate_final_points_dataframe(
         pd.DataFrame: 最終点のデータフレーム
     """
     final_points_data = []
+    landing_range_class = LAUNCH_SITES.get(landing_range_script)
+    if landing_range_class is None:
+        return pd.DataFrame({"landing_range": [0]})
+    landing_range_obj = landing_range_class()
 
     for i, (group_key, group_df) in enumerate(grouped_df):
         # 各グループの最終点データを取得
@@ -352,7 +354,61 @@ def generate_final_points_dataframe(
                 "group_key": group_key,
                 "landed_longitude": row["landed_longitude"],
                 "landed_latitude": row["landed_latitude"],
+                "landing_range": landing_range_obj.landing_range(row["landed_latitude"], row["landed_longitude"]),
             }
             final_points_data.append(final_point_data)
 
     return pd.DataFrame(final_points_data)
+
+
+def generate_landing_range_table(simulation_df: pd.DataFrame, landing_range_script: str) -> pd.DataFrame:
+    """風速と風向別の着地範囲テーブルを生成する
+
+    Args:
+        simulation_df: シミュレーション結果のDataFrame
+        landing_range_script: 着地範囲計算スクリプト名
+
+    Returns:
+        pd.DataFrame: 風速を行、風向を列とした着地範囲テーブル
+    """
+    landing_range_class = LAUNCH_SITES.get(landing_range_script)
+    if landing_range_class is None:
+        return pd.DataFrame()
+    landing_range_obj = landing_range_class()
+
+    ground_wind_speed_cols = [
+        col for col in simulation_df.columns if isinstance(col, tuple) and "ground_wind_speed" in col[1]
+    ]
+    ground_wind_dir_cols = [
+        col for col in simulation_df.columns if isinstance(col, tuple) and "ground_wind_dir" in col[1]
+    ]
+
+    if not ground_wind_speed_cols or not ground_wind_dir_cols:
+        return pd.DataFrame()
+
+    table_data = []
+
+    for _, row in simulation_df.iterrows():
+        wind_speed = row[ground_wind_speed_cols[0]]
+        wind_dir = row[ground_wind_dir_cols[0]]
+        landed_lat = row["landed_latitude"]
+        landed_lon = row["landed_longitude"]
+
+        landing_range = landing_range_obj.landing_range(landed_lat, landed_lon)
+
+        table_data.append(
+            {
+                "wind_speed": wind_speed,
+                "wind_dir": wind_dir,
+                "landing_range": landing_range,
+            }
+        )
+
+    table_df = pd.DataFrame(table_data)
+
+    return table_df.pivot_table(
+        index="wind_speed",
+        columns="wind_dir",
+        values="landing_range",
+        aggfunc="mean",
+    )

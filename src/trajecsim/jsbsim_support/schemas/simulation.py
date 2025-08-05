@@ -15,3 +15,4 @@ class SimulationSchema(BaseModel):
     parachute_deploy_delay: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     notify_interval: Annotated[list[float], BeforeValidator(convert_value_to_list)]
     output_rate: Annotated[list[int], BeforeValidator(convert_value_to_list)]
+    apogee_mode: Annotated[list[int], BeforeValidator(convert_value_to_list)]
