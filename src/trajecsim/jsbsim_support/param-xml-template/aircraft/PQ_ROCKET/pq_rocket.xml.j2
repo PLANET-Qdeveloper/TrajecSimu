@@ -162,6 +162,9 @@
         <channel name="cp_x">
             <fcs_function name="fcs/cp_x">
                 <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
                     <table>
                         <independentVar>velocities/mach</independentVar>
                         <tableData>
@@ -170,6 +173,15 @@
                             {% endfor %}
                         </tableData>
                     </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ cg_x }} </value>
+                    </product>
+                    </sum>
                 </function>
             </fcs_function>
             <pure_gain name="metrics/aero-rp-x-in">
@@ -303,6 +315,7 @@
                     <property>aero/qbar-psf</property>
                     <property> metrics/Sw-sqft </property>
                     <property>aero/alpha-rad</property>
+                    <property> simulation/launch_cleared </property>
                     <value> {{ lift_coefficient_alpha }} </value>
                 </product>
             </function>
@@ -331,6 +344,7 @@
                     <property>aero/qbar-psf</property>
                     <property> metrics/Sw-sqft </property>
                     <property>aero/beta-rad</property>
+                    <property> simulation/launch_cleared </property>
                     <value> {{ side_coefficient_beta*-1 }} </value>
                 </product>
             </function>

@@ -3,7 +3,7 @@ launch:
   yaw:
     - 283.0  # ランチャ方位角 292.34 - 磁気偏角 9.34
   pitch:
-    - 81.0
+    - 80.0
   roll: 0.0
   latitude: 40.242865 # 緯度
   longitude: 140.01045 # 経度
@@ -19,7 +19,6 @@ launch:
     - 238.0
     - 283.0
     - 328.0
-
 
   ground_wind_speed:
     - 1.0
@@ -120,7 +119,7 @@ rocket:
 simulation:
   # Simulation configuration
   flight_duration: 4000.0
-  time_step: 0.0001
+  time_step: 0.00033
   parachute_deploy_delay: 0.01
   notify_interval: 5.0
   output_rate: 10
