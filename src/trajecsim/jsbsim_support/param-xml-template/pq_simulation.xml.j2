@@ -59,21 +59,21 @@
     </event>
 
     <event name="Landed">
-      <condition>position/h-agl-ft le 0.1</condition>
+      <condition>position/h-sl-ft le 0.1</condition>
       <set name="simulation/terminate" value="1"/>
     </event>
 
     <event name="Winds aloft" continuous="true">
-      <condition>position/h-agl-ft gt {{ launcher_height * 3.280840 }}</condition>
+      <condition>position/h-sl-meters gt {{ launcher_height }}</condition>
       <set name="atmosphere/psiw-rad">
       <function>
       <sum>
       <property>simulation/wind_direction_parachute_deploy</property>
       <table>
-      <independentVar lookup="row"> position/h-agl-ft </independentVar>
+      <independentVar lookup="row"> position/h-sl-meters </independentVar>
       <tableData>
         {% for wind in winds_table|sort(attribute='0')|unique(attribute='0') -%}
-        {{ wind[0] *3.280840 }} {{ wind[2]*0.0174533}}
+        {{ wind[0] }} {{ wind[2]*0.0174533}}
         {% endfor %}
       </tableData>
       </table>
@@ -83,10 +83,10 @@
       <set name="atmosphere/wind-mag-fps">
       <function>
       <table>
-      <independentVar lookup="row"> position/h-agl-ft </independentVar>
+      <independentVar lookup="row"> position/h-sl-meters </independentVar>
       <tableData>
         {% for wind in winds_table|sort(attribute='0')|unique(attribute='0') -%}
-        {{ wind[0]  *3.280840 }} {{ wind[1] *3.280840}}
+        {{ wind[0]  }} {{ wind[1] *3.280840}}
         {% endfor %}
       </tableData>
       </table>
@@ -115,6 +115,7 @@
     <property apply="convert-rad-To-deg" caption="Roll">attitude/phi-rad</property>
     <property apply="convert-rad-To-deg" caption="Yaw">attitude/psi-rad</property>
     <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
+    <property apply="convert-ft-To-m" caption="cp">metrics/aero-rp-x-in</property>
     <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
     <property apply="convert-fps-To-m_s" caption="Wind Speed">atmosphere/wind-mag-fps</property>
     <property caption="Mach">velocities/mach</property>
