@@ -9,12 +9,25 @@ launch:
   longitude: 140.01045 # 経度
   elevation: 5.3 # ランチャ標高
   launcher_length: 5.0 # ランチャ長さ
-  wind_ref_altitude: 2.0
+  wind_ref_altitude: 0.1
   ground_wind_dir:
     - 13.0
-
+    - 58.0
+    - 103.0
+    - 148.0
+    - 193.0
+    - 238.0
+    - 283.0
+    - 328.0
   ground_wind_speed:
-    - 0.0
+    - 1.0
+    - 2.0
+    - 3.0
+    - 4.0
+    - 5.0
+    - 6.0
+    - 7.0
+    - 8.0
   wind_power_factor: 0.16666  # べき指数 1/6
   winds_table: 
   range_kmz: data/input/21stNSE保安域案_海射場.kmz
@@ -105,7 +118,7 @@ rocket:
 simulation:
   # Simulation configuration
   flight_duration: 4000.0
-  time_step: 0.00033
+  time_step: 0.0083
   parachute_deploy_delay: 0.01
   notify_interval: 5.0
   output_rate: 10
