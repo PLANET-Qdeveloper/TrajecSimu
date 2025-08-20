@@ -9,7 +9,7 @@ launch:
   longitude: 140.01045 # 経度
   elevation: 5.3 # ランチャ標高
   launcher_length: 5.0 # ランチャ長さ
-  wind_ref_altitude: 0.1
+  wind_ref_altitude: 2.0
   ground_wind_dir:
     - 13.0
     - 58.0
@@ -48,7 +48,7 @@ rocket:
   inertia_yz: 0.0
 
   # Mass parameters
-  dry_weight: 17.07 # 機体乾燥重量
+  dry_weight: 16.99 # 機体乾燥重量
   cg_x: 1.144 # 重心位置: ノーズから (1889-778)mm = 1111mm
   cg_y: 0.0
   cg_z: 0.0
@@ -118,7 +118,7 @@ rocket:
 simulation:
   # Simulation configuration
   flight_duration: 4000.0
-  time_step: 0.0083
+  time_step: 0.001
   parachute_deploy_delay: 0.01
   notify_interval: 5.0
   output_rate: 10
