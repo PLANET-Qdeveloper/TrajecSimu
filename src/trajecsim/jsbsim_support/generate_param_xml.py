@@ -55,7 +55,12 @@ def _process_parameter_combination(args: tuple[int, pd.Series, dict[str, str], P
             launch_param["wind_power_factor"],
         )
     else:
-        simulation_param["winds_table"] = launch_param["winds_table"]
+        # Apply 180-degree rotation to wind direction like in wind_table.py
+        rotated_winds_table = []
+        for altitude, speed, direction in launch_param["winds_table"]:
+            rotated_direction = direction - 180 if direction > 180 else direction + 180
+            rotated_winds_table.append((altitude, speed, rotated_direction))
+        simulation_param["winds_table"] = rotated_winds_table
 
     # パラシュートの面積を計算
     if rocket_param.get("parachute_area") is None:
