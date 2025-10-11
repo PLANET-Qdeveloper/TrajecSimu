@@ -38,13 +38,13 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config_file_path",
         type=str,
-        default="data/input/landed_area.yaml",
+        default="config/input/landed_area.yaml",
         help="Path to the configuration file",
     )
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="data/result",
+        default="config/result",
         help="Output directory",
     )
     parser.add_argument(

@@ -82,15 +82,10 @@
                 <y> {{ tank_y }} </y>
                 <z> {{ tank_z }} </z>
             </location>
-            <drain_location unit="M">
-                <x> {{ tank_drain_x }} </x>
-                <y> {{ tank_drain_y }} </y>
-                <z> {{ tank_drain_z }} </z>
-            </drain_location>
-            <radius unit="M"> {{ tank_radius }} </radius>
-            <capacity unit="KG"> {{ tank_capacity }} </capacity>
+            <radius unit="M"> {{ diameter }} </radius>
+            <inertia_factor> 0.125 </inertia_factor>
+            <capacity unit="KG"> {{ tank_contents }} </capacity>
             <contents unit="KG"> {{ tank_contents }} </contents>
-            <density unit="KG/L"> {{ tank_density }} </density>
         </tank>
         <tank type="FUEL" number="1">
             <location unit="M">
@@ -98,68 +93,48 @@
                 <y> {{ fuel_y }} </y>
                 <z> {{ fuel_z }} </z>
             </location>
-            <drain_location unit="M">
-                <x> {{ fuel_drain_x }} </x>
-                <y> {{ fuel_drain_y }} </y>
-                <z> {{ fuel_drain_z }} </z>
-            </drain_location>
             <radius unit="M"> {{ fuel_radius }} </radius>
-            <capacity unit="KG"> {{ fuel_capacity }} </capacity>
+            <capacity unit="KG"> {{ fuel_contents }} </capacity>
             <contents unit="KG"> {{ fuel_contents }} </contents>
-            <density unit="KG/L"> {{ fuel_density }} </density>
             <grain_config type="CYLINDRICAL">
-                <length unit="M"> {{ fuel_length }} </length>
+                <length unit="M"> {{ fuel_radius }} </length>
             </grain_config>
         </tank>
     </propulsion>
     
     <flight_control name="PQ_ROCKET_CONTROL">
         <channel name="chute">
-            <fcs_function name="fcs/parachute_reef_pos_norm">
-                <function>
-                    <product>
-                        <value> {{ 1 / (parachute_full_deploy_time + 0.00000001) }} </value>
-                        <difference>
-                            <property>simulation/sim-time-sec</property>
-                            <property>simulation/parachute_deploy_time</property>
-                        </difference>
-                    </product>
-                    
-                </function>
-                <clipto>
-                    <min>0.</min>
-                    <max>1.</max>
-                </clipto>
-            </fcs_function>
-            <pure_gain name="metrics/Schute-sqft">
-                <input>fcs/parachute_reef_pos_norm</input>
-                <gain> {{ parachute_area * 10.7639104}} </gain> <!-- Area of braking chute -->
-            </pure_gain>
-        </channel>
-
-        <channel name="sw-fall">
-            <fcs_function name="fcs/sw-fall">
+            <fcs_function name="fcs/parachute-timer">
                 <function>
                     <difference>
-                        <value>1</value>
-                        <product>
-                            <value> {{ 1 / (parachute_full_deploy_time + 0.00000001) }} </value>
-                            <difference>
-                                <property>simulation/sim-time-sec</property>
-                                <property>simulation/parachute_deploy_time</property>
-                            </difference>
-                        </product>
+                        <property>simulation/sim-time-sec</property>
+                        <property>simulation/parachute_deploy_time</property>
                     </difference>
                 </function>
                 <clipto>
                     <min>0.</min>
-                    <max>1.</max>
+                    <max>{{ parachute_timer_max }}</max>
                 </clipto>
             </fcs_function>
-
+            <fcs_function name="fsc/Schute-sqft">
+                <function>
+                    <table>
+                        <independentVar>fcs/parachute-timer</independentVar>
+                        <tableData>
+                            {% for parachute-area in parachute-area|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ parachute-area[0] }} {{ parachute-area[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </function>
+            </fcs_function>
+            <pure_gain name="metrics/Schute-sqft">
+                <input>fcs/Schute-sqft</input>
+                <gain> {{ UNIT_CONVERSION.sqm_sqft }} </gain>
+            </pure_gain>
         </channel>
 
-        <channel name="cp_x">
+        <channel name="cp">
             <fcs_function name="fcs/cp_x">
                 <function>
                     <sum>
@@ -184,9 +159,65 @@
                     </sum>
                 </function>
             </fcs_function>
+            <fcs_function name="fcs/cp_y">
+                <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for cp_y in cp_mach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ cp_y[0] }} {{ cp_y[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ cg_y }} </value>
+                    </product>
+                    </sum>
+                </function>
+            </fcs_function>
+            <fcs_function name="fcs/cp_z">
+                <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for cp_z in cp_mach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ cp_z[0] }} {{ cp_z[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ cg_z }} </value>
+                    </product>
+                    </sum>
+                </function>
+            </fcs_function>
             <pure_gain name="metrics/aero-rp-x-in">
                 <input>fcs/cp_x</input>
-                <gain>  39.37007874015748 </gain>
+                <gain>  UNIT_CONVERSION.m_in </gain>
+            </pure_gain>
+            <pure_gain name="metrics/aero-rp-y-in">
+                <input>fcs/cp_y</input>
+                <gain>  UNIT_CONVERSION.m_in </gain>
+            </pure_gain>
+            <pure_gain name="metrics/aero-rp-z-in">
+                <input>fcs/cp_z</input>
+                <gain>  UNIT_CONVERSION.m_in </gain>
             </pure_gain>
         </channel>
         <channel name="fuel_remaining">
@@ -208,11 +239,11 @@
             </fcs_function>
             <pure_gain name="propulsion/tank[0]/contents-lbs">
                 <input>fcs/fuel_remaining</input>
-                <gain> {{ tank_contents * 2.20462 }} </gain>
+                <gain> {{ tank_contents * UNIT_CONVERSION.kg_lbs }} </gain>
             </pure_gain>
             <pure_gain name="propulsion/tank[1]/contents-lbs">
                 <input>fcs/fuel_remaining</input>
-                <gain> {{ (fuel_contents - fuel_after_burn) * 2.20462 }} </gain>
+                <gain> {{ (fuel_contents - fuel_after_burn) * UNIT_CONVERSION.kg_lbs }} </gain>
             </pure_gain>
         </channel>
 
@@ -282,25 +313,11 @@
                     <property>aero/qbar-psf</property>
                     <property> metrics/Sw-sqft </property>
                     <table>
-                        <independentVar>aero/alpha-rad</independentVar>
+                        <independentVar lookup="row"> velocities/mach </independentVar>
+                        <independentVar lookup="column"> aero/alpha-rad </independentVar>
                         <tableData>
                             {% for cd0 in cd0_table|sort(attribute='0')|unique(attribute='0') -%}
-                            {{ cd0[0]}} {{ cd0[1] }}
-                            {% endfor %}
-                        </tableData>
-                    </table>
-                </product>
-            </function>
-            <function name="aero/coefficient/CDmach">
-                <description>Drag_due_to_Mach_number</description>
-                <product>
-                    <property>aero/qbar-psf</property>
-                    <property>metrics/Sw-sqft</property>
-                    <table>
-                        <independentVar>velocities/mach</independentVar>
-                        <tableData>
-                            {% for cdmach in cdmach_table|sort(attribute='0')|unique(attribute='0') -%}
-                            {{ cdmach[0] }} {{ cdmach[1] }}
+                            {{ cd0|join(' ')}}
                             {% endfor %}
                         </tableData>
                     </table>
@@ -314,16 +331,6 @@
                 <product>
                     <property>aero/qbar-psf</property>
                     <property> metrics/Sw-sqft </property>
-                    <property>aero/alpha-rad</property>
-                    <property> simulation/launch_cleared </property>
-                    <value> {{ lift_coefficient_alpha }} </value>
-                </product>
-            </function>
-            <function name="aero/coefficient/CNmach">
-                <description>Lift_due_to_Mach_number</description>
-                <product>
-                    <property>aero/qbar-psf</property>
-                    <property>metrics/Sw-sqft</property>
                     <property>aero/alpha-rad</property>
                     <property> simulation/launch_cleared </property>
                     <table>
@@ -346,7 +353,15 @@
                     <property> metrics/Sw-sqft </property>
                     <property>aero/beta-rad</property>
                     <property> simulation/launch_cleared </property>
-                    <value> {{ side_coefficient_beta*-1 }} </value>
+                    <value> -1 </value>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {% for csmach in csmach_table|sort(attribute='0')|unique(attribute='0') -%}
+                            {{ csmach[0] }} {{ csmach[1] }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
                 </product>
             </function>
             <function name="aero/coefficient/CSmach">

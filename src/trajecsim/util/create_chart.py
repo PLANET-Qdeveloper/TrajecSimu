@@ -63,6 +63,6 @@ def create_time_series_plots(
 
 if __name__ == "__main__":
     # Example usage
-    csv_path = "data/result/raw_result/rocket_terminal_velocity=0.0__.csv"
-    output_dir = "data/result/plots"
+    csv_path = "config/result/raw_result/rocket_terminal_velocity=0.0__.csv"
+    output_dir = "config/result/plots"
     create_time_series_plots(csv_path, output_dir)
