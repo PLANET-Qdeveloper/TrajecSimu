@@ -1,0 +1,3 @@
+[general]
+# Directory where Askama will look for templates
+dirs = ["src/trajecsim/jsbsim_support/param-xml-template"]

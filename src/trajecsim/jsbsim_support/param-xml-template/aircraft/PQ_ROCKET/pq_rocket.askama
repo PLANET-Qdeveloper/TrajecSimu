@@ -1,0 +1,436 @@
+<?xml version="1.0" ?>
+<fdm_config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PQ_ROCKET" version="2.0" xsi:noNamespaceSchemaLocation="http://jsbsim.sourceforge.net/JSBSim.xsd" release="ALPHA">
+
+    <fileheader>
+        <author> PLANET-Q </author>
+        <author> K.Gentaro </author>
+        <filecreationdate> 2025-05-02 </filecreationdate>
+        <version>$Revision: 1.00 $</version>
+        <description> Models a hybrid rocket. </description>
+        <note>
+           Automatically generated file. Hybrid rocket model.
+           This is a simple model of a hybrid rocket.
+        </note>
+    </fileheader>
+
+    <metrics>
+        <wingarea  unit="M2">  {{ projected_frontal_area }} </wingarea>
+        <wingspan  unit="M" >   {{ wingspan }} </wingspan>
+        <wing_incidence>         0.0 </wing_incidence>
+        <chord     unit="M" >    {{ body_length }} </chord>
+        <htailarea unit="M2">   0 </htailarea>
+        <htailarm  unit="M" >   0 </htailarm>
+        <vtailarea unit="M2">   0 </vtailarea>
+        <vtailarm  unit="M" >   0 </vtailarm>
+        <location name="AERORP" unit="M">
+            <x> {{ center_of_pressure_x }} </x>
+            <y> {{ center_of_pressure_y }} </y>
+            <z> {{ center_of_pressure_z }} </z>
+        </location>
+        <location name="EYEPOINT" unit="M">
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </location>
+        <location name="VRP" unit="M">
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </location>
+    </metrics>
+
+
+     <mass_balance>
+        <documentation>
+            The Center of Gravity location, empty weight, in aircraft's own
+            structural coord system.
+        </documentation>
+        <ixx unit="KG*M2"> {{ moment_of_inertia_xx }} </ixx>
+        <iyy unit="KG*M2"> {{ moment_of_inertia_yy }} </iyy>
+        <izz unit="KG*M2"> {{ moment_of_inertia_zz }} </izz>
+        <ixy unit="KG*M2"> {{ moment_of_inertia_xy }} </ixy>
+        <ixz unit="KG*M2"> {{ moment_of_inertia_xz }} </ixz>
+        <iyz unit="KG*M2"> {{ moment_of_inertia_yz }} </iyz>
+        <emptywt unit="KG"> {{ empty_weight }} </emptywt>
+        <location name="CG" unit="M">
+            <x> {{ center_of_gravity_x }} </x>
+            <y> {{ center_of_gravity_y }} </y>
+            <z> {{ center_of_gravity_z }} </z>
+        </location>
+    </mass_balance>
+
+    <ground_reactions>
+        <contact type="STRUCTURE" name="Default">
+          <location unit="IN">
+           <x> 0.0 </x>
+           <y> 0.0 </y>
+           <z> 0.0 </z>
+          </location>
+          <static_friction>  1.00 </static_friction>
+          <dynamic_friction> 1.00 </dynamic_friction>
+          <spring_coeff unit="LBS/FT">      10.00 </spring_coeff>
+          <damping_coeff unit="LBS/FT/SEC"> 10.00 </damping_coeff>
+        </contact>
+    </ground_reactions>
+
+
+
+    <propulsion>
+        <tank type="FUEL" number="0">
+            <location unit="M">
+                <x> {{ oxidizer_tank_position_x }} </x>
+                <y> {{ oxidizer_tank_position_y }} </y>
+                <z> {{ oxidizer_tank_position_z }} </z>
+            </location>
+            <radius unit="M"> {{ body_diameter }} </radius>
+            <inertia_factor> 0.125 </inertia_factor>
+            <capacity unit="KG"> {{ oxidizer_mass }} </capacity>
+            <contents unit="KG"> {{ oxidizer_mass }} </contents>
+        </tank>
+        <tank type="FUEL" number="1">
+            <location unit="M">
+                <x> {{ fuel_tank_position_x }} </x>
+                <y> {{ fuel_tank_position_y }} </y>
+                <z> {{ fuel_tank_position_z }} </z>
+            </location>
+            <radius unit="M"> {{ fuel_grain_radius }} </radius>
+            <capacity unit="KG"> {{ fuel_mass }} </capacity>
+            <contents unit="KG"> {{ fuel_mass }} </contents>
+            <grain_config type="CYLINDRICAL">
+                <length unit="M"> {{ fuel_grain_radius }} </length>
+            </grain_config>
+        </tank>
+    </propulsion>
+
+    <flight_control name="PQ_ROCKET_CONTROL">
+        <channel name="chute">
+            <fcs_function name="fcs/parachute-timer">
+                <function>
+                    <difference>
+                        <property>simulation/sim-time-sec</property>
+                        <property>simulation/parachute_deploy_time</property>
+                    </difference>
+                </function>
+                <clipto>
+                    <min>0.</min>
+                    <max>{{ parachute_deployment_duration }}</max>
+                </clipto>
+            </fcs_function>
+            <fcs_function name="fsc/Schute-sqft">
+                <function>
+                    <table>
+                        <independentVar>fcs/parachute-timer</independentVar>
+                        <tableData>
+                            {# parachute_area_schedule: Vec<(time_s, area_sqft)> #}
+                            {% for entry in parachute_area_schedule -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </function>
+            </fcs_function>
+            <pure_gain name="metrics/Schute-sqft">
+                <input>fcs/Schute-sqft</input>
+                <gain>1.0</gain>
+            </pure_gain>
+        </channel>
+
+        <channel name="cp">
+            <fcs_function name="fcs/cp_x">
+                <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# center_of_pressure_mach_table: Vec<(mach, position_m)> #}
+                            {% for entry in center_of_pressure_mach_table -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ center_of_gravity_x }} </value>
+                    </product>
+                    </sum>
+                </function>
+            </fcs_function>
+            <fcs_function name="fcs/cp_y">
+                <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# Using same table for y-axis (typically constant) #}
+                            {% for entry in center_of_pressure_mach_table -%}
+                            {{ entry.0 }} {{ center_of_pressure_y }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ center_of_gravity_y }} </value>
+                    </product>
+                    </sum>
+                </function>
+            </fcs_function>
+            <fcs_function name="fcs/cp_z">
+                <function>
+                    <sum>
+                    <product>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# Using same table for z-axis (typically constant) #}
+                            {% for entry in center_of_pressure_mach_table -%}
+                            {{ entry.0 }} {{ center_of_pressure_z }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                    </product>
+                    <product>
+                        <difference>
+                            <value> 1 </value>
+                            <property> simulation/launch_cleared </property>
+                        </difference>
+                        <value> {{ center_of_gravity_z }} </value>
+                    </product>
+                    </sum>
+                </function>
+            </fcs_function>
+            <pure_gain name="metrics/aero-rp-x-in">
+                <input>fcs/cp_x</input>
+                <gain>39.3701</gain>
+            </pure_gain>
+            <pure_gain name="metrics/aero-rp-y-in">
+                <input>fcs/cp_y</input>
+                <gain>39.3701</gain>
+            </pure_gain>
+            <pure_gain name="metrics/aero-rp-z-in">
+                <input>fcs/cp_z</input>
+                <gain>39.3701</gain>
+            </pure_gain>
+        </channel>
+        <channel name="fuel_remaining">
+            <fcs_function name="fcs/fuel_remaining">
+                <function>
+                    <table>
+                        <independentVar>simulation/sim-time-sec</independentVar>
+                        <tableData>
+                            {# fuel_mass_remaining_schedule: Vec<(time_s, fraction)> #}
+                            {% for entry in fuel_mass_remaining_schedule -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </function>
+                <clipto>
+                    <min>0.</min>
+                    <max>1.</max>
+                </clipto>
+            </fcs_function>
+            <pure_gain name="propulsion/tank[0]/contents-lbs">
+                <input>fcs/fuel_remaining</input>
+                <gain>{{ oxidizer_mass_lbs }}</gain>
+            </pure_gain>
+            <pure_gain name="propulsion/tank[1]/contents-lbs">
+                <input>fcs/fuel_remaining</input>
+                <gain>{{ fuel_consumed_lbs }}</gain>
+            </pure_gain>
+        </channel>
+
+        <channel name="thrust">
+            <fcs_function name="fcs/thrust">
+                <function>
+                    <table>
+                        <independentVar>simulation/sim-time-sec</independentVar>
+                        <tableData>
+                            {# thrust_curve: Vec<(time_s, thrust_lbf)> - already converted #}
+                            {% for entry in thrust_curve -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </function>
+                <clipto>
+                    <min>0.</min>
+                    <max>10000000000.</max>
+                </clipto>
+                <output>external_reactions/thrust/magnitude</output>
+            </fcs_function>
+        </channel>
+    </flight_control>
+
+    <external_reactions>
+        <property>fcs/parachute_reef_pos_norm</property>
+        <force name="parachute" frame="WIND">
+            <function>
+                <product>
+                    <property> aero/qbar-psf </property>
+                    <property> metrics/Schute-sqft </property>
+                    <value> {{ parachute_drag_coefficient }} </value>
+                </product>
+            </function>
+
+            <location unit="M">
+                <x> {{ center_of_gravity_x }} </x>
+                <y> {{ center_of_gravity_y }} </y>
+                <z> {{ center_of_gravity_z }} </z>
+            </location>
+            <direction>
+                <x>-1</x>
+                <y>0</y>
+                <z>0</z>
+            </direction>
+        </force>
+
+        <force name="thrust" frame="BODY">
+            <location unit="M">
+                <x> {{ thruster_offset_x }} </x>
+                <y> {{ thruster_offset_y }} </y>
+                <z> {{ thruster_offset_z }} </z>
+            </location>
+            <direction>
+                <x>1</x>
+                <y>0</y>
+                <z>0</z>
+            </direction>
+        </force>
+    </external_reactions>
+
+    <aerodynamics>
+        <axis name="DRAG">
+            <function name="aero/coefficient/CD0">
+                <description>Axial_at_zero_lift</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property> metrics/Sw-sqft </property>
+                    <table>
+                        <independentVar lookup="row"> velocities/mach </independentVar>
+                        <independentVar lookup="column"> aero/alpha-rad </independentVar>
+                        <tableData>
+                            {# drag_table_rows: Vec<String> - pre-formatted #}
+                            {% for row in drag_table_rows -%}
+                            {{ row }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </product>
+            </function>
+        </axis>
+
+        <axis name="LIFT">
+            <function name="aero/coefficient/CNalpha">
+                <description>Lift_force_due_to_alpha</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property> metrics/Sw-sqft </property>
+                    <property>aero/alpha-rad</property>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# normal_force_coefficient_mach_table: Vec<(mach, coefficient)> #}
+                            {% for entry in normal_force_coefficient_mach_table -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </product>
+            </function>
+        </axis>
+
+        <axis name="SIDE">
+            <function name="aero/coefficient/CSbeta">
+                <description>SIDE_force_due_to_beta</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property> metrics/Sw-sqft </property>
+                    <property>aero/beta-rad</property>
+                    <property> simulation/launch_cleared </property>
+                    <value> -1 </value>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# side_force_coefficient_mach_table: Vec<(mach, coefficient)> #}
+                            {% for entry in side_force_coefficient_mach_table -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </product>
+            </function>
+            <function name="aero/coefficient/CSmach">
+                <description>SIDE_due_to_Mach_number</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>aero/beta-rad</property>
+                    <property> simulation/launch_cleared </property>
+                    <table>
+                        <independentVar>velocities/mach</independentVar>
+                        <tableData>
+                            {# side_force_negated_table: Vec<(mach, -coefficient)> - pre-negated #}
+                            {% for entry in side_force_negated_table -%}
+                            {{ entry.0 }} {{ entry.1 }}
+                            {% endfor %}
+                        </tableData>
+                    </table>
+                </product>
+            </function>
+        </axis>
+
+        <axis name="ROLL">
+            <function name="aero/coefficient/Clp">
+                <description>Roll_moment_due_to_roll_rate_(roll_damping)</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/p-rad_sec</property>
+                    <value> {{ roll_damping_coefficient }} </value>
+                </product>
+            </function>
+        </axis>
+        <axis name="PITCH">
+            <function name="aero/coefficient/Cmq">
+                <description>Pitch_moment_due_to_pitch_rate</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property> metrics/cbarw-ft </property>
+                    <property> aero/ci2vel </property>
+                    <property>velocities/q-aero-rad_sec</property>
+                    <value> {{ pitch_damping_coefficient }} </value>
+                </product>
+            </function>
+        </axis>
+        <axis name="YAW">
+            <function name="aero/coefficient/Cnr">
+                <description>Yaw_moment_due_to_yaw_rate</description>
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property> metrics/cbarw-ft </property>
+                    <property> aero/ci2vel </property>
+                    <property>velocities/r-aero-rad_sec</property>
+                    <value> {{ yaw_damping_coefficient }} </value>
+                </product>
+            </function>
+        </axis>
+    </aerodynamics>
+
+</fdm_config>

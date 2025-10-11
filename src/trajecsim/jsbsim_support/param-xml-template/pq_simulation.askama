@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
+<runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
+    name="Rocket flight.">
+
+
+  <use aircraft="PQ_ROCKET" initialize="liftoff"/>
+
+  <run start="0" end="{{ simulation_duration }}" dt="{{ integration_time_step }}">
+
+
+
+    <!-- start off on the ground -->
+    <property value="1"> forces/hold-down </property>
+
+    <property value="0"> simulation/notify-time-trigger </property>
+
+    <property value="100000000"> simulation/parachute_deploy_time </property>
+
+    <property value="1"> simulation/launch_cleared </property>
+
+
+
+    <!-- Ignite -->
+    <event name="Ignition">
+        <condition>simulation/sim-time-sec  ge  {{ ignition_time }}</condition>
+    </event>
+
+    <!-- Liftoff -->
+    <event name="liftoff">
+      <condition>simulation/sim-time-sec  ge  {{ liftoff_time }}</condition>
+      <set name="forces/hold-down" value="0"/>
+      <set name="atmosphere/turb-type" value="0"/>
+    </event>
+
+    <!-- Burnout -->
+    <event name="Motor Burnout">
+      <condition>propulsion/tank[0]/contents-lbs lt 0.1</condition>
+    </event>
+
+    <!-- Zero Vertical Velocity -->
+    <event name="Apogee">
+      <condition>velocities/v-down-fps gt 1</condition>
+      <set name="simulation/parachute_deploy_time" >
+        <function>
+            <property>simulation/sim-time-sec</property>
+        </function>
+      </set>
+      {% if terminate_at_apogee == 1 %}
+      <set name="simulation/terminate" value="1"/>
+      {% endif %}
+    </event>
+
+    <event name="Landed">
+      <condition>position/h-agl-ft le 0.1</condition>
+      <set name="simulation/terminate" value="1"/>
+    </event>
+
+    <event name="Winds aloft" continuous="true">
+      <condition>position/h-sl-meters gt {{ launcher_rail_exit_height }}</condition>
+      <set name="atmosphere/psiw-rad">
+      <function>
+      <table>
+      <independentVar lookup="row"> position/h-sl-meters </independentVar>
+      <tableData>
+        {# wind_profile_altitude_table: Vec<(altitude_m, speed_fps, direction_rad)> - already converted #}
+        {% for wind in wind_profile_altitude_table -%}
+        {{ wind.0 }} {{ wind.2 }}
+        {% endfor -%}
+      </tableData>
+      </table>
+      </function>
+      </set>
+      <set name="atmosphere/wind-mag-fps">
+      <function>
+      <table>
+      <independentVar lookup="row"> position/h-sl-meters </independentVar>
+      <tableData>
+        {# wind_profile_altitude_table: Vec<(altitude_m, speed_fps, direction_rad)> - already converted #}
+        {% for wind in wind_profile_altitude_table -%}
+        {{ wind.0 }} {{ wind.1 }}
+        {% endfor -%}
+      </tableData>
+      </table>
+      </function>
+      </set>
+      <set name="simulation/launch_cleared" value="1"/>
+    </event>
+
+
+  </run>
+
+  <output name="pq_rocket_output_raw.csv" type="CSV" rate="100" file="unitconversions.xml">
+    <property caption="Latitude">position/lat-gc-deg</property>
+    <property caption="Longitude">position/long-gc-deg</property>
+    <property caption="Altitude">position/h-sl-meters</property>
+    <property apply="convert-rad-To-deg" caption="Angle of Attack">aero/alpha-rad</property>
+    <property apply="convert-rad-To-deg" caption="Angle of Sideslip">aero/beta-rad</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="X-Acceleration">accelerations/udot-ft_sec2</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="Y-Acceleration">accelerations/vdot-ft_sec2</property>
+    <property apply="convert-ft_sec2-To-m_sec2" caption="Z-Acceleration">accelerations/wdot-ft_sec2</property>
+
+    <property apply="convert-lbs-To-N" caption="Thrust">external_reactions/thrust/magnitude</property>
+    <property apply="convert-fps-To-ms" caption="True Velocity">velocities/vtrue-fps</property>
+    <property apply="convert-fps-To-m_s" caption="Ground Velocity">velocities/vg-fps</property>
+    <property apply="convert-rad-To-deg" caption="Pitch">attitude/theta-rad</property>
+    <property apply="convert-rad-To-deg" caption="Roll">attitude/phi-rad</property>
+    <property apply="convert-rad-To-deg" caption="Yaw">attitude/psi-rad</property>
+    <property apply="convert-psf-To-Pa" caption="Dynamic Pressure">aero/qbar-psf</property>
+    <property apply="convert-ft-To-m" caption="cp">metrics/aero-rp-x-in</property>
+    <property caption="parachute_deploy_gain">fcs/parachute_reef_pos_norm</property>
+    <property apply="convert-fps-To-m_s" caption="Wind Speed">atmosphere/wind-mag-fps</property>
+    <property caption="Mach">velocities/mach</property>
+    <!-- Debug  -->
+    <property caption="omega_x">velocities/p-rad_sec</property>
+    <property caption="omega_y">velocities/q-rad_sec</property>
+    <property caption="omega_z">velocities/r-rad_sec</property>
+    <property caption="Cmq">aero/coefficient/Cmq</property>
+  </output>
+</runscript>
