@@ -1,131 +1,130 @@
-launch:
-  # Liftoff configuration
-  yaw:
-    - 283.0  # ランチャ方位角 292.34 - 磁気偏角 9.34
-  pitch:
-    - 80.0
-  roll: 0.0
-  latitude: 40.242865 # 緯度
-  longitude: 140.01045 # 経度
-  elevation: 5.3 # ランチャ標高
-  launcher_length: 5.0 # ランチャ長さ
-  wind_ref_altitude: 2.0
-  ground_wind_dir:
-    - 13.0
-    - 58.0
-    - 103.0
-    - 148.0
-    - 193.0
-    - 238.0
-    - 283.0
-    - 328.0
-  ground_wind_speed:
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8.0
-  wind_power_factor: 0.16666  # べき指数 1/6
-  winds_table: 
-  range_kmz: data/input/21stNSE保安域案_海射場.kmz
+flight_simulator: # 飛行シミュレータのパラメータ (必須)
+  launcher: # 発射台パラメータ
+    rotation:
+      magnetic_declination: -9.34 # 磁気偏角 (時計回りを正とするため日本では負)
+      azimuth: 292.34 # ランチャ方位角 (真方位: 283度 + 磁気偏角: 9.34度)
+      pitch: 80.0 # ランチャ仰角 (度)
+      roll: 0.0 # ランチャ挿入時のロケットロール角 (度、デフォルト: 0.0)
+    coordinates:
+      latitude: 40.242865 # 緯度 (度)
+      longitude: 140.01045 # 経度 (度)
+      elevation: 5.3 # ランチャ標高 (m)
+    launcher_length: 5.0 # ランチャ長さ (m)
+    range_kmz: "config/input/21stNSE保安域案_海射場.kmz" # 射場保安区域KMZファイル
 
+  wind: # 風パラメータ (べき法則または風向風速テーブルを指定)
+    use_power_law: true # べき法則を使用: true、風向風速テーブルを使用: false
+    winds_table: "data/input/tables/wind_table.csv" # 風向風速テーブルパス
+    power_law: # べき法則パラメータ
+      wind_ref_altitude: 2.0 # 風速基準高度 (m)
+      ground_wind_dir: 0.0 # 地上風向 (度)
+      ground_wind_speed: 1.0 # 地上風速 (m/s)
+      wind_power_factor: 0.16666 # べき指数 (1/6)
 
-rocket:
-  # Rocket configuration
-  projected_frontal_area: 0.016512996 # 代表面積 (π*(0.145/2)^2)
-  wing_span: 0.26  # 半スパン 0.13m * 2
-  wing_chord: 0.092 # 平均コード長 (Cr+Ct)/2 = (120+64)/2 = 92mm
+  rocket: # ロケットのパラメータ
+    diameter: 0.145 # 直径 (m、145mm)
+    height: 1.889 # 全長 (m、1889mm)
 
-  # Inertia parameters
-  inertia_xx: 0.05  # ロール軸慣性モーメント
-  inertia_yy: 4.12  # ヨー軸慣性モーメント
-  inertia_zz: 4.12  # ピッチ軸慣性モーメント
-  inertia_xy: 0.0
-  inertia_xz: 0.0
-  inertia_yz: 0.0
+    # 慣性パラメータ
+    inertia:
+      xx: 0.05 # ロール軸慣性モーメント (kg·m²)
+      yy: 4.12 # ヨー軸慣性モーメント (kg·m²)
+      zz: 4.12 # ピッチ軸慣性モーメント (kg·m²)
+      xy: 0.0 # 慣性乗積 XY (kg·m²、デフォルト: 0.0)
+      xz: 0.0 # 慣性乗積 XZ (kg·m²、デフォルト: 0.0)
+      yz: 0.0 # 慣性乗積 YZ (kg·m²、デフォルト: 0.0)
 
-  # Mass parameters
-  dry_weight: 16.99 # 機体乾燥重量
-  cg_x: 1.144 # 重心位置: ノーズから (1889-778)mm = 1111mm
-  cg_y: 0.0
-  cg_z: 0.0
+    # 質量パラメータ
+    mass:
+      dry_weight: 16.99 # 機体乾燥重量 (kg)
+      cg: # 重心位置
+        x: 1.144 # 重心位置 X軸方向 (m、ノーズから1111mm)
+        y: 0.0 # 重心位置 Y軸方向 (m、デフォルト: 0.0)
+        z: 0.0 # 重心位置 Z軸方向 (m、デフォルト: 0.0)
 
-  cp_x: 1.374 # 空力中心: ノーズから (1889-515)mm = 1374mm
-  cp_mach_table: "data/input/tables/cp_mach.csv"
-  cp_y: 0.0
-  cp_z: 0.0
+      cp: # 空力中心位置
+        x: 1.374 # 空力中心 X軸方向 (m、ノーズから1374mm)
+        y: 0.0 # 空力中心 Y軸方向 (m、デフォルト: 0.0)
+        z: 0.0 # 空力中心 Z軸方向 (m、デフォルト: 0.0)
+        x_mach_table: "data/input/tables/cp_mach.csv" # 空力中心X位置のマッハ数依存テーブル (指定しない場合固定値)
+        y_mach_table: "" # 空力中心Y位置のマッハ数依存テーブル (指定しない場合固定値)
+        z_mach_table: "" # 空力中心Z位置のマッハ数依存テーブル (指定しない場合固定値)
 
-  diameter: 0.145 # 直径 145mm
-  height: 1.889 # 全長 1889mm
+      oxidizer_mass: 3.53 # 酸化剤質量 (kg)
+      tank_position:
+        x: 0.869 # タンク重心位置 X軸方向 (m、ノーズから869mm)
+        y: 0.0 # タンク重心位置 Y軸方向 (m)
+        z: 0.0 # タンク重心位置 Z軸方向 (m)
 
-  # Tank parameters
-  tank_x: 0.869 # 酸化剤タンク重心位置: ノーズから (1889-1020)mm = 869mm
-  tank_y: 0.0
-  tank_z: 0.0
-  tank_drain_x: 1.141 # タンク口金位置: ノーズから (1889-748)mm = 1141mm
-  tank_drain_y: 0.0
-  tank_drain_z: 0.0
-  tank_radius: 0.07 # 酸化剤タンク半径: 設計担当に聞いて
-  tank_capacity: 3.53 # 酸化剤タンク容量
-  tank_density: 1.0 # 酸化剤密度
+      fuel_mass_before_burn: 0.643 # 燃焼前燃料質量 (kg)
+      fuel_mass_after_burn: 0.1 # 燃焼後燃料質量 (kg)
+      fuel_position:
+        x: 0.944 # 燃料重心位置 X軸方向 (m、ノーズから944mm)
+        y: 0.0 # 燃料重心位置 Y軸方向 (m)
+        z: 0.0 # 燃料重心位置 Z軸方向 (m)
 
-  # Fuel parameters
-  fuel_x: 1.559 # 燃料重心位置: ノーズから (1889-330)mm = 1559mm
-  fuel_y: 0.0
-  fuel_z: 0.0
-  fuel_drain_x: 1.889 # 燃料排水口位置: ノーズから 機体後端
-  fuel_drain_y: 0.0
-  fuel_drain_z: 0.0
-  fuel_radius: 0.04 # 燃料半径: 設計担当に聞いて
-  fuel_capacity: 0.643 # 燃焼前燃料質量
-  fuel_density: 1.0
-  fuel_length: 0.34
-  fuel_after_burn: 0.1 # 燃焼後燃料質量
+    # パラシュートパラメータ
+    parachute:
+      1:
+        parachute_full_deploy_time: 0.01 # パラシュート展開遅延 (s)
+        parachute_deploy_delay: 3.0 # 頂点到達後または前段開傘開始後パラシュート展開時間 (s)
+        parachute_drag_coefficient: 1.2 # パラシュート抗力係数
+        use_auto_parachute_area: true # 終端速度から自動算出: true、parachute_areaで指定: false
+        parachute_area: # パラシュート面積 (m²、use_auto_parachute_area=falseの場合に指定)
+        terminal_velocity: 20.0 # 終端速度 (m/s、指定すると自動的にパラシュート面積を算出)
 
-  # Parachute parameters
-  parachute_full_deploy_time: 3.0
-  parachute_area: # パラシュート面積: 設計担当に聞いて
-  terminal_velocity: # 終端速度: 指定すると自動的にパラシュート面積が出る
-    - 0.0
-    - 20.0
+    # 空力パラメータ (係数で指定またはパラメータから自動算出)
+    aerodynamics:
+      use_aerodynamic_coefficients: true # 係数で指定: true、パラメータから自動算出: false
+      reference_area: # 参考面積 (m²、通常は直径から算出)
+      coefficients:
+        lift_coefficient_alpha: 8.387848333 # 揚力傾斜 (迎角0度、マッハ0.3)
+        lift_coefficient_table: "data/input/tables/cnmach.csv" # 揚力係数の迎角依存テーブル (指定しない場合は揚力傾斜のみ)
+        side_coefficient_beta: 8.387848333 # 横方向の揚力係数 (横滑り角0度、マッハ0.3)
+        side_coefficient_table: "data/input/tables/cnmach.csv" # 横方向の揚力係数のヨー角依存テーブル (指定しない場合は横方向の揚力傾斜のみ)
+        drag_coefficient: 0.466 # 抗力係数 (迎角0度、マッハ0.3)
+        drag_coefficient_table: "data/input/tables/cdmach.csv" # 抗力係数のマッハ数依存テーブル
 
-  parachute_drag_coefficient: 1.2
+        roll_damping_coefficient: -0.073 # ロール減衰係数
+        roll_damping_table: "" # ロール減衰係数のマッハ数依存テーブル (指定しない場合は固定値)
+        pitch_damping_coefficient: -2.394 # ピッチ減衰係数
+        pitch_damping_table: "" # ピッチ減衰係数のマッハ数依存テーブル (指定しない場合は固定値)
+        yaw_damping_coefficient: -2.394 # ヨー減衰係数
+        yaw_damping_table: "" # ヨー減衰係数のマッハ数依存テーブル (指定しない場合は固定値)
+      parameters:
+        body:
+          nose_shape: "ogive" # ノーズ形状 ("conical", "ogive", "parabolic", "elliptical"のいずれか)
+          nose_length: 0.330 # ノーズ長さ (m)
+          body_length: 1.559 # ボディ長さ (m)
+        fin:
+          root_chord: 0.092 # フィンルートコード (m)
+          tip_chord: 0.090 # フィンチップコード (m)
+          half_span: 0.13 # フィン半スパン (m)
+          number_of_fins: 4 # フィン枚数
+          fin_thickness: 0.005 # フィン厚さ (m)
+    thrust:
+      thrust_curve: "data/input/tables/thrust.csv" # 推力曲線テーブルパス
+      cut_off_time: 5.0 # 燃焼カットオフ時間 (s、テーブルの最大時間を超える場合はテーブルの最大時間を使用)
 
-  # Thrust parameters
-  thruster_x: 1.889 # エンジン重心位置: 機体後端
-  thruster_y: 0.0
-  thruster_z: 0.0
+    solver:
+      # シミュレーション設定
+      flight_duration: 4000.0 # 飛行時間 (s)
+      time_step: 0.001 # タイムステップ (s)
+      notify_interval: 5.0 # 通知間隔 (s)
+      output_rate: 10 # 出力レート (Hz)
+      apogee_mode: 0 # 頂点モード (0: 無効、1: 有効)
 
-  # Aerodynamic coefficients
-  lift_coefficient_alpha: 8.387848333 # よう力傾斜
-  side_coefficient_beta: 8.387848333
-  roll_damping_coefficient: -0.073 # ロール減衰係数
-  pitch_damping_coefficient: -2.394 # ピッチ・ヨー減衰係数
-  pitch_coefficient_alpha: 0.0 # ピッチ傾斜
-
-  # Table paths
-  fuel_remaining_table: 
-  thrust_table: "data/input/tables/thrust.csv"
-  cd0_table: "data/input/tables/cd0.csv"
-  cdmach_table: "data/input/tables/cdmach.csv"
-  cnmach_table: "data/input/tables/cnmach.csv"
-  csmach_table: "data/input/tables/cnmach.csv"
-
-
-simulation:
-  # Simulation configuration
-  flight_duration: 4000.0
-  time_step: 0.001
-  parachute_deploy_delay: 0.01
-  notify_interval: 5.0
-  output_rate: 10
-  apogee_mode: 0
-misc:
-  kml_group_by:
-    - ground_wind_speed
-  result_each:
-    - terminal_velocity
-  landing_range_script: noshiro_sea
+construction: # 構造の安全評価用の値を算出するためのパラメータ (任意)
+  rocket:
+    fin: # 翼パラメータ (フラッタ、強度算出用。aerodynamicsで与えられている部分は不要。台形翼を仮定)
+      half_span: 0.26 # フィン半スパン (m)
+      root_chord: 0.092 # フィンルートコード (m)
+      tip_chord: 0.090 # フィンチップコード (m)
+      drag_coefficient: 0.0125 # フィン抗力係数
+      lift_coefficient_alpha: 4.5 # 揚力傾斜
+      modulus_of_elasticity: 2250000000.0 # 弾性係数 (Pa)
+      poisson_ratio: 0.3 # ポアソン比
+    body: # ボディパラメータ (強度算出用)
+      body_bending_stiffness: 0.0 # ボディ曲げ剛性 (N·m²)
+    parachute: # パラシュートパラメータ (強度算出用)
+      opening_shock_factor: 2.0 # 開傘衝撃係数
