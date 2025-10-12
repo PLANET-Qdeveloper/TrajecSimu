@@ -3,6 +3,7 @@ use clap::Parser;
 use std::path::PathBuf;
 
 use trajecsim_rs::input::{loader, validator};
+use trajecsim_rs::config::processor;
 use trajecsim_rs::simulation::runner::JsbsimRunner;
 use trajecsim_rs::output::{processor::OutputProcessor, analyzer::OutputAnalyzer};
 
@@ -16,10 +17,6 @@ struct Args {
     /// Output directory for simulation results
     #[arg(short, long, default_value = "output")]
     output_dir: PathBuf,
-
-    /// Template directory containing Handlebars templates
-    #[arg(short, long, default_value = "param-xml-template")]
-    template_dir: PathBuf,
 }
 
 fn main() -> Result<()> {
@@ -27,16 +24,21 @@ fn main() -> Result<()> {
 
     // Load and validate configuration
     println!("Loading configuration from: {:?}", args.config);
-    let config = loader::load_config(&args.config)?;
-    validator::validate_config(&config)?;
+    let raw_config = loader::load_config(&args.config)?;
+    validator::validate_config(&raw_config)?;
     println!("Configuration loaded and validated successfully");
+
+    // Process configuration
+    println!("Processing configuration...");
+    let config = processor::process_config(raw_config)?;
+    println!("Configuration processed successfully");
 
     // Create output directory if it doesn't exist
     std::fs::create_dir_all(&args.output_dir)?;
 
     // Setup simulation runner
     println!("Setting up simulation runner...");
-    let runner = JsbsimRunner::new(&args.template_dir, &args.output_dir)?;
+    let runner = JsbsimRunner::new(&args.output_dir)?;
 
     // Prepare and run simulation
     println!("Preparing simulation files...");
