@@ -40,11 +40,16 @@ fn main() {
 
     // Display computed values
     println!("\n4. Computed values:");
-    println!("   - Reference area: {:.6} m² (from diameter {:.3} m)",
-             sim_config.rocket.reference_area,
-             sim_config.rocket.diameter);
-    println!("   - Parachute area: {:.6} m²",
-             sim_config.rocket.parachute.area);
+    println!("   - Projected frontal area: {:.6} m² (from diameter {:.3} m)",
+             sim_config.rocket.projected_frontal_area,
+             sim_config.rocket.body_diameter);
+
+    if !sim_config.rocket.parachutes.is_empty() {
+        println!("   - Parachutes:");
+        for (i, chute) in sim_config.rocket.parachutes.iter().enumerate() {
+            println!("     {}. {} - Area: {:.6} m²", i + 1, chute.name, chute.area);
+        }
+    }
 
     match &sim_config.rocket.aerodynamics.mode {
         trajecsim_rs::config::config::AerodynamicsMode::Coefficients { reference_area, .. } => {
@@ -52,24 +57,27 @@ fn main() {
             println!("   - Aero reference area: {:.6} m²", reference_area);
         }
         trajecsim_rs::config::config::AerodynamicsMode::Parameters {
-            computed_lift_coefficient_alpha,
-            computed_drag_coefficient,
+            reference_area,
+            normal_force_coefficient_mach_table,
+            drag_coefficient_zero_lift_table,
             ..
         } => {
             println!("   - Aerodynamics mode: Parameters (computed)");
-            println!("   - Computed lift coefficient: {:.6}", computed_lift_coefficient_alpha);
-            println!("   - Computed drag coefficient: {:.6}", computed_drag_coefficient);
+            println!("   - Reference area: {:.6} m²", reference_area);
+            println!("   - Normal force table entries: {}", normal_force_coefficient_mach_table.len());
+            println!("   - Drag table rows: {}", drag_coefficient_zero_lift_table.len());
         }
     }
 
     match &sim_config.wind.mode {
-        trajecsim_rs::config::config::WindMode::PowerLaw { ground_wind_speed, .. } => {
+        trajecsim_rs::config::config::WindMode::PowerLaw { ground_wind_speed, wind_profile_altitude_table, .. } => {
             println!("   - Wind mode: Power Law");
             println!("   - Ground wind speed: {:.2} m/s", ground_wind_speed);
+            println!("   - Generated wind profile entries: {}", wind_profile_altitude_table.len());
         }
-        trajecsim_rs::config::config::WindMode::Table { path } => {
+        trajecsim_rs::config::config::WindMode::Table { wind_profile_altitude_table } => {
             println!("   - Wind mode: Table");
-            println!("   - Wind table: {:?}", path);
+            println!("   - Wind profile entries: {}", wind_profile_altitude_table.len());
         }
     }
 

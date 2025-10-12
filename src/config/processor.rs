@@ -673,7 +673,7 @@ pub fn load_2d_table<P: AsRef<Path>>(path: P) -> Result<Vec<Vec<f64>>> {
     let mut table = Vec::new();
     let mut is_first_line = true;
 
-    for (line_num, line_result) in reader.lines().enumerate() {
+    for (_line_num, line_result) in reader.lines().enumerate() {
         let line = line_result?;
         let line = line.trim();
 
