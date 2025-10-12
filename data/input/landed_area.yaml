@@ -10,7 +10,7 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
       longitude: 140.01045 # 経度 (度)
       elevation: 5.3 # ランチャ標高 (m)
     launcher_length: 5.0 # ランチャ長さ (m)
-    range_kmz: "config/input/21stNSE保安域案_海射場.kmz" # 射場保安区域KMZファイル
+    # range_kmz: "config/input/21stNSE保安域案_海射場.kmz" # 射場保安区域KMZファイル (optional)
 
   wind: # 風パラメータ (べき法則または風向風速テーブルを指定)
     use_power_law: true # べき法則を使用: true、風向風速テーブルを使用: false
