@@ -1,7 +1,9 @@
 /// Processed and validated configuration ready for simulation
 /// All computed values are pre-calculated and guaranteed to be present
-/// All values are in JSBSim units (Imperial/US customary) unless otherwise noted
+/// All values use type-safe uom units
 use std::path::PathBuf;
+
+use uom::si::f64::*;
 
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
@@ -13,15 +15,15 @@ pub struct SimulationConfig {
 
 #[derive(Debug, Clone)]
 pub struct LauncherConfig {
-    pub magnetic_declination: f64,           // degrees
-    pub launcher_azimuth_angle: f64,         // degrees (template variable)
-    pub launcher_pitch_angle: f64,           // degrees (template variable)
-    pub launcher_roll_angle: f64,            // degrees (template variable)
-    pub launch_site_latitude: f64,           // degrees (template variable)
-    pub launch_site_longitude: f64,          // degrees (template variable)
-    pub launch_site_elevation_msl: f64,      // meters (template variable)
-    pub launcher_length: f64,                // meters (template variable)
-    pub launcher_rail_exit_height: f64,      // meters (template variable, computed)
+    pub magnetic_declination: Angle,
+    pub launcher_azimuth_angle: Angle,
+    pub launcher_pitch_angle: Angle,
+    pub launcher_roll_angle: Angle,
+    pub launch_site_latitude: Angle,
+    pub launch_site_longitude: Angle,
+    pub launch_site_elevation_msl: Length,
+    pub launcher_length: Length,
+    pub launcher_rail_exit_height: Length,
     pub range_kmz: Option<PathBuf>,
 }
 
@@ -33,22 +35,22 @@ pub struct WindConfig {
 #[derive(Debug, Clone)]
 pub enum WindMode {
     PowerLaw {
-        wind_ref_altitude: f64,              // meters
-        ground_wind_dir: f64,                // degrees
-        ground_wind_speed: f64,              // m/s
-        wind_power_factor: f64,
-        // Generated table for template (altitude_m, speed_fps, direction_rad)
-        wind_profile_altitude_table: Vec<(f64, f64, f64)>,
+        wind_ref_altitude: Length,
+        ground_wind_dir: Angle,
+        ground_wind_speed: Velocity,
+        wind_power_factor: f64,  // Dimensionless exponent
+        // Wind profile table: (altitude, speed, direction)
+        wind_profile_altitude_table: Vec<(Length, Velocity, Angle)>,
     },
     Table {
-        // Loaded and processed table (altitude_m, speed_fps, direction_rad)
-        wind_profile_altitude_table: Vec<(f64, f64, f64)>,
+        // Wind profile table: (altitude, speed, direction)
+        wind_profile_altitude_table: Vec<(Length, Velocity, Angle)>,
     },
 }
 
 impl WindMode {
     /// Get the wind profile table regardless of mode
-    pub fn get_wind_profile_table(&self) -> &[(f64, f64, f64)] {
+    pub fn get_wind_profile_table(&self) -> &[(Length, Velocity, Angle)] {
         match self {
             WindMode::PowerLaw { wind_profile_altitude_table, .. } => wind_profile_altitude_table,
             WindMode::Table { wind_profile_altitude_table } => wind_profile_altitude_table,
@@ -58,17 +60,17 @@ impl WindMode {
 
 #[derive(Debug, Clone)]
 pub struct RocketConfig {
-    pub body_diameter: f64,                  // meters (template variable)
-    pub body_length: f64,                    // meters (template variable)
-    pub projected_frontal_area: f64,         // m² (template variable, computed)
-    pub fin_span: f64,                       // meters (template variable)
+    pub body_diameter: Length,
+    pub body_length: Length,
+    pub projected_frontal_area: Area,
+    pub fin_span: Length,
 
     pub inertia: InertiaConfig,
     pub mass: MassConfig,
     pub parachutes: Vec<ParachuteConfig>,
-    pub parachute_area_schedule: Vec<(f64, f64)>,  // (time_s, area_sqft) - template variable
-    pub parachute_drag_coefficient: f64,           // dimensionless (template variable)
-    pub parachute_deployment_duration: f64,        // seconds (template variable)
+    pub parachute_area_schedule: Vec<(Time, Area)>,
+    pub parachute_drag_coefficient: f64,  // Dimensionless
+    pub parachute_deployment_duration: Time,
     pub aerodynamics: AerodynamicsConfig,
     pub thrust: ThrustConfig,
     pub solver: SolverConfig,
@@ -76,47 +78,47 @@ pub struct RocketConfig {
 
 #[derive(Debug, Clone)]
 pub struct InertiaConfig {
-    pub moment_of_inertia_xx: f64,           // kg·m² (template variable)
-    pub moment_of_inertia_yy: f64,           // kg·m² (template variable)
-    pub moment_of_inertia_zz: f64,           // kg·m² (template variable)
-    pub moment_of_inertia_xy: f64,           // kg·m² (template variable)
-    pub moment_of_inertia_xz: f64,           // kg·m² (template variable)
-    pub moment_of_inertia_yz: f64,           // kg·m² (template variable)
+    pub moment_of_inertia_xx: MomentOfInertia,
+    pub moment_of_inertia_yy: MomentOfInertia,
+    pub moment_of_inertia_zz: MomentOfInertia,
+    pub moment_of_inertia_xy: MomentOfInertia,
+    pub moment_of_inertia_xz: MomentOfInertia,
+    pub moment_of_inertia_yz: MomentOfInertia,
 }
 
 #[derive(Debug, Clone)]
 pub struct MassConfig {
-    pub dry_mass: f64,                       // kg (template variable)
-    pub center_of_gravity_x: f64,            // meters (template variable)
-    pub center_of_gravity_y: f64,            // meters (template variable)
-    pub center_of_gravity_z: f64,            // meters (template variable)
-    pub center_of_pressure_x: f64,           // meters (template variable, initial value)
-    pub center_of_pressure_y: f64,           // meters (template variable)
-    pub center_of_pressure_z: f64,           // meters (template variable)
+    pub dry_mass: Mass,
+    pub center_of_gravity_x: Length,
+    pub center_of_gravity_y: Length,
+    pub center_of_gravity_z: Length,
+    pub center_of_pressure_x: Length,
+    pub center_of_pressure_y: Length,
+    pub center_of_pressure_z: Length,
 
-    // Center of pressure mach tables (mach, position_m) - template variable
-    pub center_of_pressure_mach_table: Vec<(f64, f64)>,
+    // Center of pressure mach table: (mach_number, position)
+    pub center_of_pressure_mach_table: Vec<(f64, Length)>,  // Mach is dimensionless
 
-    pub oxidizer_mass: f64,                  // kg (template variable)
-    pub oxidizer_tank_position_x: f64,       // meters (template variable)
-    pub oxidizer_tank_position_y: f64,       // meters (template variable)
-    pub oxidizer_tank_position_z: f64,       // meters (template variable)
+    pub oxidizer_mass: Mass,
+    pub oxidizer_tank_position_x: Length,
+    pub oxidizer_tank_position_y: Length,
+    pub oxidizer_tank_position_z: Length,
 
-    pub fuel_mass: f64,                      // kg (template variable, before burn)
-    pub fuel_mass_after_burn: f64,           // kg (template variable)
-    pub fuel_tank_position_x: f64,           // meters (template variable)
-    pub fuel_tank_position_y: f64,           // meters (template variable)
-    pub fuel_tank_position_z: f64,           // meters (template variable)
-    pub fuel_grain_radius: f64,              // meters (template variable, computed)
+    pub fuel_mass: Mass,
+    pub fuel_mass_after_burn: Mass,
+    pub fuel_tank_position_x: Length,
+    pub fuel_tank_position_y: Length,
+    pub fuel_tank_position_z: Length,
+    pub fuel_grain_radius: Length,
 }
 
 #[derive(Debug, Clone)]
 pub struct ParachuteConfig {
     pub name: String,
-    pub parachute_full_deploy_time: f64,     // seconds
-    pub parachute_deploy_delay: f64,         // seconds
-    pub parachute_drag_coefficient: f64,     // dimensionless
-    pub area: f64,                           // m²
+    pub parachute_full_deploy_time: Time,
+    pub parachute_deploy_delay: Time,
+    pub parachute_drag_coefficient: f64,  // Dimensionless
+    pub area: Area,
 }
 
 #[derive(Debug, Clone)]
@@ -127,24 +129,23 @@ pub struct AerodynamicsConfig {
 #[derive(Debug, Clone)]
 pub enum AerodynamicsMode {
     Coefficients {
-        reference_area: f64,                 // m²
+        reference_area: Area,
 
-        // All tables are guaranteed to exist (fallback to single-row table)
-        // (mach, coefficient) - template variable
+        // Coefficient tables: (mach_number, coefficient) - both dimensionless
         normal_force_coefficient_mach_table: Vec<(f64, f64)>,
         side_force_coefficient_mach_table: Vec<(f64, f64)>,
-        // 2D table: each row is [mach, alpha1, alpha2, ...] - template variable
+        // 2D table: each row is [mach, alpha1, alpha2, ...] - all dimensionless
         drag_coefficient_zero_lift_table: Vec<Vec<f64>>,
 
-        // Damping coefficients (dimensionless) - template variable
+        // Damping coefficients - all dimensionless
         roll_damping_coefficient: f64,
         pitch_damping_coefficient: f64,
         yaw_damping_coefficient: f64,
     },
     Parameters {
-        reference_area: f64,                 // m²
+        reference_area: Area,
 
-        // Computed aerodynamic coefficient tables
+        // Computed aerodynamic coefficient tables - all dimensionless
         normal_force_coefficient_mach_table: Vec<(f64, f64)>,
         side_force_coefficient_mach_table: Vec<(f64, f64)>,
         drag_coefficient_zero_lift_table: Vec<Vec<f64>>,
@@ -155,13 +156,13 @@ pub enum AerodynamicsMode {
 
         // Original parameters
         nose_shape: String,
-        nose_length: f64,                    // meters
-        body_length: f64,                    // meters
-        fin_root_chord: f64,                 // meters
-        fin_tip_chord: f64,                  // meters
-        fin_half_span: f64,                  // meters
-        fin_number: u32,
-        fin_thickness: f64,                  // meters
+        nose_length: Length,
+        body_length: Length,
+        fin_root_chord: Length,
+        fin_tip_chord: Length,
+        fin_half_span: Length,
+        fin_number: u32,  // Dimensionless count
+        fin_thickness: Length,
     },
 }
 
@@ -217,24 +218,24 @@ impl AerodynamicsMode {
 
 #[derive(Debug, Clone)]
 pub struct ThrustConfig {
-    // (time_s, thrust_lbf) - template variable
-    pub thrust_curve: Vec<(f64, f64)>,
-    // (time_s, fuel_fraction) - template variable
-    pub fuel_mass_remaining_schedule: Vec<(f64, f64)>,
-    pub thruster_position_x: f64,            // meters (template variable)
-    pub thruster_position_y: f64,            // meters (template variable)
-    pub thruster_position_z: f64,            // meters (template variable)
-    pub cut_off_time: f64,                   // seconds
-    pub liftoff_time: f64,                   // seconds (computed)
+    // Thrust curve: (time, thrust)
+    pub thrust_curve: Vec<(Time, Force)>,
+    // Fuel mass schedule: (time, fuel_fraction) - fraction is dimensionless
+    pub fuel_mass_remaining_schedule: Vec<(Time, f64)>,
+    pub thruster_position_x: Length,
+    pub thruster_position_y: Length,
+    pub thruster_position_z: Length,
+    pub cut_off_time: Time,
+    pub liftoff_time: Time,
 }
 
 #[derive(Debug, Clone)]
 pub struct SolverConfig {
-    pub simulation_duration: f64,            // seconds (template variable)
-    pub integration_time_step: f64,          // seconds (template variable)
-    pub notify_interval: f64,                // seconds
-    pub output_rate: u32,                    // Hz
-    pub terminate_at_apogee: u32,            // 0 or 1 (template variable)
+    pub simulation_duration: Time,
+    pub integration_time_step: Time,
+    pub notify_interval: Time,
+    pub output_rate: u32,  // Hz (frequency)
+    pub terminate_at_apogee: bool,  // Boolean flag
 }
 
 #[derive(Debug, Clone)]
@@ -246,21 +247,21 @@ pub struct ConstructionConfig {
 
 #[derive(Debug, Clone)]
 pub struct ConstructionFinConfig {
-    pub half_span: f64,                      // meters
-    pub root_chord: f64,                     // meters
-    pub tip_chord: f64,                      // meters
-    pub drag_coefficient: f64,               // dimensionless
-    pub lift_coefficient_alpha: f64,         // dimensionless
-    pub modulus_of_elasticity: f64,          // Pa
-    pub poisson_ratio: f64,                  // dimensionless
+    pub half_span: Length,
+    pub root_chord: Length,
+    pub tip_chord: Length,
+    pub drag_coefficient: f64,  // Dimensionless
+    pub lift_coefficient_alpha: f64,  // Dimensionless
+    pub modulus_of_elasticity: Pressure,  // Pa = N/m²
+    pub poisson_ratio: f64,  // Dimensionless
 }
 
 #[derive(Debug, Clone)]
 pub struct ConstructionBodyConfig {
-    pub body_bending_stiffness: f64,         // N·m²
+    pub body_bending_stiffness: f64,  // N·m² (no direct uom type, using f64)
 }
 
 #[derive(Debug, Clone)]
 pub struct ConstructionParachuteConfig {
-    pub opening_shock_factor: f64,           // dimensionless
+    pub opening_shock_factor: f64,  // Dimensionless
 }
