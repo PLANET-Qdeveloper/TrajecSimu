@@ -6,7 +6,8 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nAdd Rust project foundation\n\nInitialize Rust rewrite of TrajecSimu with basic project structure:\n- Cargo.toml with dependencies (serde, askama, uom, rayon, etc.)\n- Main entry point and library structure\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git commit:*)",
-      "Bash(cargo run:*)"
+      "Bash(cargo run:*)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }

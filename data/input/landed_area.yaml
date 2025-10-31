@@ -3,7 +3,7 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
     rotation:
       magnetic_declination: -9.34 # 磁気偏角 (時計回りを正とするため日本では負)
       azimuth: 292.34 # ランチャ方位角 (真方位: 283度 + 磁気偏角: 9.34度)
-      pitch: 80.0 # ランチャ仰角 (度)
+      pitch: 76.0 # ランチャ仰角 (度)
       roll: 0.0 # ランチャ挿入時のロケットロール角 (度、デフォルト: 0.0)
     coordinates:
       latitude: 40.242865 # 緯度 (度)
@@ -72,7 +72,7 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
         use_auto_parachute_area: true # 終端速度から自動算出: true、parachute_areaで指定: false
         parachute_area: # パラシュート面積 (m²、use_auto_parachute_area=falseの場合に指定)
         terminal_velocity: 20.0 # 終端速度 (m/s、指定すると自動的にパラシュート面積を算出)
-
+0.572
     # 空力パラメータ (係数で指定またはパラメータから自動算出)
     aerodynamics:
       use_aerodynamic_coefficients: true # 係数で指定: true、パラメータから自動算出: false
