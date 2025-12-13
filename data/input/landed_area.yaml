@@ -1,8 +1,8 @@
 flight_simulator: # 飛行シミュレータのパラメータ (必須)
   launcher: # 発射台パラメータ
     rotation:
-      magnetic_declination: -9.34 # 磁気偏角 (時計回りを正とするため日本では負)
-      azimuth: 292.34 # ランチャ方位角 (真方位: 283度 + 磁気偏角: 9.34度)
+      magnetic_declination: -9.34 # 磁気偏角 (国際的な表記に則り時計回りを正とするため日本では必ず負)
+      azimuth: 292.34 # ランチャ磁気方位角 (真方位 + 磁気偏角)
       pitch: 76.0 # ランチャ仰角 (度)
       roll: 0.0 # ランチャ挿入時のロケットロール角 (度、デフォルト: 0.0)
     coordinates:
@@ -65,18 +65,12 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
 
     # パラシュートパラメータ
     parachute:
-      1:
-        parachute_full_deploy_time: 0.01 # パラシュート展開遅延 (s)
-        parachute_deploy_delay: 3.0 # 頂点到達後または前段開傘開始後パラシュート展開時間 (s)
-        parachute_drag_coefficient: 1.2 # パラシュート抗力係数
-        use_auto_parachute_area: true # 終端速度から自動算出: true、parachute_areaで指定: false
-        parachute_area: # パラシュート面積 (m²、use_auto_parachute_area=falseの場合に指定)
-        terminal_velocity: 20.0 # 終端速度 (m/s、指定すると自動的にパラシュート面積を算出)
-0.572
+      - full_deploy_time: 0.01 # パラシュート展開遅延 (s)
+        deploy_delay: 3.0 # 頂点到達後または前段開傘開始後パラシュート展開時間 (s)
+        drag_coefficient: 1.2 # パラシュート抗力係数
+        area: 0.572 # パラシュート面積
     # 空力パラメータ (係数で指定またはパラメータから自動算出)
     aerodynamics:
-      use_aerodynamic_coefficients: true # 係数で指定: true、パラメータから自動算出: false
-      reference_area: # 参考面積 (m²、通常は直径から算出)
       coefficients:
         lift_coefficient_alpha: 8.387848333 # 揚力傾斜 (迎角0度、マッハ0.3)
         lift_coefficient_table: "data/input/tables/cnmach.csv" # 揚力係数の迎角依存テーブル (指定しない場合は揚力傾斜のみ)
@@ -91,20 +85,9 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
         pitch_damping_table: "" # ピッチ減衰係数のマッハ数依存テーブル (指定しない場合は固定値)
         yaw_damping_coefficient: -2.394 # ヨー減衰係数
         yaw_damping_table: "" # ヨー減衰係数のマッハ数依存テーブル (指定しない場合は固定値)
-      parameters:
-        body:
-          nose_shape: "ogive" # ノーズ形状 ("conical", "ogive", "parabolic", "elliptical"のいずれか)
-          nose_length: 0.330 # ノーズ長さ (m)
-          body_length: 1.559 # ボディ長さ (m)
-        fin:
-          root_chord: 0.092 # フィンルートコード (m)
-          tip_chord: 0.090 # フィンチップコード (m)
-          half_span: 0.13 # フィン半スパン (m)
-          number_of_fins: 4 # フィン枚数
-          fin_thickness: 0.005 # フィン厚さ (m)
     thrust:
       thrust_curve: "data/input/tables/thrust.csv" # 推力曲線テーブルパス
-      cut_off_time: 5.0 # 燃焼カットオフ時間 (s、テーブルの最大時間を超える場合はテーブルの最大時間を使用)
+      cut_off_time: 1000.0 # 燃焼カットオフ時間 (s、テーブルの最大時間を超える場合はテーブルの最大時間を使用)
 
     solver:
       # シミュレーション設定
@@ -116,15 +99,18 @@ flight_simulator: # 飛行シミュレータのパラメータ (必須)
 
 construction: # 構造の安全評価用の値を算出するためのパラメータ (任意)
   rocket:
+    body:
+      nose_shape: "ogive" # ノーズ形状 ("conical", "ogive", "parabolic", "elliptical"のいずれか)
+      nose_length: 0.330 # ノーズ長さ (m)
+      body_bending_stiffness: 14.7e9 # ボディ曲げ剛性 (N·m²)
     fin: # 翼パラメータ (フラッタ、強度算出用。aerodynamicsで与えられている部分は不要。台形翼を仮定)
       half_span: 0.26 # フィン半スパン (m)
       root_chord: 0.092 # フィンルートコード (m)
       tip_chord: 0.090 # フィンチップコード (m)
-      drag_coefficient: 0.0125 # フィン抗力係数
-      lift_coefficient_alpha: 4.5 # 揚力傾斜
-      modulus_of_elasticity: 2250000000.0 # 弾性係数 (Pa)
+      number_of_fins: 4          # 追加
+      fin_thickness: 0.003       # 追加 (例: 3mm)
+      modulus_of_elasticity: 2.25e9  # 弾性係数 (Pa)
       poisson_ratio: 0.3 # ポアソン比
-    body: # ボディパラメータ (強度算出用)
-      body_bending_stiffness: 0.0 # ボディ曲げ剛性 (N·m²)
+
     parachute: # パラシュートパラメータ (強度算出用)
       opening_shock_factor: 2.0 # 開傘衝撃係数
