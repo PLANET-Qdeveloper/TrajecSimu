@@ -1,0 +1,7 @@
+# Valid YAML but doesn't match our schema
+some_random_field: 123
+another_field:
+  nested: value
+list:
+  - item1
+  - item2
