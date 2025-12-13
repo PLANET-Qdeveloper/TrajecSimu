@@ -127,7 +127,7 @@ impl AircraftTemplate {
         // Extract reference area from either mode
         let reference_area = match aero {
             AerodynamicsMode::Coefficients { reference_area, .. } => reference_area.get::<square_meter>(),
-            AerodynamicsMode::Parameters { reference_area, .. } => reference_area.get::<square_meter>(),
+
         };
 
         // Conversion constant
