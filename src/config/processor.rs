@@ -7,20 +7,13 @@ use std::path::Path;
 // Unit conversion using uom
 use uom::si::f64::*;
 use uom::si::{
+    angle::degree, area::square_meter, force::newton, length::meter, mass::kilogram,
+    moment_of_inertia::kilogram_square_meter, pressure::pascal, time::second,
     velocity::meter_per_second,
-    angle::degree,
-    area::square_meter,
-    force::newton,
-    length::meter,
-    mass::kilogram,
-    time::second,
-    moment_of_inertia::kilogram_square_meter,
-    pressure::pascal,
 };
 
+use crate::config::schema::*;
 use crate::input::schema::InputParameter as RawConfig;
-use super::config::*;
-
 /// Transform raw YAML config into processed simulation config
 /// This function performs all necessary computations and validations
 /// All unit conversions are performed here using the uom library
@@ -53,9 +46,8 @@ fn process_launcher(raw: &RawConfig) -> Result<LauncherConfig> {
 
     // Compute launcher_rail_exit_height: launcher_length * sin(pitch) + elevation
     let pitch_rad = l.rotation.pitch.to_radians();
-    let launcher_rail_exit_height = Length::new::<meter>(
-        l.launcher_length * pitch_rad.sin() + l.coordinates.elevation
-    );
+    let launcher_rail_exit_height =
+        Length::new::<meter>(l.launcher_length * pitch_rad.sin() + l.coordinates.elevation);
 
     Ok(LauncherConfig {
         magnetic_declination,
@@ -75,7 +67,9 @@ fn process_wind(raw: &RawConfig) -> Result<WindConfig> {
     let wind = &raw.flight_simulator.wind;
 
     let mode = if wind.use_power_law {
-        let pl = wind.power_law.as_ref()
+        let pl = wind
+            .power_law
+            .as_ref()
             .ok_or_else(|| anyhow!("Power law parameters required"))?;
 
         // Generate wind profile table from power law
@@ -94,7 +88,9 @@ fn process_wind(raw: &RawConfig) -> Result<WindConfig> {
             wind_profile_altitude_table,
         }
     } else {
-        let path = wind.winds_table.as_ref()
+        let path = wind
+            .winds_table
+            .as_ref()
             .ok_or_else(|| anyhow!("Wind table path required"))?;
 
         // Load wind profile table from CSV
@@ -121,8 +117,6 @@ fn process_rocket(raw: &RawConfig) -> Result<RocketConfig> {
         } else {
             0.0
         }
-    } else if let Some(params) = &rocket.aerodynamics.parameters {
-        params.fin.half_span * 2.0
     } else {
         0.0
     };
@@ -134,12 +128,14 @@ fn process_rocket(raw: &RawConfig) -> Result<RocketConfig> {
     let parachute_area_schedule = generate_parachute_area_schedule(&parachutes);
 
     // Get parachute drag coefficient from first parachute
-    let parachute_drag_coefficient = parachutes.first()
+    let parachute_drag_coefficient = parachutes
+        .first()
         .map(|p| p.parachute_drag_coefficient)
         .unwrap_or(1.2); // Default value
 
     // Compute max deployment duration
-    let parachute_deployment_duration = parachute_area_schedule.iter()
+    let parachute_deployment_duration = parachute_area_schedule
+        .iter()
         .map(|(t, _)| *t)
         .max_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
         .unwrap_or(Time::new::<second>(10.0)); // Default 10 seconds
@@ -181,7 +177,8 @@ fn process_mass(raw: &RawConfig) -> Result<MassConfig> {
     let center_of_pressure_mach_table = if let Some(cp_x_table_path) = &m.cp.x_mach_table {
         let raw_table = load_1d_table(cp_x_table_path)?;
         // Convert f64 to Length
-        raw_table.into_iter()
+        raw_table
+            .into_iter()
             .map(|(mach, pos)| (mach, Length::new::<meter>(pos)))
             .collect()
     } else {
@@ -232,7 +229,8 @@ fn process_parachutes(raw: &RawConfig, _reference_area: f64) -> Result<Vec<Parac
     for (name, parachute) in parachutes {
         // Compute parachute area
         let area = if parachute.use_auto_parachute_area {
-            let terminal_velocity = parachute.terminal_velocity
+            let terminal_velocity = parachute
+                .terminal_velocity
                 .ok_or_else(|| anyhow!("Terminal velocity required for auto parachute area"))?;
 
             compute_parachute_area(
@@ -241,7 +239,8 @@ fn process_parachutes(raw: &RawConfig, _reference_area: f64) -> Result<Vec<Parac
                 total_mass,
             )
         } else {
-            parachute.parachute_area
+            parachute
+                .parachute_area
                 .ok_or_else(|| anyhow!("Parachute area must be specified for parachute {}", name))?
         };
 
@@ -298,7 +297,8 @@ pub fn generate_parachute_area_schedule(parachutes: &[ParachuteConfig]) -> Vec<(
         }
 
         // Update total area and cumulative time
-        total_area = Area::new::<square_meter>(total_area.get::<square_meter>() + parachute_area_m2);
+        total_area =
+            Area::new::<square_meter>(total_area.get::<square_meter>() + parachute_area_m2);
         cumulative_time = deploy_start; // Next parachute's delay is relative to this one's start
 
         // Add point at full deployment
@@ -307,7 +307,9 @@ pub fn generate_parachute_area_schedule(parachutes: &[ParachuteConfig]) -> Vec<(
 
     // Sort by time and remove duplicates
     schedule.sort_by(|a, b| {
-        a.0.get::<second>().partial_cmp(&b.0.get::<second>()).unwrap_or(std::cmp::Ordering::Equal)
+        a.0.get::<second>()
+            .partial_cmp(&b.0.get::<second>())
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
     schedule.dedup_by(|a, b| a.0.get::<second>() == b.0.get::<second>());
 
@@ -317,78 +319,41 @@ pub fn generate_parachute_area_schedule(parachutes: &[ParachuteConfig]) -> Vec<(
 fn process_aerodynamics(raw: &RawConfig, reference_area: f64) -> Result<AerodynamicsConfig> {
     let aero = &raw.flight_simulator.rocket.aerodynamics;
 
-    let mode = if aero.use_aerodynamic_coefficients {
-        let coeffs = aero.coefficients.as_ref()
-            .ok_or_else(|| anyhow!("Aerodynamic coefficients required"))?;
+    let coeffs = &aero.coefficients;
 
-        let ref_area = aero.reference_area.unwrap_or(reference_area);
+    let ref_area = reference_area; // Use calculated reference area as base
 
-        // Load or create fallback tables
-        let normal_force_coefficient_mach_table = if let Some(table_path) = &coeffs.lift_coefficient_table {
+    // Load or create fallback tables
+    let normal_force_coefficient_mach_table =
+        if let Some(table_path) = &coeffs.lift_coefficient_table {
             load_1d_table(table_path)?
         } else {
             vec![(0.0, coeffs.lift_coefficient_alpha)]
         };
 
-        let side_force_coefficient_mach_table = if let Some(table_path) = &coeffs.side_coefficient_table {
-            load_1d_table(table_path)?
-        } else {
-            vec![(0.0, coeffs.side_coefficient_beta)]
-        };
-
-        let drag_coefficient_zero_lift_table = if let Some(table_path) = &coeffs.drag_coefficient_table {
-            load_2d_table(table_path)?
-        } else {
-            // Fallback to single-row table: [mach, alpha, cd]
-            vec![vec![0.0, 0.0, coeffs.drag_coefficient]]
-        };
-
-        AerodynamicsMode::Coefficients {
-            reference_area: Area::new::<square_meter>(ref_area),
-            normal_force_coefficient_mach_table,
-            side_force_coefficient_mach_table,
-            drag_coefficient_zero_lift_table,
-            roll_damping_coefficient: coeffs.roll_damping_coefficient,
-            pitch_damping_coefficient: coeffs.pitch_damping_coefficient,
-            yaw_damping_coefficient: coeffs.yaw_damping_coefficient,
-        }
+    let side_force_coefficient_mach_table = if let Some(table_path) = &coeffs.side_coefficient_table
+    {
+        load_1d_table(table_path)?
     } else {
-        let params = aero.parameters.as_ref()
-            .ok_or_else(|| anyhow!("Aerodynamic parameters required"))?;
+        vec![(0.0, coeffs.side_coefficient_beta)]
+    };
 
-        let ref_area = aero.reference_area.unwrap_or(reference_area);
+    let drag_coefficient_zero_lift_table = if let Some(table_path) = &coeffs.drag_coefficient_table
+    {
+        load_2d_table(table_path)?
+    } else {
+        // Fallback to single-row table: [mach, alpha, cd]
+        vec![vec![0.0, 0.0, coeffs.drag_coefficient]]
+    };
 
-        // Compute aerodynamic coefficients from geometry
-        let computed_lift = compute_lift_coefficient(&params.fin, &params.body);
-        let computed_drag = compute_drag_coefficient(&params.fin, &params.body);
-
-        // Create single-value tables
-        let normal_force_coefficient_mach_table = vec![(0.0, computed_lift)];
-        let side_force_coefficient_mach_table = vec![(0.0, computed_lift)];
-        let drag_coefficient_zero_lift_table = vec![vec![0.0, 0.0, computed_drag]];
-
-        // Compute damping coefficients (simplified)
-        let roll_damping_coefficient = -0.05;
-        let pitch_damping_coefficient = -2.0;
-        let yaw_damping_coefficient = -2.0;
-
-        AerodynamicsMode::Parameters {
-            reference_area: Area::new::<square_meter>(ref_area),
-            normal_force_coefficient_mach_table,
-            side_force_coefficient_mach_table,
-            drag_coefficient_zero_lift_table,
-            roll_damping_coefficient,
-            pitch_damping_coefficient,
-            yaw_damping_coefficient,
-            nose_shape: params.body.nose_shape.clone(),
-            nose_length: Length::new::<meter>(params.body.nose_length),
-            body_length: Length::new::<meter>(params.body.body_length),
-            fin_root_chord: Length::new::<meter>(params.fin.root_chord),
-            fin_tip_chord: Length::new::<meter>(params.fin.tip_chord),
-            fin_half_span: Length::new::<meter>(params.fin.half_span),
-            fin_number: params.fin.number_of_fins,
-            fin_thickness: Length::new::<meter>(params.fin.fin_thickness),
-        }
+    let mode = AerodynamicsMode::Coefficients {
+        reference_area: Area::new::<square_meter>(ref_area),
+        normal_force_coefficient_mach_table,
+        side_force_coefficient_mach_table,
+        drag_coefficient_zero_lift_table,
+        roll_damping_coefficient: coeffs.roll_damping_coefficient,
+        pitch_damping_coefficient: coeffs.pitch_damping_coefficient,
+        yaw_damping_coefficient: coeffs.yaw_damping_coefficient,
     };
 
     Ok(AerodynamicsConfig { mode })
@@ -398,15 +363,12 @@ fn process_thrust(raw: &RawConfig) -> Result<ThrustConfig> {
     let t = &raw.flight_simulator.rocket.thrust;
 
     // Load thrust curve from CSV (time_s, thrust_N)
-    let thrust_curve_n = load_1d_table(&t.thrust_curve)
-        .context("Failed to load thrust curve")?;
+    let thrust_curve_n = load_1d_table(&t.thrust_curve).context("Failed to load thrust curve")?;
 
     // Convert to uom types
     let thrust_curve: Vec<(Time, Force)> = thrust_curve_n
         .iter()
-        .map(|(time, thrust_n)| {
-            (Time::new::<second>(*time), Force::new::<newton>(*thrust_n))
-        })
+        .map(|(time, thrust_n)| (Time::new::<second>(*time), Force::new::<newton>(*thrust_n)))
         .collect();
 
     // Compute fuel mass remaining schedule from thrust curve
@@ -417,10 +379,8 @@ fn process_thrust(raw: &RawConfig) -> Result<ThrustConfig> {
     );
 
     // Compute liftoff time (when thrust > weight)
-    let liftoff_time = compute_liftoff_time(
-        &thrust_curve,
-        raw.flight_simulator.rocket.mass.dry_weight,
-    );
+    let liftoff_time =
+        compute_liftoff_time(&thrust_curve, raw.flight_simulator.rocket.mass.dry_weight);
 
     // Thruster position (assumed at CG for now, can be customized)
     let thruster_position_x = raw.flight_simulator.rocket.mass.cg.x;
@@ -446,29 +406,34 @@ fn process_solver(raw: &RawConfig) -> Result<SolverConfig> {
         integration_time_step: Time::new::<second>(s.time_step),
         notify_interval: Time::new::<second>(s.notify_interval),
         output_rate: s.output_rate,
-        terminate_at_apogee: s.apogee_mode != 0,  // Convert u32 to bool
+        terminate_at_apogee: s.apogee_mode != 0, // Convert u32 to bool
     })
 }
 
 fn process_construction(raw: &RawConfig) -> Option<ConstructionConfig> {
-    raw.construction.as_ref().map(|c| {
-        ConstructionConfig {
-            fin: c.rocket.fin.as_ref().map(|f| ConstructionFinConfig {
-                half_span: Length::new::<meter>(f.half_span),
-                root_chord: Length::new::<meter>(f.root_chord),
-                tip_chord: Length::new::<meter>(f.tip_chord),
-                drag_coefficient: f.drag_coefficient,
-                lift_coefficient_alpha: f.lift_coefficient_alpha,
-                modulus_of_elasticity: Pressure::new::<pascal>(f.modulus_of_elasticity),
-                poisson_ratio: f.poisson_ratio,
-            }),
-            body: c.rocket.body.as_ref().map(|b| ConstructionBodyConfig {
-                body_bending_stiffness: b.body_bending_stiffness,
-            }),
-            parachute: c.rocket.parachute.as_ref().map(|p| ConstructionParachuteConfig {
+    raw.construction.as_ref().map(|c| ConstructionConfig {
+        fin: c.rocket.fin.as_ref().map(|f| ConstructionFinConfig {
+            half_span: Length::new::<meter>(f.half_span),
+            root_chord: Length::new::<meter>(f.root_chord),
+            tip_chord: Length::new::<meter>(f.tip_chord),
+            drag_coefficient: f.drag_coefficient,
+            lift_coefficient_alpha: f.lift_coefficient_alpha,
+            modulus_of_elasticity: Pressure::new::<pascal>(f.modulus_of_elasticity),
+            poisson_ratio: f.poisson_ratio,
+        }),
+        body: c.rocket.body.as_ref().map(|b| ConstructionBodyConfig {
+            nose_shape: b.nose_shape.clone(),
+            nose_length: Length::new::<meter>(b.nose_length),
+            body_length: Length::new::<meter>(b.body_length),
+            body_bending_stiffness: b.body_bending_stiffness,
+        }),
+        parachute: c
+            .rocket
+            .parachute
+            .as_ref()
+            .map(|p| ConstructionParachuteConfig {
                 opening_shock_factor: p.opening_shock_factor,
             }),
-        }
     })
 }
 
@@ -484,45 +449,11 @@ pub fn compute_reference_area(diameter: f64) -> f64 {
 /// Compute parachute area from terminal velocity
 /// Formula: A = (2 * m * g) / (ρ * Cd * v_t²)
 /// Assuming standard atmosphere at sea level: ρ = 1.225 kg/m³, g = 9.81 m/s²
-pub fn compute_parachute_area(
-    terminal_velocity: f64,
-    drag_coefficient: f64,
-    mass: f64,
-) -> f64 {
-    const G: f64 = 9.81;  // m/s²
-    const RHO: f64 = 1.225;  // kg/m³ (sea level)
+pub fn compute_parachute_area(terminal_velocity: f64, drag_coefficient: f64, mass: f64) -> f64 {
+    const G: f64 = 9.81; // m/s²
+    const RHO: f64 = 1.225; // kg/m³ (sea level)
 
     (2.0 * mass * G) / (RHO * drag_coefficient * terminal_velocity.powi(2))
-}
-
-/// Compute lift coefficient from fin geometry
-pub fn compute_lift_coefficient(
-    fin: &crate::input::schema::Fin,
-    _body: &crate::input::schema::Body,
-) -> f64 {
-    let fin_span = fin.half_span * 2.0;
-    let mean_chord = (fin.root_chord + fin.tip_chord) / 2.0;
-    let aspect_ratio = fin_span / mean_chord;
-
-    2.0 * PI * aspect_ratio / (aspect_ratio + 2.0)
-}
-
-/// Compute drag coefficient from body and fin geometry
-pub fn compute_drag_coefficient(
-    fin: &crate::input::schema::Fin,
-    body: &crate::input::schema::Body,
-) -> f64 {
-    let body_drag = match body.nose_shape.as_str() {
-        "ogive" => 0.15,
-        "conical" => 0.25,
-        "parabolic" => 0.18,
-        "elliptical" => 0.16,
-        _ => 0.20,
-    };
-
-    let fin_drag = 0.01 * fin.number_of_fins as f64 * fin.fin_thickness;
-
-    body_drag + fin_drag
 }
 
 /// Generate wind profile from power law
@@ -567,16 +498,19 @@ pub fn compute_fuel_remaining_schedule(
     if thrust_curve.is_empty() {
         return vec![
             (Time::new::<second>(0.0), 1.0),
-            (Time::new::<second>(cut_off_time), 0.0)
+            (Time::new::<second>(cut_off_time), 0.0),
         ];
     }
 
     // Calculate total impulse to determine burn rate
-    let total_impulse: f64 = thrust_curve.windows(2).map(|w| {
-        let dt = w[1].0.get::<second>() - w[0].0.get::<second>();
-        let avg_thrust = (w[0].1.get::<newton>() + w[1].1.get::<newton>()) / 2.0;
-        avg_thrust * dt
-    }).sum();
+    let total_impulse: f64 = thrust_curve
+        .windows(2)
+        .map(|w| {
+            let dt = w[1].0.get::<second>() - w[0].0.get::<second>();
+            let avg_thrust = (w[0].1.get::<newton>() + w[1].1.get::<newton>()) / 2.0;
+            avg_thrust * dt
+        })
+        .sum();
 
     // Approximate specific impulse (simplified)
     let isp = 200.0; // seconds (typical hybrid rocket)
@@ -626,7 +560,10 @@ pub fn compute_liftoff_time(thrust_curve: &[(Time, Force)], mass_kg: f64) -> Tim
     }
 
     // Default to first time in curve
-    thrust_curve.first().map(|&(t, _)| t).unwrap_or(Time::new::<second>(0.0))
+    thrust_curve
+        .first()
+        .map(|&(t, _)| t)
+        .unwrap_or(Time::new::<second>(0.0))
 }
 
 // ============================================================================
@@ -793,7 +730,9 @@ pub fn load_wind_table<P: AsRef<Path>>(path: P) -> Result<Vec<(Length, Velocity,
         let speed_result: Result<f64, _> = parts[1].parse();
         let direction_result: Result<f64, _> = parts[2].parse();
 
-        if is_first_line && (altitude_result.is_err() || speed_result.is_err() || direction_result.is_err()) {
+        if is_first_line
+            && (altitude_result.is_err() || speed_result.is_err() || direction_result.is_err())
+        {
             // Skip header row
             is_first_line = false;
             continue;
@@ -818,7 +757,9 @@ pub fn load_wind_table<P: AsRef<Path>>(path: P) -> Result<Vec<(Length, Velocity,
 
     // Sort by altitude and remove duplicates
     table.sort_by(|a, b| {
-        a.0.get::<meter>().partial_cmp(&b.0.get::<meter>()).unwrap_or(std::cmp::Ordering::Equal)
+        a.0.get::<meter>()
+            .partial_cmp(&b.0.get::<meter>())
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
     table.dedup_by(|a, b| a.0.get::<meter>() == b.0.get::<meter>());
 
