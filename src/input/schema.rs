@@ -34,8 +34,6 @@ pub struct Launcher {
     pub rotation: LauncherRotation,
     pub coordinates: Coordinates,
     pub launcher_length: f64,
-    #[serde(default, deserialize_with = "deserialize_optional_path")]
-    pub range_kmz: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -76,7 +74,7 @@ pub struct Rocket {
     pub height: f64,
     pub inertia: Inertia,
     pub mass: Mass,
-    pub parachute: std::collections::HashMap<String, Parachute>,
+    pub parachute: Vec<Parachute>,
     pub aerodynamics: Aerodynamics,
     pub thrust: Thrust,
     pub solver: Solver,
@@ -133,20 +131,15 @@ pub struct CenterOfPressure {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Parachute {
-    pub parachute_full_deploy_time: f64,
-    pub parachute_deploy_delay: f64,
-    pub parachute_drag_coefficient: f64,
-    pub use_auto_parachute_area: bool,
-    pub parachute_area: Option<f64>,
-    pub terminal_velocity: Option<f64>,
+    pub full_deploy_time: f64,
+    pub deploy_delay: f64,
+    pub drag_coefficient: f64,
+    pub area: f64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Aerodynamics {
-    pub use_aerodynamic_coefficients: bool,
-    pub reference_area: Option<f64>,
-    pub coefficients: Option<AerodynamicCoefficients>,
-    pub parameters: Option<AerodynamicParameters>,
+    pub coefficients: AerodynamicCoefficients,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -169,28 +162,6 @@ pub struct AerodynamicCoefficients {
     pub yaw_damping_coefficient: f64,
     #[serde(default, deserialize_with = "deserialize_optional_path")]
     pub yaw_damping_table: Option<PathBuf>,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct AerodynamicParameters {
-    pub body: Body,
-    pub fin: Fin,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Body {
-    pub nose_shape: String,
-    pub nose_length: f64,
-    pub body_length: f64,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Fin {
-    pub root_chord: f64,
-    pub tip_chord: f64,
-    pub half_span: f64,
-    pub number_of_fins: u32,
-    pub fin_thickness: f64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -222,21 +193,23 @@ pub struct ConstructionRocket {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ConstructionFin {
-    pub half_span: f64,
-    pub root_chord: f64,
-    pub tip_chord: f64,
-    pub drag_coefficient: f64,
-    pub lift_coefficient_alpha: f64,
-    pub modulus_of_elasticity: f64,
-    pub poisson_ratio: f64,
+    pub root_chord: Option<f64>,
+    pub tip_chord: Option<f64>,
+    pub half_span: Option<f64>,
+    pub number_of_fins: Option<u32>,
+    pub fin_thickness: Option<f64>,
+    pub modulus_of_elasticity: Option<f64>,
+    pub poisson_ratio: Option<f64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ConstructionBody {
-    pub body_bending_stiffness: f64,
+    pub nose_shape: Option<String>,
+    pub nose_length: Option<f64>,
+    pub body_bending_stiffness: Option<f64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ConstructionParachute {
-    pub opening_shock_factor: f64,
+    pub opening_shock_factor: Option<f64>,
 }
