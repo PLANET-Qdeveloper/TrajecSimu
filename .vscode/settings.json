@@ -9,5 +9,14 @@
     "mypy-type-checker.args": [
         "--config=pyproject.toml"
     ],
-    "terminal.integrated.scrollback": 100000
+    "terminal.integrated.scrollback": 100000,
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.check.features": "all",
+    "[rust]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    },
+    "rust-analyzer.checkOnSave": true,
+    "rust-analyzer.cargo.allFeatures": true,
+    "editor.formatOnSave": true
 }
