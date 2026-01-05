@@ -59,7 +59,10 @@
     </event>
 
     <event name="Landed">
-      <condition>position/h-agl-ft le 0.1</condition>
+      <condition logic="AND">
+position/h-sl-ft le 0.1
+simulation/sim-time-sec ge {{ liftoff_time +5 }}
+</condition>
       <set name="simulation/terminate" value="1"/>
     </event>
 
