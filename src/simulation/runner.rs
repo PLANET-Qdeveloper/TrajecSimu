@@ -3,7 +3,7 @@ use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::config::config::SimulationConfig;
+use crate::config::schema::SimulationConfig;
 use super::template;
 
 pub struct JsbsimRunner {

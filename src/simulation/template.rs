@@ -1,6 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use crate::config::config::{SimulationConfig, AerodynamicsMode};
+use crate::config::schema::{SimulationConfig, AerodynamicsMode};
 
 // Import uom units for extracting f64 values
 use uom::si::{
