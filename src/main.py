@@ -56,7 +56,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--chart_output",
         type=bool,
-        default=False,
+        default=True,
         help="Output charts",
     )
     parser.add_argument(

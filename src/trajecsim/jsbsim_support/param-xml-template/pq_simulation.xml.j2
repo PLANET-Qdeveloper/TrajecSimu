@@ -59,9 +59,8 @@
     </event>
 
     <event name="Landed">
-      <condition logic="AND">
-position/h-sl-ft le 0.1
-simulation/sim-time-sec ge {{ liftoff_time +5 }}
+      <condition>
+position/h-agl-ft lt 0.01
 </condition>
       <set name="simulation/terminate" value="1"/>
     </event>
@@ -104,7 +103,7 @@ simulation/sim-time-sec ge {{ liftoff_time +5 }}
   <output name="pq_rocket_output_raw.csv" type="CSV" rate="100" file="unitconversions.xml">
     <property caption="Latitude">position/lat-gc-deg</property>
     <property caption="Longitude">position/long-gc-deg</property>
-    <property caption="Altitude">position/h-sl-meters</property>
+    <property apply="convert-ft-To-m" caption="Altitude">position/h-agl-ft</property>
     <property apply="convert-rad-To-deg" caption="Angle of Attack">aero/alpha-rad</property>
     <property apply="convert-rad-To-deg" caption="Angle of Sideslip">aero/beta-rad</property>
     <property apply="convert-ft_sec2-To-m_sec2" caption="X-Acceleration">accelerations/udot-ft_sec2</property>

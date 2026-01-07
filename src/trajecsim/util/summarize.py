@@ -85,7 +85,7 @@ def delete_final_point(row: pd.Series) -> None:
     """最終点から数点を削除する."""
     output_file = row["raw_output_file"]
     output_df = pd.read_csv(output_file)
-    output_df = output_df[output_df["Time"] < output_df["Time"].max() - 0.5]
+    output_df = output_df[output_df["Time"] < output_df["Time"].max() - 0.1]
     output_df.to_csv(output_file, index=False)
 
 
